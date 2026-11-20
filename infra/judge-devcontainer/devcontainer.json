@@ -1,0 +1,27 @@
+{
+  // Specrun: Umgebung für den unabhängigen Prüfer.
+  // Wird von runner/prepare-run.sh nach <lauf>/judge/.devcontainer kopiert;
+  // dabei werden __SPECRUN__ (Pfad zu Specrun) und __LAUF__ (Laufnummer) eingesetzt.
+  // Gleiches Image wie der Agent (Dockerfile identisch mit infra/devcontainer).
+  "name": "specrun-pruefer-__LAUF__",
+  "build": { "dockerfile": "Dockerfile" },
+
+  "remoteUser": "dev",
+  "containerUser": "dev",
+  "updateRemoteUserUID": false,
+  "runArgs": ["--userns=keep-id:uid=1000,gid=1000"],
+
+  // Arbeitsordner = <lauf>/judge: hier landen die Ergebnisse (ergebnis/)
+  "workspaceFolder": "/workspace",
+  "workspaceMount": "source=${localWorkspaceFolder},target=/workspace,type=bind",
+
+  // Nur lesbar: der ganze Laufordner (Werk des Agenten unter /lauf/work) und Specrun (Prüfer, Spec)
+  "mounts": [
+    "source=${localWorkspaceFolder}/..,target=/lauf,type=bind,readonly",
+    "source=__SPECRUN__,target=/specrun,type=bind,readonly"
+  ],
+
+  "containerEnv": { "SPECRUN_LAUF": "__LAUF__" },
+
+  "postCreateCommand": "echo 'Prüfer bereit. Starten mit: /specrun/runner/pruefen.sh'"
+}

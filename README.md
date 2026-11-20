@@ -56,14 +56,16 @@ make down      # stoppt alles
 cd judge && npm ci
 node all.mjs ../reference      # prüft Level für Level, bricht beim ersten Fehler ab
 ```
-Für Level 2 braucht der Prüfer `nginx` auf dem Mac (`brew install nginx`).
+Direkt auf dem Mac braucht der Prüfer für Level 2 `nginx` (`brew install nginx`). Im Prüfer-Container ist alles vorhanden.
 
 **Nachbau-Lauf im Dev Container (empfohlen)**
 ```bash
-runner/prepare-run.sh                 # legt specruns_testlaeufe/<nr>/ mit spec/ und .devcontainer/ an
-# … in VS Code im Container öffnen, Claude den Auftrag geben (siehe Ausgabe des Skripts) …
-runner/judge-run.sh <laufordner>      # Prüfer misst alle Levels, Bericht in runs/
+runner/prepare-run.sh                 # legt specruns_testlaeufe/<nr>/ an: env/, work/spec/, judge/
+# 1. <lauf>/env in VS Code im Container öffnen, Claude den Auftrag geben (siehe Ausgabe des Skripts)
+# 2. <lauf>/judge in VS Code im Container öffnen und dort ausführen:  /specrun/runner/pruefen.sh
+runner/uebernehmen.sh <laufordner>    # Bericht nach runs/lauf-<nr>/ übernehmen
 ```
+Der Prüfer läuft in einem eigenen Container aus demselben Image. Er sieht das Werk des Agenten nur lesend und baut es selbst neu.
 Der Dev Container ([`infra/devcontainer/`](infra/devcontainer/Dockerfile)) enthält genau die Startausrüstung aus der Spec. Er hat keine root-Rechte und kein Docker, und der Agent sieht nichts außer dem Laufordner.
 
 **Nachbau-Lauf ohne Container (headless auf dem Mac)**

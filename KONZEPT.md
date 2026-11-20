@@ -54,7 +54,7 @@ Ein **unabhängiger Prüfer** misst danach nach, ob die Levels wirklich geschaff
 | Registry | **GitHub Container Registry (GHCR)** |
 | Hosting | **eigener kleiner Server (VPS) bei Hetzner**. Die Pipeline deployt per SSH mit `docker compose` |
 | Zugangsdaten | als **Organisations-Secrets der GitHub-Test-Organisation**. Der Agent sieht weder SSH-Schlüssel noch Server-Zugang |
-| Unabhängiger Prüfer | Level 1–5 **lokal auf dem Mac**, Level 6–10 und der Lasttest in einem **Prüfer-Workflow in GitHub Actions** |
+| Unabhängiger Prüfer | Level 1–5 in einem **eigenen Prüfer-Container** (gleiches Image wie der Agent, in VS Code geöffnet, Werk des Agenten nur lesbar), Level 6–10 und der Lasttest in einem **Prüfer-Workflow in GitHub Actions** |
 | Grenzwerte | **locker starten**: zuerst nur messen und protokollieren; feste Grenzen erst nach den ersten Durchläufen. Von Anfang an gelten nur ein Zeit- und ein Kostenlimit |
 | Optik | wird bewertet, aber nur als **Nebenwert** (zählt nicht zum Score) |
 | Design-Stil | **technisch-sachlich**, wie ein Monitoring-Dashboard: dunkel, klare Statusfarben, Zahlen im Vordergrund |
@@ -183,7 +183,7 @@ Weitere Festlegungen in der Spec:
    - Lokal nur `GH_TOKEN` setzen.
 2. **Agent baut:** `claude -p` mit einem festen Start-Prompt, Zeit- und Kostenlimit, Ausgabe als JSON (Kosten, Tokens, Turns).
 3. **Prüfer misst:**
-   - Level 1–5 lokal auf dem Mac.
+   - Level 1–5 im Prüfer-Container (`<lauf>/judge`, Befehl `/specrun/runner/pruefen.sh`).
    - Level 6–10 über den Prüfer-Workflow in GitHub Actions.
    - Abbruch beim ersten Fehler.
 4. **Optik-Bewertung:** Ein Bewertungs-Agent beurteilt Screenshots (hell, dunkel, mobil). Das Ergebnis ist ein Nebenwert.
@@ -225,7 +225,7 @@ Die Kosten kennt nur unser Runner, nicht der Agent selbst. Sie erscheinen deshal
 Da es keine Rückfragen gibt, muss alles vorbereitet sein. Die Spec listet es auf, `run.sh` prüft es vorab.
 
 **Auf dem Mac**
-- Node, Go, nginx, `gh`, `make` – **kein Docker** (Images entstehen nur in der Pipeline). Der Agent arbeitet im Dev Container; der Prüfer braucht dieselben Werkzeuge auf dem Mac.
+- Node, Go, nginx, `gh`, `make` – **kein Docker** (Images entstehen nur in der Pipeline). Agent und Prüfer arbeiten in Containern aus demselben Image; auf dem Mac braucht es nur Podman und VS Code.
 - Playwright-Browser
 - Genaue Versionen legen wir noch fest.
 
@@ -432,9 +432,14 @@ Alle vier Schritte sind erledigt.
 - Referenz (`reference/`, auf macOS und im Container unter Linux grün)
 - Spec v0.2.0
 - Prüfer `judge/level2.mjs` und `judge/all.mjs`; die Gegenprobe findet beide eingebauten nginx-Fehler
-- Runner für Container-Läufe (`runner/prepare-run.sh`, `runner/judge-run.sh`)
+- Runner für Container-Läufe (`runner/prepare-run.sh`, `runner/pruefen.sh`, `runner/uebernehmen.sh`)
 
-Offen ist noch der Nachbau-Test bis Level 2.
+Offen ist noch der Nachbau-Test bis Level 2 (Lauf 003 läuft).
+
+**Nach Lauf 003 umstellen** (entschieden 2026-11-20): Das Volume `specrun-claude-config` speichert Claudes gesamten Zustand (Memory, Sessions, Plugins) über alle Läufe hinweg. Weil jeder Lauf unter `/workspace` arbeitet, könnte ein späterer Agent sich an frühere Läufe erinnern.
+- **Neu:** kein Volume mehr. Die Anmeldung kommt nur noch über `CLAUDE_CODE_OAUTH_TOKEN` (aus `claude setup-token`, als Umgebungsvariable auf dem Mac).
+- **Dockerfile:** Die Ersteinrichtung wird als erledigt vorgemerkt.
+- **Ergebnis:** Jeder Lauf startet mit leerem Gedächtnis.
 
 ### Entscheidungen
 | Thema | Entscheidung |
@@ -443,7 +448,7 @@ Offen ist noch der Nachbau-Test bis Level 2.
 | Startausrüstung | **eigener Dev Container in Specrun** (`infra/devcontainer/`), versioniert, ohne `CLAUDE.md`. Die Spec beschreibt ihn exakt |
 | nginx-Regeln | siehe unten (Caching, 404, gzip, Server-Version ausgeblendet) |
 | `make check` | prüft **alle gebauten Levels** (ab jetzt 1 und 2) und schreibt für jedes ein Ergebnis. Ein Fehler sperrt alle höheren Levels |
-| Prüfer | weiterhin **auf dem Mac**. Er braucht dafür nginx (Homebrew) |
+| Prüfer | ~~auf dem Mac~~ → seit 2026-11-20 im **eigenen Prüfer-Container** (siehe unten) |
 
 ### Dev Container (`infra/devcontainer/`)
 - Linux-Basis-Image mit festen Versionen von:
@@ -493,7 +498,7 @@ Offen ist noch der Nachbau-Test bis Level 2.
 3. Er wiederholt die Darstellungstests K2–K4 gegen nginx, also auch die fehlende Datei: Mit echtem 404 muss die Seite „Datei fehlt“ zeigen.
 4. `make check`: Exit 0, Level 1 und 2 bestanden, die Checks wörtlich wie in der Spec.
 
-**Risiko:** Der Prüfer nutzt das nginx vom Mac (Homebrew). Seine Version und Module können vom Dev Container abweichen. Eine Konfiguration, die im Container läuft, könnte auf dem Mac scheitern oder umgekehrt. Deshalb werden in der Spec nur gängige Direktiven verlangt.
+~~Risiko: abweichendes nginx auf dem Mac~~ – entfällt, weil der Prüfer jetzt im selben Image läuft wie der Agent.
 
 ### Auswirkungen auf die Spec (v0.2.0)
 - Level-Titel 6 und 7 ändern sich zu „Repo + CI“ und „Images in der Pipeline“. Betroffen sind Spec, Referenz und die Testdaten des Prüfers.
@@ -507,3 +512,42 @@ Offen ist noch der Nachbau-Test bis Level 2.
 3. Spec v0.2.0 schreiben.
 4. Prüfer für Level 2 bauen.
 5. Nachbau-Test bis Level 2 im neuen Dev Container.
+
+---
+
+## 15. Prüfer im eigenen Container (entschieden 2026-11-20)
+
+Der Prüfer für die Levels 1–5 läuft nicht mehr auf dem Mac, sondern in einem **eigenen Dev Container**. Er wird wie der Agent in VS Code geöffnet. So bleibt jeder Schritt sichtbar, ohne versteckte Automatik.
+
+```
+<lauf>/
+  env/.devcontainer/      Container des Agenten
+  work/                   Arbeitsordner des Agenten
+  judge/.devcontainer/    Container des Prüfers (infra/judge-devcontainer, Pfad zu Specrun eingesetzt)
+  judge/ergebnis/         Bericht, Logs, Bildschirmfotos
+  cost.txt                Ausgabe von /cost
+```
+
+| Im Prüfer-Container | Quelle | Rechte |
+|---|---|---|
+| `/workspace` | `<lauf>/judge` | schreiben |
+| `/lauf` | `<lauf>` (Werk des Agenten unter `/lauf/work`) | nur lesen |
+| `/specrun` | Specrun | nur lesen |
+
+**Ablauf:** `/specrun/runner/pruefen.sh`
+1. Kopiert das Werk des Agenten nach `~/build` (ohne `node_modules`, `dist`, `.run`). Der Prüfer baut aus dem Quellcode.
+2. Kopiert den Prüfer und installiert dessen Abhängigkeiten.
+3. Legt Metadaten, `files.txt` und `cost.txt` ab.
+4. Misst mit `judge/all.mjs` Level für Level.
+5. Schreibt den Bericht.
+
+Danach übernimmt `runner/uebernehmen.sh <lauf>` (auf dem Mac) das Ergebnis nach `runs/lauf-<nr>/`.
+
+**Vorteile:**
+- gleiche Umgebung wie beim Agenten
+- kein Konflikt um Port 8080 (getrennte Netzwerke)
+- das Werk des Agenten bleibt unverändert
+- kein nginx und kein Playwright auf dem Mac nötig
+- keine persönlichen Pfade im Bericht
+
+Der frühere Weg über `runner/judge-run.sh` auf dem Mac ist entfernt.

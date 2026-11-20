@@ -1,0 +1,15 @@
+
+added 3 packages, and audited 4 packages in 357ms
+
+found 0 vulnerabilities
+
+Running 5 tests using 1 worker
+
+  ✓  1 tests/level1.spec.ts:8:3 › level-1 › Seite antwortet mit HTTP 200 (12ms)
+  ✓  2 tests/level1.spec.ts:14:3 › level-1 › Titel ist „Levelboard“ (84ms)
+  ✓  3 tests/level1.spec.ts:19:3 › level-1 › 10 Level-Karten sichtbar (87ms)
+  ✓  4 tests/level1.spec.ts:29:3 › level-1 › Keine Konsolenfehler (61ms)
+  ✓  5 tests/level1.spec.ts:40:3 › level-1 › Handy-Ansicht: Karten einspaltig (121ms)
+
+  5 passed (675ms)
+Level 1: bestanden (5/5 Checks)

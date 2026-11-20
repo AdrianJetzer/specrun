@@ -1,0 +1,128 @@
+{
+  "level": 2,
+  "passed": true,
+  "checkedAt": "2026-11-20T11:03:37.860Z",
+  "target": "/home/dev/build",
+  "criteria": [
+    {
+      "id": "L2-K1",
+      "name": "make level2 startet nginx auf Port 8080",
+      "ok": true,
+      "detail": "0.8 s"
+    },
+    {
+      "id": "L2-K2",
+      "name": "nginx-Regeln (Cache, 404, gzip, Server, Typen)",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "id": "L2-K3",
+      "name": "Darstellungstests aus Level 1 bestehen über nginx",
+      "ok": true,
+      "detail": "15 Tests"
+    },
+    {
+      "id": "L2-K4",
+      "name": "make check: Exit 0, schemagültig, Level 1 (5) und 2 (7) bestanden",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "id": "L2-K5",
+      "name": "public/results.json bleibt im Startzustand",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "id": "L2-K6",
+      "name": "make down beendet nginx (Port 8080 frei)",
+      "ok": true,
+      "detail": ""
+    }
+  ],
+  "nebenwerte": {
+    "makeLevel2Ms": 826,
+    "judgeTests": [
+      {
+        "title": "K2.1 gemischte Status: Karten, Abzeichen, Fakten",
+        "ok": true,
+        "error": ""
+      },
+      {
+        "title": "K2.2 feste Titel und Nummern L01–L10",
+        "ok": true,
+        "error": ""
+      },
+      {
+        "title": "K2.3 Kopfzeile und Zusammenfassung",
+        "ok": true,
+        "error": ""
+      },
+      {
+        "title": "K2.4 alle bestanden → 10 / 10",
+        "ok": true,
+        "error": ""
+      },
+      {
+        "title": "K2.5 Statusfarben laut Design-Tokens",
+        "ok": true,
+        "error": ""
+      },
+      {
+        "title": "K3.1 Datei fehlt → Hinweis „missing“ und Leerzustand",
+        "ok": true,
+        "error": ""
+      },
+      {
+        "title": "K3.2 ungültig (kein JSON) → Hinweis „invalid“",
+        "ok": true,
+        "error": ""
+      },
+      {
+        "title": "K3.2 ungültig (nur 9 Levels) → Hinweis „invalid“",
+        "ok": true,
+        "error": ""
+      },
+      {
+        "title": "K3.2 ungültig (unbekannter Status) → Hinweis „invalid“",
+        "ok": true,
+        "error": ""
+      },
+      {
+        "title": "K3.2 ungültig (doppelte Nummer) → Hinweis „invalid“",
+        "ok": true,
+        "error": ""
+      },
+      {
+        "title": "K3.2 ungültig (run fehlt) → Hinweis „invalid“",
+        "ok": true,
+        "error": ""
+      },
+      {
+        "title": "K3.2 ungültig (falscher Typ bei durationMs) → Hinweis „invalid“",
+        "ok": true,
+        "error": ""
+      },
+      {
+        "title": "K4.1 alle data-testids vorhanden",
+        "ok": true,
+        "error": ""
+      },
+      {
+        "title": "K4.2 keine Konsolenfehler (gültig, fehlend, ungültig)",
+        "ok": true,
+        "error": ""
+      },
+      {
+        "title": "K4.3 Raster: 5 / 2 / 1 Spalten, kein horizontales Scrollen",
+        "ok": true,
+        "error": ""
+      }
+    ],
+    "makeCheckMs": 1428,
+    "selbstmessung": "bestanden",
+    "fremdmessung": "bestanden",
+    "abweichung": false
+  }
+}

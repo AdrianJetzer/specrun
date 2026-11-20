@@ -1,0 +1,16 @@
+{
+  "reachedLevel": 2,
+  "score": 20,
+  "maxChecked": 2,
+  "levels": [
+    {
+      "level": 1,
+      "passed": true
+    },
+    {
+      "level": 2,
+      "passed": true
+    }
+  ],
+  "checkedAt": "2026-11-20T11:03:37.866Z"
+}

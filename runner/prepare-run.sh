@@ -1,15 +1,35 @@
 #!/usr/bin/env bash
 # Specrun – legt einen frischen Laufordner für einen Nachbau im Dev Container an.
 # Aufruf: runner/prepare-run.sh [ordner]
-#   Standard: ~/Documents/Claude/specruns_testlaeufe/<nächste Nummer>
+#         runner/prepare-run.sh --nur-pruefer <laufordner>   (ergänzt nur judge/ in einem bestehenden Lauf)
+#   Standard-Ordner: ~/Documents/Claude/specruns_testlaeufe/<nächste Nummer>
 #
 # Aufbau danach:
-#   <lauf>/env/.devcontainer/   – Umgebung (aus infra/devcontainer); diesen Ordner öffnet VS Code
-#   <lauf>/work/spec/           – Arbeitsordner des Agenten (/workspace im Container), zu Beginn nur spec/
+#   <lauf>/env/.devcontainer/    Container des Agenten   → in VS Code öffnen, Agent baut
+#   <lauf>/work/spec/            Arbeitsordner des Agenten (/workspace), zu Beginn nur spec/
+#   <lauf>/judge/.devcontainer/  Container des Prüfers   → danach in VS Code öffnen, Prüfer misst
 set -euo pipefail
 
 ROOT="$(cd "$(dirname "$0")/.." && pwd)"
 BASE="${SPECRUN_RUNS:-$HOME/Documents/Claude/specruns_testlaeufe}"
+
+add_judge() {
+  local dir="$1" nr
+  nr="$(basename "$dir")"
+  [ -e "$dir/judge" ] && { echo "✖ $dir/judge existiert bereits" >&2; exit 1; }
+  mkdir -p "$dir/judge/.devcontainer"
+  cp "$ROOT/infra/devcontainer/Dockerfile" "$dir/judge/.devcontainer/Dockerfile"
+  sed -e "s|__SPECRUN__|$ROOT|g" -e "s|__LAUF__|$nr|g" \
+    "$ROOT/infra/judge-devcontainer/devcontainer.json" > "$dir/judge/.devcontainer/devcontainer.json"
+}
+
+if [ "${1:-}" = "--nur-pruefer" ]; then
+  DIR="$(cd "${2:?Aufruf: runner/prepare-run.sh --nur-pruefer <laufordner>}" && pwd)"
+  add_judge "$DIR"
+  echo "✔ Prüfer ergänzt: $DIR/judge  → in VS Code öffnen, „Reopen in Container“, dann /specrun/runner/pruefen.sh"
+  exit 0
+fi
+
 if [ $# -ge 1 ]; then
   DIR="$1"
 else
@@ -22,13 +42,16 @@ fi
 mkdir -p "$DIR/env" "$DIR/work"
 cp -R "$ROOT/infra/devcontainer" "$DIR/env/.devcontainer"
 cp -R "$ROOT/spec" "$DIR/work/spec"
+DIR="$(cd "$DIR" && pwd)"
+add_judge "$DIR"
 find "$DIR" -name .DS_Store -delete
 
 SPEC_VERSION="$(grep -m1 'Spec-Version' "$ROOT/spec/00-start.md" | sed -E 's/.*\*\* *([0-9.]+).*/\1/')"
 cat <<EOF
 ✔ Laufordner angelegt: $DIR  (Spec $SPEC_VERSION)
-    env/   → in VS Code öffnen (enthält nur .devcontainer/)
-    work/  → Arbeitsordner des Agenten, im Container /workspace (enthält nur spec/)
+    env/    → Container des Agenten (enthält nur .devcontainer/)
+    work/   → Arbeitsordner des Agenten, im Container /workspace (enthält nur spec/)
+    judge/  → Container des Prüfers
 
 So geht es weiter:
   1. In VS Code: „Ordner öffnen“ → $DIR/env → „Reopen in Container“.
@@ -37,7 +60,12 @@ So geht es weiter:
      Lies spec/00-start.md und folge der Arbeitsanweisung darin vollständig. Baue das Projekt im aktuellen Verzeichnis. Stelle keine Rückfragen.
 
   3. Nicht eingreifen. Am Ende /cost eingeben und die Ausgabe nach $DIR/cost.txt kopieren.
-  4. Im Container: make down. Dann auf dem Mac:
+  4. Container schließen. Dann in VS Code: „Ordner öffnen“ → $DIR/judge → „Reopen in Container“
+     und im Container-Terminal:
 
-     $ROOT/runner/judge-run.sh $DIR
+     /specrun/runner/pruefen.sh
+
+  5. Ergebnis ins Repo übernehmen (auf dem Mac):
+
+     $ROOT/runner/uebernehmen.sh $DIR
 EOF

@@ -1,0 +1,9 @@
+{
+  "runId": "lauf-003",
+  "specVersion": "0.2.1",
+  "model": "interaktive Session im Dev Container",
+  "fake": false,
+  "buildDir": "/lauf/work",
+  "judgedIn": "Prüfer-Container",
+  "judgedAt": "2026-11-20T11:03:27Z"
+}
