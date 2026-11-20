@@ -6,7 +6,7 @@ In Level 3 liest die Seite weiter `results.json`, und `make check` schreibt weit
 
 ## Liefergegenstände
 - `backend/` – Go-Modul, **nur Standardbibliothek**:
-  - `go.mod` mit `module levelboard/backend` und `go 1.27`, **ohne** `require`
+  - `go.mod` mit `module levelboard/backend` und `go 1.27`, **ohne** `require` (ab Level 4 genau eine Abhängigkeit, siehe `level-04.md`)
   - Quelltext im Paket `main` direkt in `backend/`, z. B. `main.go`, `store.go` und `handlers.go`
   - **Go-Tests** (`*_test.go`) für die Regeln und die Fehlerfälle
   - das gebaute Programm liegt in `backend/bin/levelboard-backend` (nicht versioniert)
@@ -38,7 +38,7 @@ In Level 3 liest die Seite weiter `results.json`, und `make check` schreibt weit
 1. `make level3` → Seite auf 8080 (nginx), Backend auf 8081. Ausgabe der beiden Zeilen `Levelboard läuft auf http://127.0.0.1:8080` und `Backend läuft auf http://127.0.0.1:8081`.
 2. `make check` → `Level 1: bestanden (5/5 Checks)`, `Level 2: bestanden (7/7 Checks)`, `Level 3: bestanden (8/8 Checks)`, Exit-Code 0.
 3. `make down` → weder nginx noch das Backend laufen noch, beide Ports sind frei.
-4. Am Ende `make level3` und `make check`, dann alles laufen lassen.
+4. Wenn es weitere Levels gibt, mit dem nächsten Level weitermachen; was am Ende laufen soll, steht in `00-start.md`.
 
 ## Bestanden, wenn (Prüfer)
 1. Level 1 und 2 sind bestanden.
@@ -46,6 +46,6 @@ In Level 3 liest die Seite weiter `results.json`, und `make check` schreibt weit
 3. Die API verhält sich exakt nach `openapi.yaml` und `04-api.md`: jede Antwort im Schema, alle Regeln, alle Fehlercodes in der festgelegten Reihenfolge.
 4. Viele gleichzeitige Meldungen führen zu keinem Fehler 5xx und zu einem konsistenten Endzustand.
 5. Nach `make down` und erneutem `make level3` ist der Startzustand wiederhergestellt.
-6. `go.mod` hat keine Abhängigkeiten, `go vet ./...` ist sauber, `go test ./...` ist grün. Die Testabdeckung wird als Nebenwert erfasst.
+6. `go.mod` hat keine Abhängigkeiten (bis Level 3; ab Level 4 siehe `level-04.md`), `go vet ./...` ist sauber, `go test ./...` ist grün. Die Testabdeckung wird als Nebenwert erfasst.
 7. `make check` endet mit Exit-Code 0. `results.json` meldet die Levels 1–3 als `bestanden`, mit den Checks wörtlich aus den Level-Dateien.
 8. `make down` beendet nginx und das Backend.

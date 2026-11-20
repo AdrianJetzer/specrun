@@ -80,3 +80,18 @@ export const LEVEL3_CHECKS = [
   'Unbekanntes Level ergibt 404',
   'Go-Tests bestehen',
 ];
+
+export const LEVEL4_CHECKS = [
+  'Meldungen erscheinen in der Historie, neueste zuerst',
+  'Historie begrenzt mit limit',
+  'Daten überstehen einen Neustart des Backends',
+  'Abgelehnte Meldungen landen nicht in der Historie',
+  'Datenbank hat das vorgegebene Schema',
+];
+
+// Erwartetes DB-Schema (spec/05-datenmodell.md): [Spalte, Typ, notnull, pk]
+export const DB_SCHEMA = {
+  levels: [['level', 'INTEGER', 0, 1], ['status', 'TEXT', 1, 0], ['checked_at', 'TEXT', 0, 0], ['duration_ms', 'INTEGER', 0, 0], ['checks', 'TEXT', 1, 0], ['metrics', 'TEXT', 1, 0]],
+  reports: [['id', 'INTEGER', 0, 1], ['level', 'INTEGER', 1, 0], ['status', 'TEXT', 1, 0], ['checked_at', 'TEXT', 1, 0], ['duration_ms', 'INTEGER', 1, 0], ['checks', 'TEXT', 1, 0], ['metrics', 'TEXT', 1, 0]],
+  meta: [['key', 'TEXT', 0, 1], ['value', 'TEXT', 0, 0]],
+};

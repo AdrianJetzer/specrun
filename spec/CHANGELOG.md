@@ -1,5 +1,10 @@
 # Spec-Changelog
 
+## 0.4.0 – 2026-11-20
+- Neu: **Level 4** (Datenbank): `levels/level-04.md`, SQLite-Datei `.run/levelboard.db`, exaktes Schema mit Migration (`05-datenmodell.md`), Historie `GET /api/levels/{n}/history`, `make level4` und `make restart-backend`, 5 neue Checks.
+- Erste Abhängigkeit: `modernc.org/sqlite` v1.62.0 (reines Go). Vorgaben gegen SQLite-Fallen: eine Verbindung, WAL, busy_timeout, Meldung in einer Transaktion.
+- 03: `make level3` löscht die Datenbank vor dem Start; `playwright.config.ts` mit `workers: 1`.
+
 ## 0.3.0 – 2026-11-20
 - Neu: **Level 3** (REST-Backend in Go): `levels/level-03.md`, `04-api.md`, `openapi.yaml`, `make level3`, Port 8081, 8 neue Checks.
 - Das Backend setzt die Regeln beim Melden selbst durch (Status, Zeitpunkt, Sperren, 409 bei falscher Reihenfolge).

@@ -1,11 +1,12 @@
-# 04 – REST-API (ab Level 3)
+# 04 – REST-API (ab Level 3; Historie ab Level 4)
 
 Der verbindliche Vertrag ist **`openapi.yaml`** (OpenAPI 3.1). Diese Datei erklärt die Regeln und gibt Beispiele.
 
 ## Grundlagen
 - Basis-Adresse: `http://127.0.0.1:8081`. Der Server lauscht **nur** auf `127.0.0.1:8081`.
 - Alle Antworten, auch Fehler, haben den Header `Content-Type: application/json` (exakt so, ohne `charset`).
-- Daten liegen **im Arbeitsspeicher**. Ein Neustart setzt alles auf den Startzustand zurück.
+- Level 3: Daten liegen **im Arbeitsspeicher**; ein Neustart setzt alles zurück.
+- Ab Level 4: Daten liegen in einer **SQLite-Datei** (siehe `05-datenmodell.md`). Ein Neustart nur des Backends behält sie, `make level3` bzw. `make level4` beginnen mit einer frischen Datei.
 - Gleichzeitige Anfragen müssen sicher sein (z. B. mit `sync.Mutex`). Viele parallele Meldungen dürfen weder abstürzen noch zu einem inkonsistenten Zustand führen.
 
 ## Startzustand
@@ -21,6 +22,7 @@ Der verbindliche Vertrag ist **`openapi.yaml`** (OpenAPI 3.1). Diese Datei erkl�
 | `GET` | `/api/levels` | 200, Gesamtstand im Format von `results.json` |
 | `GET` | `/api/levels/{n}` | 200, ein Level-Objekt |
 | `POST` | `/api/levels/{n}/result` | 200, der neue Gesamtstand (wie `GET /api/levels`) |
+| `GET` | `/api/levels/{n}/history?limit=50` | 200, die Historie von Level n (ab Level 4) |
 
 `{n}` ist eine Zahl von 1 bis 10. Alles andere ergibt 404, z. B. `0`, `11`, `abc`.
 
@@ -44,6 +46,23 @@ Regeln (der **Server** setzt sie durch, nicht der Melder):
    - `title`: immer der feste Titel aus `01-produkt.md`
 3. Alle Levels **über** `n` werden geleert (`checkedAt`, `durationMs` = `null`, `checks` = `[]`, `metrics` = `{}`). Ihr Status wird `offen`, wenn `n` bestanden ist, sonst `gesperrt`.
 4. `run.updatedAt` bekommt denselben Zeitpunkt wie `checkedAt`.
+5. Ab Level 4 entsteht zusätzlich ein Eintrag in der Historie (siehe unten).
+
+## Historie: `GET /api/levels/{n}/history` (ab Level 4)
+Liefert alle **angenommenen** Meldungen zu Level n, **neueste zuerst** (nach `id` absteigend):
+```json
+{ "level": 2, "entries": [
+  { "id": 7, "status": "bestanden", "checkedAt": "2026-11-21T09:14:00.000Z", "durationMs": 120,
+    "checks": [ { "name": "a", "ok": true } ], "metrics": {} }
+] }
+```
+- `id`: fortlaufende Nummer über alle Levels (Spalte `reports.id`).
+- `status` ist nur `bestanden` oder `fehlgeschlagen`.
+- Die übrigen Felder sind genau so, wie sie bei der Meldung im Level gespeichert wurden.
+- `limit`: optional, ganze Zahl von 1 bis 500, Standard 50; sonst **400**.
+- Keine Meldungen: `"entries": []`.
+- Meldungen mit 409 erscheinen **nicht**.
+- Wird ein höheres Level durch eine neue Meldung geleert, bleibt seine Historie erhalten.
 
 ## Fehler
 Immer als `{"error":"<Text in Deutsch>"}`:
@@ -51,6 +70,7 @@ Immer als `{"error":"<Text in Deutsch>"}`:
 | Code | Wann |
 |---|---|
 | 400 | ungültiges JSON, fehlende, falsche oder unbekannte Felder |
+| 400 | bei der Historie: ungültiges `limit` |
 | 404 | unbekanntes Level oder unbekannter Pfad (auch außerhalb von `/api/`) |
 | 405 | falsche Methode (z. B. `DELETE /api/levels`, `GET /api/levels/1/result`), mit Header `Allow` (z. B. `Allow: GET`) |
 | 409 | ein niedrigeres Level ist nicht bestanden |

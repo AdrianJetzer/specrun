@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"errors"
 	"io"
+	"log"
 	"mime"
 	"net/http"
 	"strconv"
@@ -20,6 +21,11 @@ func writeJSON(w http.ResponseWriter, code int, v any) {
 
 func writeError(w http.ResponseWriter, code int, msg string) {
 	writeJSON(w, code, map[string]string{"error": msg})
+}
+
+func internalError(w http.ResponseWriter, err error) {
+	log.Printf("interner Fehler: %v", err)
+	writeError(w, http.StatusInternalServerError, "interner Fehler")
 }
 
 // allow prüft die Methode; bei falscher Methode 405 mit Allow-Header.
@@ -92,14 +98,19 @@ func NewHandler(s *Store) http.Handler {
 		if !allow(w, r, http.MethodGet) {
 			return
 		}
-		writeJSON(w, http.StatusOK, map[string]string{"status": "ok", "version": s.Snapshot().Run.Version})
+		writeJSON(w, http.StatusOK, map[string]string{"status": "ok", "version": s.version})
 	})
 
 	mux.HandleFunc("/api/levels", func(w http.ResponseWriter, r *http.Request) {
 		if !allow(w, r, http.MethodGet) {
 			return
 		}
-		writeJSON(w, http.StatusOK, s.Snapshot())
+		res, err := s.Snapshot()
+		if err != nil {
+			internalError(w, err)
+			return
+		}
+		writeJSON(w, http.StatusOK, res)
 	})
 
 	mux.HandleFunc("/api/levels/{n}", func(w http.ResponseWriter, r *http.Request) {
@@ -111,8 +122,38 @@ func NewHandler(s *Store) http.Handler {
 		if !allow(w, r, http.MethodGet) {
 			return
 		}
-		l, _ := s.Level(n)
+		l, err := s.Level(n)
+		if err != nil {
+			internalError(w, err)
+			return
+		}
 		writeJSON(w, http.StatusOK, l)
+	})
+
+	mux.HandleFunc("/api/levels/{n}/history", func(w http.ResponseWriter, r *http.Request) {
+		n, ok := levelNumber(r)
+		if !ok {
+			writeError(w, http.StatusNotFound, "Level nicht gefunden")
+			return
+		}
+		if !allow(w, r, http.MethodGet) {
+			return
+		}
+		limit := 50
+		if q := r.URL.Query(); q.Has("limit") {
+			v, err := strconv.Atoi(q.Get("limit"))
+			if err != nil || v < 1 || v > 500 {
+				writeError(w, http.StatusBadRequest, "limit muss eine ganze Zahl von 1 bis 500 sein")
+				return
+			}
+			limit = v
+		}
+		entries, err := s.History(n, limit)
+		if err != nil {
+			internalError(w, err)
+			return
+		}
+		writeJSON(w, http.StatusOK, map[string]any{"level": n, "entries": entries})
 	})
 
 	mux.HandleFunc("/api/levels/{n}/result", func(w http.ResponseWriter, r *http.Request) {
@@ -147,6 +188,10 @@ func NewHandler(s *Store) http.Handler {
 		res, err := s.Report(n, rep)
 		if errors.Is(err, ErrConflict) {
 			writeError(w, http.StatusConflict, err.Error())
+			return
+		}
+		if err != nil {
+			internalError(w, err)
 			return
 		}
 		writeJSON(w, http.StatusOK, res)

@@ -1,4 +1,4 @@
-// Levelboard-Backend: REST-API für die Level-Ergebnisse (nur Go-Standardbibliothek).
+// Levelboard-Backend: REST-API für die Level-Ergebnisse, gespeichert in SQLite (modernc.org/sqlite).
 package main
 
 import (
@@ -22,9 +22,20 @@ func main() {
 	if runID == "" {
 		runID = "lokal"
 	}
+	dbPath := os.Getenv("LEVELBOARD_DB")
+	if dbPath == "" {
+		dbPath = ".run/levelboard.db"
+	}
+	store, err := OpenStore(dbPath, runID, version, nil)
+	if err != nil {
+		log.Fatalf("Datenbank %s: %v", dbPath, err)
+	}
+	defer store.Close()
+	log.Printf("Datenbank: %s", dbPath)
+
 	srv := &http.Server{
 		Addr:              addr,
-		Handler:           logRequests(NewHandler(NewStore(runID, version, nil))),
+		Handler:           logRequests(NewHandler(store)),
 		ReadHeaderTimeout: 5 * time.Second,
 	}
 

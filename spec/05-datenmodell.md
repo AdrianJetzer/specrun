@@ -80,3 +80,40 @@ Aufruf: `node write-results.mjs <level> [<level> …]`, z. B. `node write-result
 8. Gibt pro angegebenem Level eine Zeile aus: `Level <n>: <status> (x/y Checks)`, bzw. ohne Klammer, wenn das Level keine Checks hat. Endet mit Exit-Code 0, wenn kein Level fehlgeschlagen ist, sonst 1.
 
 `vite preview` liefert die geänderte Datei sofort aus. Nach einem Neuladen zeigt die Seite das neue Ergebnis.
+
+## Datenbank (ab Level 4)
+Das Backend speichert in einer SQLite-Datei (Pfad aus `LEVELBOARD_DB`, Standard `.run/levelboard.db`). Das Schema ist **exakt** so anzulegen, mit Spalten in dieser Reihenfolge:
+
+```sql
+CREATE TABLE levels (
+  level        INTEGER PRIMARY KEY CHECK (level BETWEEN 1 AND 10),
+  status       TEXT    NOT NULL CHECK (status IN ('offen','bestanden','fehlgeschlagen','gesperrt')),
+  checked_at   TEXT,
+  duration_ms  INTEGER,
+  checks       TEXT    NOT NULL DEFAULT '[]',
+  metrics      TEXT    NOT NULL DEFAULT '{}'
+);
+CREATE TABLE reports (
+  id           INTEGER PRIMARY KEY AUTOINCREMENT,
+  level        INTEGER NOT NULL REFERENCES levels(level),
+  status       TEXT    NOT NULL CHECK (status IN ('bestanden','fehlgeschlagen')),
+  checked_at   TEXT    NOT NULL,
+  duration_ms  INTEGER NOT NULL,
+  checks       TEXT    NOT NULL,
+  metrics      TEXT    NOT NULL
+);
+CREATE INDEX reports_level ON reports(level, id);
+CREATE TABLE meta (key TEXT PRIMARY KEY, value TEXT);
+```
+
+Bedeutung:
+- `levels`: der aktuelle Stand, eine Zeile pro Level.
+  - `checked_at`: Zeitpunkt im Format von `toISOString()`, `NULL` solange nicht geprüft
+  - `checks`: JSON-Array der Checks
+  - `metrics`: JSON-Objekt
+- `reports`: die **Historie**. Jede angenommene Meldung ergibt genau eine Zeile; Meldungen mit 409 erzeugen keine.
+- `meta`: Schlüssel `updated_at` ist der Wert für `run.updatedAt`. Fehlt die Zeile, ist `updatedAt` `null`.
+
+**Migration:** Beim Start liest das Backend `PRAGMA user_version`. Bei 0 legt es in **einer Transaktion** das Schema an, fügt die 10 Zeilen in `levels` mit `status = 'offen'` ein (sonst Standardwerte) und setzt `PRAGMA user_version = 1`. Bei 1 ändert es nichts.
+
+`run.id` und `run.version` werden **nicht** gespeichert. Sie kommen wie in Level 3 aus `RUN_ID` bzw. sind fest `0.1.0`.

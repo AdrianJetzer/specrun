@@ -60,7 +60,13 @@ async function call(method, p, { body, type = 'application/json', raw } = {}) {
     init.headers['Content-Type'] = type;
     init.body = raw ?? JSON.stringify(body);
   }
-  const r = await fetch(`${API}${p}`, init);
+  let r;
+  try {
+    r = await fetch(`${API}${p}`, init);
+  } catch (e) {
+    // Backend nicht erreichbar: als Status 0 werten, damit die Prüfung weiterläuft und das Kriterium scheitert
+    return { status: 0, type: null, allow: null, json: null, text: `nicht erreichbar: ${e.cause?.code ?? e.message}` };
+  }
   const text = await r.text();
   let json = null;
   try { json = JSON.parse(text); } catch {}
@@ -209,7 +215,9 @@ if (webUp && apiUp) {
 
   // ---- L3-K5: Go-Qualität ----
   const gomod = fs.readFileSync(path.join(target, 'backend/go.mod'), 'utf8');
-  const noDeps = !/^\s*require\b/m.test(gomod);
+  // Bis Level 3 keine Abhängigkeit; ab Level 4 ist genau modernc.org/sqlite v1.62.0 erlaubt (spec/levels/level-04.md)
+  const direct = [...gomod.matchAll(/^\s*(?:require\s+)?([\w./-]+)\s+(v[\w.+-]+)\s*$/gm)].map((m) => `${m[1]} ${m[2]}`);
+  const noDeps = direct.every((d) => d === 'modernc.org/sqlite v1.62.0');
   const vet = run('go', ['vet', './...'], { cwd: path.join(target, 'backend') });
   const test = run('go', ['test', '-count=1', '-cover', './...'], { cwd: path.join(target, 'backend') });
   const cov = test.out.match(/coverage:\s*([\d.]+)%/);
@@ -217,7 +225,7 @@ if (webUp && apiUp) {
   nebenwerte.goTestFiles = fs.readdirSync(path.join(target, 'backend')).filter((f) => f.endsWith('_test.go')).length;
   fs.writeFileSync(path.join(out, 'go-test.log'), vet.out + '\n' + test.out);
   add('L3-K5', 'Go: keine Abhängigkeiten, go vet sauber, go test grün', noDeps && vet.code === 0 && test.code === 0 && nebenwerte.goTestFiles > 0,
-    [!noDeps && 'go.mod hat require', vet.code !== 0 && 'go vet meldet Probleme', test.code !== 0 && 'go test schlägt fehl', nebenwerte.goTestFiles === 0 && 'keine *_test.go']
+    [!noDeps && `unerlaubte Abhängigkeiten: ${JSON.stringify(direct)}`, vet.code !== 0 && 'go vet meldet Probleme', test.code !== 0 && 'go test schlägt fehl', nebenwerte.goTestFiles === 0 && 'keine *_test.go']
       .filter(Boolean).join('; ') || `Abdeckung ${nebenwerte.goCoverage ?? '?'} %`);
 
   // ---- L3-K6: make check (Level 1–3) ----

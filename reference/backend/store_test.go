@@ -2,12 +2,33 @@ package main
 
 import (
 	"errors"
+	"path/filepath"
 	"sync"
 	"testing"
 	"time"
 )
 
 func fixedNow() time.Time { return time.Date(2026, 11, 21, 9, 14, 0, 0, time.UTC) }
+
+// newTestStore öffnet eine frische Datenbank in einem temporären Ordner.
+func newTestStore(t *testing.T, now func() time.Time) *Store {
+	t.Helper()
+	s, err := OpenStore(filepath.Join(t.TempDir(), "test.db"), "lokal", "0.1.0", now)
+	if err != nil {
+		t.Fatal(err)
+	}
+	t.Cleanup(func() { s.Close() })
+	return s
+}
+
+func snap(t *testing.T, s *Store) Results {
+	t.Helper()
+	r, err := s.Snapshot()
+	if err != nil {
+		t.Fatal(err)
+	}
+	return r
+}
 
 func ok(n int) []Check {
 	cs := make([]Check, n)
@@ -18,8 +39,8 @@ func ok(n int) []Check {
 }
 
 func TestStartzustand(t *testing.T) {
-	s := NewStore("lokal", "0.1.0", fixedNow)
-	r := s.Snapshot()
+	s := newTestStore(t, fixedNow)
+	r := snap(t, s)
 	if len(r.Levels) != 10 || r.Run.ID != "lokal" || r.Run.UpdatedAt != nil {
 		t.Fatalf("unerwarteter Startzustand: %+v", r.Run)
 	}
@@ -31,7 +52,7 @@ func TestStartzustand(t *testing.T) {
 }
 
 func TestBestandenSetztHoehereAufOffen(t *testing.T) {
-	s := NewStore("lokal", "0.1.0", fixedNow)
+	s := newTestStore(t, fixedNow)
 	r, err := s.Report(1, Report{Checks: ok(3), DurationMs: 120})
 	if err != nil {
 		t.Fatal(err)
@@ -51,7 +72,7 @@ func TestBestandenSetztHoehereAufOffen(t *testing.T) {
 }
 
 func TestFehlschlagSperrtHoehere(t *testing.T) {
-	s := NewStore("lokal", "0.1.0", fixedNow)
+	s := newTestStore(t, fixedNow)
 	_, _ = s.Report(1, Report{Checks: ok(1)})
 	r, err := s.Report(2, Report{Checks: []Check{{"a", true}, {"b", false}}})
 	if err != nil {
@@ -73,18 +94,18 @@ func TestFehlschlagSperrtHoehere(t *testing.T) {
 }
 
 func TestReihenfolgeErzwungen(t *testing.T) {
-	s := NewStore("lokal", "0.1.0", fixedNow)
-	before := s.Snapshot()
+	s := newTestStore(t, fixedNow)
+	before := snap(t, s)
 	if _, err := s.Report(3, Report{Checks: ok(1)}); !errors.Is(err, ErrConflict) {
 		t.Fatalf("erwartet ErrConflict, bekommen %v", err)
 	}
-	if s.Snapshot().Levels[2].Status != before.Levels[2].Status {
+	if snap(t, s).Levels[2].Status != before.Levels[2].Status {
 		t.Error("Zustand wurde trotz Konflikt geändert")
 	}
 }
 
 func TestUnbekanntesLevel(t *testing.T) {
-	s := NewStore("lokal", "0.1.0", fixedNow)
+	s := newTestStore(t, fixedNow)
 	for _, n := range []int{0, 11, -1} {
 		if _, err := s.Report(n, Report{Checks: ok(1)}); !errors.Is(err, ErrNotFound) {
 			t.Errorf("Level %d: erwartet ErrNotFound, bekommen %v", n, err)
@@ -95,20 +116,54 @@ func TestUnbekanntesLevel(t *testing.T) {
 	}
 }
 
-func TestSnapshotIstKopie(t *testing.T) {
-	s := NewStore("lokal", "0.1.0", fixedNow)
-	_, _ = s.Report(1, Report{Checks: ok(1), Metrics: map[string]any{"x": 1.0}})
-	r := s.Snapshot()
-	r.Levels[0].Checks[0].Name = "verändert"
-	r.Levels[0].Metrics["x"] = 2.0
-	l, _ := s.Level(1)
-	if l.Checks[0].Name != "c" || l.Metrics["x"] != 1.0 {
-		t.Error("Snapshot teilt Daten mit dem Store")
+func TestPersistenzUeberNeustart(t *testing.T) {
+	path := filepath.Join(t.TempDir(), "p.db")
+	s1, err := OpenStore(path, "lokal", "0.1.0", fixedNow)
+	if err != nil {
+		t.Fatal(err)
+	}
+	_, _ = s1.Report(1, Report{Checks: ok(2), DurationMs: 5, Metrics: map[string]any{"x": 1.0}})
+	s1.Close()
+	s2, err := OpenStore(path, "lokal", "0.1.0", fixedNow)
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer s2.Close()
+	l, _ := s2.Level(1)
+	if l.Status != StatusBestanden || l.Metrics["x"] != 1.0 || len(l.Checks) != 2 {
+		t.Fatalf("Daten nach Neustart verloren: %+v", l)
+	}
+	h, _ := s2.History(1, 50)
+	if len(h) != 1 {
+		t.Fatalf("Historie nach Neustart: %d Einträge", len(h))
+	}
+}
+
+func TestHistorie(t *testing.T) {
+	s := newTestStore(t, fixedNow)
+	_, _ = s.Report(1, Report{Checks: ok(1), DurationMs: 1})
+	_, _ = s.Report(1, Report{Checks: []Check{{"a", false}}, DurationMs: 2})
+	_, _ = s.Report(2, Report{Checks: ok(1), DurationMs: 3}) // 409, darf nicht in die Historie
+	h, err := s.History(1, 50)
+	if err != nil || len(h) != 2 {
+		t.Fatalf("Historie Level 1: %v, %d Einträge", err, len(h))
+	}
+	if h[0].DurationMs != 2 || h[0].Status != StatusFehlgeschlagen || h[1].DurationMs != 1 || h[0].ID <= h[1].ID {
+		t.Errorf("Reihenfolge/Inhalt falsch: %+v", h)
+	}
+	if h2, _ := s.History(2, 50); len(h2) != 0 {
+		t.Errorf("abgelehnte Meldung in der Historie: %+v", h2)
+	}
+	if h1, _ := s.History(1, 1); len(h1) != 1 || h1[0].DurationMs != 2 {
+		t.Errorf("limit wirkt nicht: %+v", h1)
+	}
+	if _, err := s.History(11, 50); !errors.Is(err, ErrNotFound) {
+		t.Errorf("Level 11: %v", err)
 	}
 }
 
 func TestGleichzeitigeMeldungen(t *testing.T) {
-	s := NewStore("lokal", "0.1.0", nil)
+	s := newTestStore(t, nil)
 	var wg sync.WaitGroup
 	for i := 0; i < 200; i++ {
 		wg.Add(2)
@@ -116,10 +171,13 @@ func TestGleichzeitigeMeldungen(t *testing.T) {
 			defer wg.Done()
 			_, _ = s.Report(1, Report{Checks: []Check{{"c", pass}}})
 		}(i%2 == 0)
-		go func() { defer wg.Done(); _ = s.Snapshot() }()
+		go func() { defer wg.Done(); _, _ = s.Snapshot() }()
 	}
 	wg.Wait()
-	r := s.Snapshot()
+	if h, _ := s.History(1, 500); len(h) != 200 {
+		t.Fatalf("Historie hat %d statt 200 Einträge", len(h))
+	}
+	r := snap(t, s)
 	want := StatusOffen
 	if r.Levels[0].Status == StatusFehlgeschlagen {
 		want = StatusGesperrt

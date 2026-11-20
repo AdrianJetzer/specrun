@@ -22,7 +22,15 @@ const levels = [];
 for (const n of available.filter((n) => n <= max)) {
   console.log(`\n════════ Level ${n} ════════`);
   const r = spawnSync('node', [path.join(here, `level${n}.mjs`), target, out], { stdio: 'inherit' });
-  const res = JSON.parse(fs.readFileSync(path.join(out, `judge-level${n}.json`), 'utf8'));
+  let res;
+  try {
+    res = JSON.parse(fs.readFileSync(path.join(out, `judge-level${n}.json`), 'utf8'));
+  } catch {
+    // Prüfer für dieses Level ist abgestürzt: Level gilt als nicht bestanden, Lauf bleibt auswertbar
+    console.log(`❌ Prüfer für Level ${n} ist abgebrochen (Exit-Code ${r.status}) – Level gilt als nicht bestanden`);
+    res = { level: n, passed: false, criteria: [{ id: `L${n}-ABBRUCH`, name: 'Prüfer abgebrochen', ok: false, detail: `Exit-Code ${r.status}` }], nebenwerte: {} };
+    fs.writeFileSync(path.join(out, `judge-level${n}.json`), JSON.stringify(res, null, 2));
+  }
   levels.push({ level: n, passed: res.passed });
   if (r.status !== 0 || !res.passed) break;
   reached = n;

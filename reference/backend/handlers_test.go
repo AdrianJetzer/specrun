@@ -20,7 +20,7 @@ func do(t *testing.T, h http.Handler, method, path, ctype, body string) *httptes
 }
 
 func TestHealth(t *testing.T) {
-	h := NewHandler(NewStore("lokal", "0.1.0", fixedNow))
+	h := NewHandler(newTestStore(t, fixedNow))
 	rec := do(t, h, "GET", "/api/health", "", "")
 	if rec.Code != 200 || rec.Header().Get("Content-Type") != "application/json" {
 		t.Fatalf("Status %d, Typ %q", rec.Code, rec.Header().Get("Content-Type"))
@@ -33,7 +33,7 @@ func TestHealth(t *testing.T) {
 }
 
 func TestLevelsUndEinzelnesLevel(t *testing.T) {
-	h := NewHandler(NewStore("lokal", "0.1.0", fixedNow))
+	h := NewHandler(newTestStore(t, fixedNow))
 	var r Results
 	if err := json.Unmarshal(do(t, h, "GET", "/api/levels", "", "").Body.Bytes(), &r); err != nil || len(r.Levels) != 10 {
 		t.Fatalf("GET /api/levels: %v, %d Levels", err, len(r.Levels))
@@ -46,7 +46,7 @@ func TestLevelsUndEinzelnesLevel(t *testing.T) {
 }
 
 func TestMeldenUndFehlerfaelle(t *testing.T) {
-	h := NewHandler(NewStore("lokal", "0.1.0", fixedNow))
+	h := NewHandler(newTestStore(t, fixedNow))
 	const j = "application/json"
 	okBody := `{"checks":[{"name":"a","ok":true}],"durationMs":5}`
 
@@ -75,6 +75,13 @@ func TestMeldenUndFehlerfaelle(t *testing.T) {
 		{"unbekannter Pfad", "GET", "/api/unbekannt", "", "", 404},
 		{"DELETE auf levels", "DELETE", "/api/levels", "", "", 405},
 		{"GET auf result", "GET", "/api/levels/1/result", "", "", 405},
+		{"Historie", "GET", "/api/levels/1/history", "", "", 200},
+		{"Historie limit", "GET", "/api/levels/1/history?limit=500", "", "", 200},
+		{"Historie limit 0", "GET", "/api/levels/1/history?limit=0", "", "", 400},
+		{"Historie limit 501", "GET", "/api/levels/1/history?limit=501", "", "", 400},
+		{"Historie limit abc", "GET", "/api/levels/1/history?limit=abc", "", "", 400},
+		{"Historie Level 11", "GET", "/api/levels/11/history", "", "", 404},
+		{"Historie POST", "POST", "/api/levels/1/history", j, okBody, 405},
 	}
 	for _, c := range cases {
 		rec := do(t, h, c.method, c.path, c.ctype, c.body)

@@ -2,6 +2,8 @@
 # make level1          baut das Frontend und startet es mit vite preview auf http://127.0.0.1:8080
 # make level2          baut das Frontend und startet es mit nginx auf http://127.0.0.1:8080
 # make level3          wie level2, dazu das Go-Backend auf http://127.0.0.1:8081
+# make level4          wie level3; das Backend speichert in der SQLite-Datei .run/levelboard.db
+# make restart-backend startet nur das Backend neu, die Datenbank bleibt erhalten
 # make check           prüft alle Levels bis zum zuletzt gestarteten und schreibt results.json
 # make check URL=…     dasselbe gegen eine andere Adresse der Seite (API_URL für das Backend)
 # make down            stoppt alles, was gestartet wurde
@@ -10,11 +12,12 @@ SHELL   := /bin/bash
 RUN     := .run
 URL     ?= http://127.0.0.1:8080
 API_URL ?= http://127.0.0.1:8081
+DB      := $(RUN)/levelboard.db
 # Zuletzt gestartetes Level (von make levelN geschrieben); ohne Datei: höchstes gebautes Level
-LEVEL  := $(shell cat $(RUN)/level 2>/dev/null || echo 3)
+LEVEL  := $(shell cat $(RUN)/level 2>/dev/null || echo 4)
 LEVELS := $(shell seq 1 $(LEVEL))
 
-.PHONY: level1 level2 level3 check down build backend-build start-nginx wait
+.PHONY: level1 level2 level3 level4 restart-backend check down build backend-build start-nginx start-backend stop-backend wait
 
 build:
 	cd frontend && npm ci && npm run build
@@ -31,6 +34,17 @@ start-nginx:
 	@mkdir -p $(RUN)/nginx-tmp
 	nginx -p "$(CURDIR)/" -e $(RUN)/nginx-error.log -c frontend/nginx.conf
 
+start-backend:
+	@mkdir -p $(RUN)
+	@nohup env LEVELBOARD_DB=$(DB) ./backend/bin/levelboard-backend < /dev/null >> $(RUN)/backend.log 2>&1 & echo $$! > $(RUN)/backend.pid
+	@$(MAKE) --no-print-directory wait PORT_URL=http://127.0.0.1:8081/api/health
+
+# beendet das Backend und wartet bis zu 5 s, bis der Prozess wirklich weg ist
+stop-backend:
+	@if [ -f $(RUN)/backend.pid ]; then kill $$(cat $(RUN)/backend.pid) 2>/dev/null || true; \
+	  for i in $$(seq 1 50); do kill -0 $$(cat $(RUN)/backend.pid) 2>/dev/null || break; sleep 0.1; done; \
+	  rm -f $(RUN)/backend.pid; fi
+
 level1: down build
 	@mkdir -p $(RUN)
 	@cd frontend; nohup ./node_modules/.bin/vite preview < /dev/null > ../$(RUN)/frontend.log 2>&1 & echo $$! > ../$(RUN)/frontend.pid
@@ -43,13 +57,21 @@ level2: down build start-nginx
 	@$(MAKE) --no-print-directory wait PORT_URL=http://127.0.0.1:8080/
 	@echo "Levelboard läuft auf http://127.0.0.1:8080"
 
+# Ab Level 3 beginnt jeder Start mit einer frischen Datenbank (Neustart setzt zurück)
 level3: down build backend-build start-nginx
-	@nohup ./backend/bin/levelboard-backend < /dev/null > $(RUN)/backend.log 2>&1 & echo $$! > $(RUN)/backend.pid
+	@rm -f $(DB) $(DB)-wal $(DB)-shm
+	@$(MAKE) --no-print-directory start-backend
 	@echo 3 > $(RUN)/level
 	@$(MAKE) --no-print-directory wait PORT_URL=http://127.0.0.1:8080/
-	@$(MAKE) --no-print-directory wait PORT_URL=http://127.0.0.1:8081/api/health
 	@echo "Levelboard läuft auf http://127.0.0.1:8080"
 	@echo "Backend läuft auf http://127.0.0.1:8081"
+
+level4: level3
+	@echo 4 > $(RUN)/level
+	@echo "Datenbank: $(DB)"
+
+restart-backend: stop-backend start-backend
+	@echo "Backend neu gestartet (Datenbank erhalten)"
 
 check:
 	cd checks && ([ -d node_modules ] || npm ci) && npx playwright install chromium > /dev/null
@@ -58,5 +80,5 @@ check:
 down:
 	@if [ -f $(RUN)/frontend.pid ]; then kill $$(cat $(RUN)/frontend.pid) 2>/dev/null || true; rm -f $(RUN)/frontend.pid; fi
 	@if [ -f $(RUN)/nginx.pid ]; then kill $$(cat $(RUN)/nginx.pid) 2>/dev/null || true; rm -f $(RUN)/nginx.pid; fi
-	@if [ -f $(RUN)/backend.pid ]; then kill $$(cat $(RUN)/backend.pid) 2>/dev/null || true; rm -f $(RUN)/backend.pid; fi
+	@$(MAKE) --no-print-directory stop-backend
 	@rm -f $(RUN)/level

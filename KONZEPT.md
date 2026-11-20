@@ -651,3 +651,112 @@ Zusätzlich zum Entwurf unten gibt es einen 8. Check: „Falsche Reihenfolge erg
 2. Spec v0.3.0 schreiben.
 3. Prüfer für Level 3 bauen, mit Gegenprobe.
 4. Nachbau-Test bis Level 3.
+
+---
+
+## 17. Level 4 im Detail – „Datenbank“
+
+**Status (2026-11-20):** gebaut. Erledigt sind:
+- Referenz mit SQLite (Go-Abdeckung 72,9 %)
+- Spec v0.4.0
+- Prüfer `judge/level4.mjs`
+
+Die Referenz erreicht im Container Level 4 (Score 40).
+
+**Gegenproben:**
+- Ohne eine einzelne Verbindung und ohne `busy_timeout` scheitert schon Level 3: 19 von 50 gleichzeitigen Anfragen enden mit 5xx.
+- Eine falsch sortierte Historie und eine fehlende `user_version` erkennt der Prüfer für Level 4. Die Go-Tests der Referenz finden sie ebenfalls.
+
+Dabei ist der Prüfer robuster geworden: Ein nicht erreichbares Backend lässt ihn nicht mehr abbrechen.
+
+**Beobachtung:** Der Go-Proxy lieferte einmal kurz `403`. Jeder frische Container lädt die SQLite-Module neu, das dauert etwa 10 s. Möglich wäre, die Module im Image vorzuhalten. Das ist noch nicht entschieden.
+
+Offen ist noch der Nachbau-Test bis Level 4 (Lauf 004).
+
+### Entscheidungen
+| Thema | Entscheidung |
+|---|---|
+| Speicherort | **SQLite als Datei** `.run/levelboard.db`. Ein Neustart nur des Backends behält die Daten; jedes `make levelN` (N ≥ 3) löscht die Datei vorher. „Neustart setzt zurück“ gilt also weiter auf Level-Ebene |
+| Bibliothek | genau **eine** Abhängigkeit: `modernc.org/sqlite` **v1.62.0** (reines Go, kein C-Compiler nötig). Sonst weiterhin nur Standardbibliothek, Zugriff über `database/sql` |
+| Schema | **exakt vorgegeben** (Tabellen, Spalten, Typen, Migration). Der Prüfer öffnet die Datei selbst (`node:sqlite`) |
+| SQLite-Fallen | die Spec **benennt sie kurz**: eine offene Verbindung (`SetMaxOpenConns(1)`), `journal_mode=WAL`, `busy_timeout=5000` |
+| Historie | `GET /api/levels/{n}/history` je Level, neueste zuerst, `?limit=` (Standard 50, 1–500) |
+
+### Schema (Entwurf)
+```sql
+-- Migration 1 (PRAGMA user_version = 1)
+CREATE TABLE levels (
+  level        INTEGER PRIMARY KEY CHECK (level BETWEEN 1 AND 10),
+  status       TEXT    NOT NULL CHECK (status IN ('offen','bestanden','fehlgeschlagen','gesperrt')),
+  checked_at   TEXT,                     -- ISO wie toISOString(), NULL wenn offen/gesperrt
+  duration_ms  INTEGER,
+  checks       TEXT    NOT NULL DEFAULT '[]',   -- JSON-Array
+  metrics      TEXT    NOT NULL DEFAULT '{}'    -- JSON-Objekt
+);
+CREATE TABLE reports (                  -- Historie: jede angenommene Meldung
+  id           INTEGER PRIMARY KEY AUTOINCREMENT,
+  level        INTEGER NOT NULL REFERENCES levels(level),
+  status       TEXT    NOT NULL CHECK (status IN ('bestanden','fehlgeschlagen')),
+  checked_at   TEXT    NOT NULL,
+  duration_ms  INTEGER NOT NULL,
+  checks       TEXT    NOT NULL,
+  metrics      TEXT    NOT NULL
+);
+CREATE INDEX reports_level ON reports(level, id);
+CREATE TABLE meta (key TEXT PRIMARY KEY, value TEXT);  -- 'updated_at'
+```
+- Beim Start prüft das Backend `PRAGMA user_version`. Ist sie 0, legt es die Tabellen in **einer Transaktion** an, füllt `levels` mit den 10 Startzeilen (`offen`) und setzt `user_version = 1`.
+- Eine Meldung ändert `levels`, `reports` und `meta` in **einer Transaktion**. Eine Meldung mit 409 schreibt nichts.
+
+### API-Erweiterung
+`GET /api/levels/{n}/history?limit=50`:
+```json
+{ "level": 2, "entries": [ { "id": 7, "status": "bestanden", "checkedAt": "…", "durationMs": 120, "checks": [ … ], "metrics": {} } ] }
+```
+- Neueste zuerst (nach `id` absteigend).
+- `limit` muss eine ganze Zahl von 1 bis 500 sein, sonst 400.
+- Unbekanntes Level ergibt 404, eine falsche Methode 405.
+- Alle übrigen Endpunkte bleiben **unverändert**. Die Prüfungen aus Level 3 müssen weiterhin bestehen.
+
+### Makefile ab Level 4
+| Befehl | Wirkung |
+|---|---|
+| `make level4` | wie `make level3`, das Backend nutzt `.run/levelboard.db`. Die Datei wird vorher gelöscht. Schreibt `4` nach `.run/level` |
+| `make restart-backend` | **neu**: stoppt nur das Backend und startet es wieder, **ohne** die Datenbank zu löschen. Feste Schnittstelle für den Prüfer |
+| `make check` | prüft die Levels 1 bis `.run/level` |
+
+Der Pfad der Datenbank kommt über die Umgebungsvariable `LEVELBOARD_DB` (Standard `.run/levelboard.db`). Auch `make level3` löscht ab jetzt die Datei vor dem Start.
+
+### Prüfsuite des Agenten (neue Checks für Level 4, Entwurf)
+- Meldungen erscheinen in der Historie, neueste zuerst
+- Historie begrenzt mit limit
+- Daten überstehen einen Neustart des Backends (über `make restart-backend`)
+- Abgelehnte Meldungen landen nicht in der Historie
+- Datenbank hat das vorgegebene Schema (über `node:sqlite` aus der Prüfsuite heraus)
+
+### Prüfer für Level 4
+1. Die Levels 1–3 müssen bestanden sein.
+2. `make level4` startet alles, und `.run/levelboard.db` existiert.
+3. Er öffnet die DB-Datei selbst:
+   - Tabellen und Spalten wie in der Spec,
+   - `user_version = 1`,
+   - nach Meldungen stimmen Datei und API überein.
+4. Historie: Reihenfolge, Inhalte, `limit` samt Fehlerfällen; Meldungen mit 409 sind nicht enthalten.
+5. Persistenz: Meldungen, dann `make restart-backend`. Danach sind Stand und Historie unverändert.
+6. Last: 100 gleichzeitige Meldungen. Kein 5xx, die Historie enthält **genau** 100 neue Einträge, und der Endzustand ist konsistent.
+7. Der API-Vertrag aus Level 3 gilt weiterhin; die Prüfungen von L3-K2 werden erneut ausgeführt.
+8. `go.mod` hat genau die eine Abhängigkeit in der vorgegebenen Version, `go vet` ist sauber, `go test` grün.
+9. `make check` meldet Level 1–4 bestanden. Die Startdatei bleibt unverändert, `make down` gibt die Ports frei.
+
+### Auswirkungen auf die Spec (v0.4.0)
+- `04-api.md` und `openapi.yaml` bekommen die Historie.
+- `05-datenmodell.md` bekommt das DB-Schema.
+- `03` bekommt `make level4`, `make restart-backend` und `LEVELBOARD_DB`.
+- `level-03.md`: Die Regel „ohne `require`“ gilt nur bis Level 3. Ab Level 4 ist genau die SQLite-Abhängigkeit erlaubt.
+- `levels/level-04.md` kommt neu dazu.
+
+### Nächster Schritt (erst auf dein Go)
+1. Referenz für Level 4 bauen.
+2. Spec v0.4.0 schreiben.
+3. Prüfer für Level 4 bauen, mit Gegenprobe.
+4. Nachbau-Test bis Level 4 (Lauf 004 neu).

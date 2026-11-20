@@ -1,7 +1,7 @@
 openapi: 3.1.0
 info:
   title: Levelboard-API
-  version: 0.3.0
+  version: 0.4.0
   description: |
     REST-Schnittstelle des Levelboard-Backends (ab Level 3).
     Regeln und Beispiele stehen in 04-api.md. Bei Widersprüchen gilt diese Datei.
@@ -68,6 +68,26 @@ paths:
         '409': { $ref: '#/components/responses/Conflict' }
         '413': { $ref: '#/components/responses/TooLarge' }
         '415': { $ref: '#/components/responses/UnsupportedMediaType' }
+  /api/levels/{n}/history:
+    parameters:
+      - $ref: '#/components/parameters/LevelNumber'
+    get:
+      summary: Historie der angenommenen Meldungen zu Level n (ab Level 4), neueste zuerst
+      parameters:
+        - name: limit
+          in: query
+          required: false
+          description: 1–500, Standard 50 (sonst 400)
+          schema: { type: integer, minimum: 1, maximum: 500, default: 50 }
+      responses:
+        '200':
+          description: Historie
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/History' }
+        '400': { $ref: '#/components/responses/BadRequest' }
+        '404': { $ref: '#/components/responses/NotFound' }
+        '405': { $ref: '#/components/responses/MethodNotAllowed' }
 components:
   parameters:
     LevelNumber:
@@ -139,6 +159,28 @@ components:
         metrics:
           description: optional; null zählt wie „nicht angegeben“ (ergibt {})
           type: [object, 'null']
+    HistoryEntry:
+      type: object
+      additionalProperties: false
+      required: [id, status, checkedAt, durationMs, checks, metrics]
+      properties:
+        id: { type: integer, minimum: 1 }
+        status: { enum: [bestanden, fehlgeschlagen] }
+        checkedAt: { type: string, format: date-time }
+        durationMs: { type: integer, minimum: 0 }
+        checks:
+          type: array
+          items: { $ref: '#/components/schemas/Check' }
+        metrics: { type: object }
+    History:
+      type: object
+      additionalProperties: false
+      required: [level, entries]
+      properties:
+        level: { type: integer, minimum: 1, maximum: 10 }
+        entries:
+          type: array
+          items: { $ref: '#/components/schemas/HistoryEntry' }
     Error:
       type: object
       additionalProperties: false

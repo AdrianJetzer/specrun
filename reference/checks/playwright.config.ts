@@ -4,6 +4,8 @@ import { defineConfig } from '@playwright/test';
 export default defineConfig({
   testDir: './tests',
   retries: 0,
+  // Nacheinander: Die API-Tests (ab Level 3) verändern den gemeinsamen Zustand des Backends.
+  workers: 1,
   timeout: 15_000,
   reporter: [['list'], ['json', { outputFile: '.out/playwright.json' }]],
   use: {
