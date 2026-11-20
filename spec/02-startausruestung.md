@@ -20,7 +20,7 @@ Du arbeitest in einem **Linux-Container** (Dev Container). Diese Werkzeuge sind 
 Internetzugang für `npm` ist vorhanden.
 
 ## Arbeitsordner
-Dein Arbeitsverzeichnis ist der Projektordner. Er enthält zu Beginn nur `spec/` (und `.devcontainer/` für die Umgebung, nicht anfassen). Lege das Projekt direkt darin an.
+Dein Arbeitsverzeichnis ist der Projektordner `/workspace`. Er enthält zu Beginn nur `spec/`. Lege das Projekt direkt darin an.
 
 Die Seite auf Port 8080 wird an den Rechner des Benutzers weitergeleitet. Binde sie trotzdem nur an `127.0.0.1`.
 

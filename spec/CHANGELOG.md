@@ -1,5 +1,8 @@
 # Spec-Changelog
 
+## 0.2.1 – 2026-11-20
+- 02: Der Arbeitsordner `/workspace` enthält zu Beginn nur `spec/`; die Container-Konfiguration liegt außerhalb (neuer Laufordner-Aufbau `env/` + `work/`).
+
 ## 0.2.0 – 2026-11-20
 - Neu: **Level 2** (Webserver): `levels/level-02.md`, `frontend/nginx.conf`, `make level2`, 7 neue Checks.
 - 02: Startausrüstung ist jetzt ein **Linux-Dev-Container** (Ubuntu 24.04, Node 26.13.0, Go 1.27.4, nginx 1.31.9, Chromium vorinstalliert), ohne root und ohne Docker.

@@ -5,8 +5,10 @@
 set -uo pipefail
 
 ROOT="$(cd "$(dirname "$0")/.." && pwd)"
-SRC="$(cd "${1:?Aufruf: runner/judge-run.sh <laufordner> [höchstes-level]}" && pwd)"
+LAUF="$(cd "${1:?Aufruf: runner/judge-run.sh <laufordner> [höchstes-level]}" && pwd)"
 MAX="${2:-}"
+# Neuer Aufbau: <lauf>/work ist der Bauordner; alter Aufbau: der Laufordner selbst
+if [ -d "$LAUF/work" ]; then SRC="$LAUF/work"; else SRC="$LAUF"; fi
 
 if curl -s -o /dev/null http://127.0.0.1:8080/; then
   echo "✖ Port 8080 ist belegt (läuft die Seite noch im Container? → dort 'make down', in VS Code die Weiterleitung schließen)" >&2
@@ -30,7 +32,7 @@ cat > "$RUN_DIR/meta.json" <<EOF
   "judgedAt": "$(date -u +%Y-%m-%dT%H:%M:%SZ)"
 }
 EOF
-[ -f "$SRC/cost.txt" ] && cp "$SRC/cost.txt" "$RUN_DIR/cost.txt"
+for c in "$LAUF/cost.txt" "$SRC/cost.txt"; do [ -f "$c" ] && { cp "$c" "$RUN_DIR/cost.txt"; break; }; done
 
 # Was hat der Agent angelegt? (ohne Spec, Umgebung, Abhängigkeiten und Build-Ausgaben)
 ( cd "$SRC" && find . -type f -not -path './spec/*' -not -path './.devcontainer/*' -not -path '*/node_modules/*' \
