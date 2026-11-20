@@ -116,4 +116,6 @@ fi
 
 # ---------- Bericht ----------
 node "$ROOT/runner/report.mjs" "$RUN_DIR"
+# Persönliche Pfade entfernen (das Repo ist öffentlich)
+node "$ROOT/runner/sanitize.mjs" "$RUN_DIR" "$ROOT"
 say "Bericht: $RUN_DIR/report.md"
