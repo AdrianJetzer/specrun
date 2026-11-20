@@ -61,10 +61,13 @@ Direkt auf dem Mac braucht der Prüfer für Level 2 `nginx` (`brew install nginx
 **Nachbau-Lauf im Dev Container (empfohlen)**
 ```bash
 runner/prepare-run.sh                 # legt specruns_testlaeufe/<nr>/ an: env/, work/spec/, judge/
+runner/prepare-run.sh --modell opus  # dasselbe mit anderem Modell (Standard: sonnet; auch haiku oder eine Modell-ID)
 # 1. <lauf>/env in VS Code im Container öffnen, Claude den Auftrag geben (siehe Ausgabe des Skripts)
 # 2. <lauf>/judge in VS Code im Container öffnen und dort ausführen:  /specrun/runner/pruefen.sh
 runner/uebernehmen.sh <laufordner>    # Bericht nach runs/lauf-<nr>/ übernehmen
 ```
+Das Modell des Agenten ist pro Lauf fest vorgegeben (`ANTHROPIC_MODEL` im Agent-Container, Standard `claude-sonnet-5-5`). Der Bericht zeigt das vorgegebene und das laut Protokoll tatsächlich verwendete Modell.
+
 Der Prüfer läuft in einem eigenen Container aus demselben Image. Er sieht das Werk des Agenten nur lesend und baut es selbst neu.
 
 **Anmeldung von Claude im Agent-Container (einmalig einrichten)**

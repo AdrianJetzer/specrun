@@ -42,7 +42,11 @@ const agentLines = claude
     ]
   : tok
     ? [
-        `- Modell: ${tok.modelle.join(', ') || '?'}`,
+        `- Modell laut Protokoll: ${tok.modelle.join(', ') || '?'}${
+          /^claude-/.test(meta.model ?? '') && tok.modelle.some((m) => m.startsWith('claude-') && !m.startsWith(meta.model))
+            ? ` ⚠ weicht vom vorgegebenen Modell ${meta.model} ab`
+            : ''
+        }`,
         `- Dauer der Session: ${fmtS(tok.dauerS)}; ${tok.antworten} Antworten, ${tok.werkzeugaufrufe} Werkzeugaufrufe`,
         `- Tokens gesamt: ${n(tok.gesamt.gesamt)} (Eingabe ${n(tok.gesamt.eingabe)}, Cache-Schreiben ${n(tok.gesamt.cacheSchreiben)}, Cache-Lesen ${n(tok.gesamt.cacheLesen)}, Ausgabe ${n(tok.gesamt.ausgabe)})`,
         `- Laut eigener Prüfsuite erreicht: Level ${tok.erreichtesLevel}`,
@@ -58,7 +62,7 @@ const lines = [
   '|---|---|',
   `| **Score** | **${score} / 100** (erreichtes Level: ${reached}) |`,
   `| Spec-Version | ${meta.specVersion ?? '?'} |`,
-  `| Modell | ${meta.model ?? '?'} |`,
+  `| Modell (vorgegeben) | ${meta.model ?? '?'} |`,
   ...(meta.claudeCode ? [`| Claude Code | ${meta.claudeCode} |`] : []),
   `| Bauordner | \`${meta.buildDir ?? '?'}\` |`,
   ...(meta.notes ? [`| Hinweis | ${meta.notes} |`] : []),

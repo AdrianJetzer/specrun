@@ -41,7 +41,7 @@ cat > "$OUT/meta.json" <<EOF
 {
   "runId": "lauf-${SPECRUN_LAUF:-?}",
   "specVersion": "${SPEC_VERSION:-?}",
-  "model": "interaktive Session im Dev Container",
+  "model": "$(cat /lauf/modell.txt 2>/dev/null || echo 'nicht vorgegeben (Standard der Kommandozeile)')",
   "fake": false,
   "buildDir": "/lauf/work",
   "judgedIn": "Prüfer-Container",

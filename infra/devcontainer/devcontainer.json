@@ -22,10 +22,13 @@
   // gesetzt ist (einmalig erzeugt mit `claude setup-token`, siehe README).
   // GH_TOKEN: eng begrenztes Token des Agenten für die Organisation specrun-lab (ab Level 6)
   // RUN_ID: Kennung des Laufs (setzt runner/prepare-run.sh ein), Repo heißt specrun-lab/levelboard-<RUN_ID>
+  // ANTHROPIC_MODEL: fest vorgegebenes Modell für vergleichbare Läufe (setzt runner/prepare-run.sh ein,
+  // Standard claude-sonnet-5-5, wählbar mit --modell)
   "containerEnv": {
     "CLAUDE_CODE_OAUTH_TOKEN": "${localEnv:CLAUDE_CODE_OAUTH_TOKEN}",
     "GH_TOKEN": "${localEnv:SPECRUN_AGENT_GH_TOKEN}",
-    "RUN_ID": "__RUN_ID__"
+    "RUN_ID": "__RUN_ID__",
+    "ANTHROPIC_MODEL": "__MODEL__"
   },
 
   // Session-Protokolle von Claude landen im Laufordner (<lauf>/protokoll) – für die Messung der Tokens

@@ -1,7 +1,9 @@
 #!/usr/bin/env bash
 # Specrun – legt einen frischen Laufordner für einen Nachbau im Dev Container an.
-# Aufruf: runner/prepare-run.sh [ordner]
+# Aufruf: runner/prepare-run.sh [--modell <name>] [ordner]
 #         runner/prepare-run.sh --nur-pruefer <laufordner>   (ergänzt nur judge/ in einem bestehenden Lauf)
+#   Modell des Agenten: Standard claude-sonnet-5-5; Kurzformen sonnet, opus, haiku
+#   (→ claude-sonnet-5-5, claude-opus-5-5, claude-haiku-5-5) oder eine vollständige Modell-ID.
 #   Standard-Ordner: ~/Documents/Claude/specruns_testlaeufe/<nächste Nummer>
 #
 # Aufbau danach:
@@ -31,6 +33,19 @@ if [ "${1:-}" = "--nur-pruefer" ]; then
   exit 0
 fi
 
+MODEL=claude-sonnet-5-5
+if [ "${1:-}" = "--modell" ]; then
+  MODEL="${2:?Aufruf: runner/prepare-run.sh --modell <sonnet|opus|haiku|modell-id> [ordner]}"
+  shift 2
+fi
+case "$MODEL" in
+  sonnet) MODEL=claude-sonnet-5-5 ;;
+  opus) MODEL=claude-opus-5-5 ;;
+  haiku) MODEL=claude-haiku-5-5 ;;
+  claude-*) ;;
+  *) echo "✖ Unbekanntes Modell: $MODEL (sonnet, opus, haiku oder eine Modell-ID wie claude-sonnet-5-5)" >&2; exit 1 ;;
+esac
+
 if [ $# -ge 1 ]; then
   DIR="$1"
 else
@@ -43,7 +58,9 @@ fi
 mkdir -p "$DIR/env" "$DIR/work" "$DIR/protokoll"
 cp -R "$ROOT/infra/devcontainer" "$DIR/env/.devcontainer"
 # Lauf-ID für das GitHub-Repo des Agenten (ab Level 6): specrun-lab/levelboard-lauf-<nr>
-sed -i '' "s|__RUN_ID__|lauf-$(basename "$DIR")|g" "$DIR/env/.devcontainer/devcontainer.json"
+sed -i '' -e "s|__RUN_ID__|lauf-$(basename "$DIR")|g" -e "s|__MODEL__|$MODEL|g" "$DIR/env/.devcontainer/devcontainer.json"
+# Vorgegebenes Modell für den Prüfer (Metadaten im Bericht)
+echo "$MODEL" > "$DIR/modell.txt"
 cp -R "$ROOT/spec" "$DIR/work/spec"
 DIR="$(cd "$DIR" && pwd)"
 add_judge "$DIR"
@@ -51,7 +68,7 @@ find "$DIR" -name .DS_Store -delete
 
 SPEC_VERSION="$(grep -m1 'Spec-Version' "$ROOT/spec/00-start.md" | sed -E 's/.*\*\* *([0-9.]+).*/\1/')"
 cat <<EOF
-✔ Laufordner angelegt: $DIR  (Spec $SPEC_VERSION)
+✔ Laufordner angelegt: $DIR  (Spec $SPEC_VERSION, Modell $MODEL)
     env/    → Container des Agenten (enthält nur .devcontainer/)
     work/   → Arbeitsordner des Agenten, im Container /workspace (enthält nur spec/)
     judge/  → Container des Prüfers

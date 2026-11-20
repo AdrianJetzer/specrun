@@ -1006,7 +1006,13 @@ Im Referenz-Repo sind beide Jobs grün (`check` ~1:20 min, `images` ~2 min). Die
 - 14 Minuten bis Level 7, 39 Antworten, 65 587 Ausgabe-Tokens.
 - 86 % der Ausgabe fielen in die Phase bis Level 1: Der Agent schreibt zuerst den gesamten Code und prüft danach Level für Level.
 - Zweitgrößter Block ist GitHub (Level 6–7, 5 Minuten, vor allem Warten auf die Pipeline).
-- Modell war **`claude-sonnet-5-5`**, der Standard der Kommandozeile im Container. Für vergleichbare Läufe sollte das Modell fest vorgegeben werden (offen).
+- Modell war **`claude-sonnet-5-5`**, der Standard der Kommandozeile im Container. Für vergleichbare Läufe wird das Modell seither fest vorgegeben (siehe unten).
+
+**Modell des Agenten (entschieden):**
+- Standard ist **Sonnet 5.5** (`claude-sonnet-5-5`): halb so teuer wie Opus 5.5 ($2/$10 statt $4/$20 pro Mio. Tokens Eingabe/Ausgabe) und hat Level 7 auf Anhieb geschafft. Lauf 007 hätte mit Sonnet ≈ $1.60 gekostet, mit Opus ≈ $3.20 (hochgerechnet).
+- Opus 5.5 gelegentlich zum Vergleich, vor allem ab Level 8–10.
+- Haiku 5.5 als Härtetest für die Spec: Je schwächer das Modell, desto mehr muss die Spec leisten.
+- Umsetzung: `runner/prepare-run.sh --modell <sonnet|opus|haiku|modell-id>` trägt `ANTHROPIC_MODEL` in den Agent-Container ein und legt `<lauf>/modell.txt` für den Prüfer ab. Der Bericht zeigt das vorgegebene Modell und warnt, wenn das Protokoll ein anderes zeigt.
 
 Ursprüngliche Planung:
 - **Quelle:** das Session-Protokoll von Claude Code im Agent-Container (`~/.claude/projects/…/*.jsonl`). Es enthält pro Antwort die Tokens (Eingabe, Cache-Lesen, Cache-Schreiben, Ausgabe) mit Zeitstempel sowie alle Befehle des Agenten.
