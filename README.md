@@ -6,7 +6,7 @@ Specrun ist ein Experiment. Eine frische Claude-Code-Session erhält ausschließ
 
 Die gebaute App, das **Levelboard**, ist zugleich die Anzeigetafel für die Leistung des Agenten: Sie zeigt, welche Levels er geschafft hat. Ein **unabhängiger Prüfer**, den der Agent nicht sieht, misst anschließend nach. Nur sein Urteil zählt.
 
-> **Stand:** Levels 1–6 sind umgesetzt (Spec v0.6.0, Referenz, Prüfer, Dev Container). Die Referenz läuft als echtes Repo [`specrun-lab/levelboard-referenz`](https://github.com/specrun-lab/levelboard-referenz) mit grüner Pipeline. Echte Nachbauten haben Level 1 (Lauf 001) und Level 2 (Lauf 003) laut unabhängigem Prüfer bestanden; Lauf 005 (Levels 1–4) ist gebaut, aber noch nicht geprüft.
+> **Stand:** Levels 1–7 sind umgesetzt (Spec v0.7.0, Referenz, Prüfer, Dev Container). Die Referenz läuft als echtes Repo [`specrun-lab/levelboard-referenz`](https://github.com/specrun-lab/levelboard-referenz): Die Pipeline testet die Levels 1–5, baut die App-Images, testet sie als Container und veröffentlicht sie in der GHCR. Echte Nachbauten haben Level 1 (Lauf 001) und Level 2 (Lauf 003) laut unabhängigem Prüfer bestanden; Lauf 005 (Levels 1–4) ist gebaut, aber noch nicht geprüft.
 
 ## Die 10 Levels
 

@@ -85,7 +85,8 @@ if (!RUN_ID || !process.env.GH_TOKEN) {
     if (!pushBranches.includes('main') || !(on && 'workflow_dispatch' in on)) wp.push('Auslöser: push auf main und workflow_dispatch');
     const jobs = Object.keys(wf.jobs ?? {});
     const job = wf.jobs?.check;
-    if (!same(jobs, ['check'])) wp.push(`Jobs ${JSON.stringify(jobs)} statt ["check"]`);
+    // Level 6: genau der Job „check“; ab Level 7 kommt rechtmäßig der Job „images“ dazu
+    if (!jobs.includes('check') || jobs.some((j) => !['check', 'images'].includes(j))) wp.push(`Jobs ${JSON.stringify(jobs)} statt ["check"] (ab Level 7 zusätzlich "images")`);
     if (job) {
       if (job['runs-on'] !== 'ubuntu-latest') wp.push(`runs-on ${job['runs-on']}`);
       if (job['timeout-minutes'] !== 20) wp.push(`timeout-minutes ${job['timeout-minutes']}`);

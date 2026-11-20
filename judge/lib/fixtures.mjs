@@ -117,3 +117,18 @@ export const SECRET_PATTERNS = [
   /\bgh[opsur]_[A-Za-z0-9]{30,}/,
   /sk-ant-[A-Za-z0-9_-]{20,}/,
 ];
+
+export const LEVEL7_CHECKS = [
+  'Job images des letzten Laufs ist grün',
+  'Beide Images liegen öffentlich in der GHCR',
+  'Report der Container-Suite enthält nur bestandene Checks',
+];
+
+export const CONTAINER_CHECKS = [
+  'Seite läuft im Container und liest aus dem Backend',
+  '/api/ wird an den Backend-Container weitergeleitet',
+  'Meldung erscheint ohne Neuladen',
+  'Daten überstehen einen Neustart des Backend-Containers',
+  'Cache- und gzip-Regeln gelten im Container',
+  'Backend-Container läuft nicht als root',
+];

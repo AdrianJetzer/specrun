@@ -84,6 +84,7 @@ const nw3 = levelResults[2]?.nebenwerte ?? {};
 const nw4 = levelResults[3]?.nebenwerte ?? {};
 const nw5 = levelResults[4]?.nebenwerte ?? {};
 const nw6 = levelResults[5]?.nebenwerte ?? {};
+const nw7 = levelResults[6]?.nebenwerte ?? {};
 lines.push(
   '## Nebenwerte',
   '',
@@ -94,6 +95,7 @@ lines.push(
   ...(nw5.makeLevel5Ms ? [`- \`make level5\`: ${(nw5.makeLevel5Ms / 1000).toFixed(1)} s`] : []),
   ...(nw6.repo ? [`- Repo: https://github.com/${nw6.repo}`] : []),
   ...(nw6.pipelineLaeufe ? [`- Pipeline-Läufe: ${nw6.pipelineLaeufe}${nw6.pipelineDauerS ? `, letzter Lauf ${nw6.pipelineDauerS} s` : ''}, Commits: ${nw6.commits ?? '?'}`] : []),
+  ...(nw7.imageGroessenMB ? [`- Image-Größen (komprimiert): Frontend ${nw7.imageGroessenMB.frontend ?? '?'} MB, Backend ${nw7.imageGroessenMB.backend ?? '?'} MB${nw7.imagesJobS ? `; Job images ${nw7.imagesJobS} s` : ''}`] : []),
   ...(nw5.liveVerzoegerungMs ? [`- Live-Anzeige: erste Änderung nach ${(nw5.liveVerzoegerungMs / 1000).toFixed(1)} s sichtbar`] : []),
   ...((nw4.goCoverage ?? nw3.goCoverage) !== undefined ? [`- Go-Testabdeckung: ${(nw4.goCoverage ?? nw3.goCoverage) ?? '?'} % (${(nw4.goTestFiles ?? nw3.goTestFiles) ?? '?'} Testdateien)`] : []),
   `- \`make check\`: ${(nw5.makeCheckMs ?? nw4.makeCheckMs ?? nw3.makeCheckMs ?? nw2.makeCheckMs ?? nw1.makeCheckMs) ? `${((nw5.makeCheckMs ?? nw4.makeCheckMs ?? nw3.makeCheckMs ?? nw2.makeCheckMs ?? nw1.makeCheckMs) / 1000).toFixed(1)} s` : '–'}`,

@@ -909,3 +909,85 @@ Die Referenz erreicht Level 6 (Score 60). Die Gegenprobe (nicht gepusht, falsche
 2. Ich veröffentliche das Image (mit deinem Login) und baue die Referenz für Level 6 als echtes Repo in `specrun-lab`.
 3. Spec v0.6.0.
 4. Prüfer für Level 6, mit Gegenprobe.
+
+---
+
+## 20. Level 7 im Detail – „Images in der Pipeline“
+
+**Status (2026-11-20):** gebaut. Erledigt sind:
+- Referenz mit Dockerfiles, Compose, Container-Suite und Job `images`
+- Spec v0.7.0
+- Prüfer `judge/level7.mjs`
+
+Im Referenz-Repo sind beide Jobs grün (`check` ~1:20 min, `images` ~2 min). Die Referenz erreicht Level 7 (Score 70); die Images sind komprimiert 25,2 MB (Frontend) und 8,3 MB (Backend) groß. Die Gegenprobe (Backend als root, Port nach außen, falsche Weiterleitung, nicht gepusht) wird vollständig erkannt.
+
+**Funde:**
+- **Sichtbarkeit:** Pakete, die per `GITHUB_TOKEN` gepusht werden und über das Label `org.opencontainers.image.source` mit einem öffentlichen Repo verknüpft sind, werden **automatisch öffentlich**. Plan B (Lese-Token auf dem Server) ist nicht nötig.
+- **Abweichung vom Entwurf:** Der Prüfer startet die Images nicht selbst, weil er lokal kein Docker hat. Er liest sie ohne Anmeldung aus der Registry (Manifest, Konfiguration, Labels, Benutzer, Ports, Umgebung). Gestartet und von außen geprüft werden sie in Level 8 auf dem Server.
+- **Prüfer Level 6:** Er erlaubt jetzt neben `check` auch den Job `images`.
+- **Container-Suite:** Sie läuft direkt auf dem Runner (mit `setup-node`), nicht im Werkstatt-Image, weil sie `docker compose restart` braucht.
+
+### Entscheidungen
+| Thema | Entscheidung |
+|---|---|
+| Basis-Images | Frontend **`nginx:1.31.9-alpine`**, Backend **`alpine:3.23`**, Builder `node:26.13.0-alpine` und `golang:1.27.4-alpine`. Alles von Docker Hub (keine Google-Registry) |
+| Sichtbarkeit | App-Images **öffentlich**. Ob GitHub das bei Verknüpfung mit dem öffentlichen Repo (`org.opencontainers.image.source`) automatisch macht, wird beim Bau der Referenz **ausprobiert**. Falls nicht: Plan B mit Lese-Token auf dem Server (Level 8) |
+| Tests in der Pipeline | eine **eigene Container-Suite** `checks/tests/container.spec.ts`. Die bestehenden Level-Tests bleiben lokal |
+
+### Images
+- **`frontend/Dockerfile`**, mehrstufig:
+  1. `node:26.13.0-alpine` baut mit `npm ci` und `npm run build`.
+  2. `nginx:1.31.9-alpine` mit `dist/`, `{"source":"api"}` als `config.json` und **`frontend/nginx-container.conf`**.
+  - Die Konfiguration hat die Regeln aus Level 2/5. nginx lauscht auf `0.0.0.0:8080` und leitet `/api/` an `http://backend:8081` weiter.
+- **`backend/Dockerfile`**, mehrstufig:
+  1. `golang:1.27.4-alpine` mit `CGO_ENABLED=0 go build -buildvcs=false`.
+  2. `alpine:3.23` mit dem Programm, ohne root (eigener Benutzer), Datenbank unter `/data/levelboard.db` (Volume).
+- **Backend-Adresse aus `LEVELBOARD_ADDR`**, Standard `127.0.0.1:8081`, im Container `0.0.0.0:8081`. Das ist eine kleine Änderung am Backend.
+- **`docker-compose.yml`:**
+  - `backend` mit Volume `levelboard-data:/data` und Healthcheck auf `/api/health`.
+  - `frontend` mit Port `8080:8080`, startet erst, wenn `backend` gesund ist.
+  - Images werden per `image:` benannt, damit sie sich pushen lassen.
+- Labels in beiden Images: `org.opencontainers.image.source=https://github.com/<repo>` und `…revision=<commit>`.
+
+### Pipeline (Erweiterung von `ci.yml`)
+- Neuer Job **`images`**: `needs: check`, `runs-on: ubuntu-latest` (ohne Container, weil Docker gebraucht wird), `permissions: packages: write, contents: read`.
+- Schritte:
+  1. Checkout.
+  2. `docker compose build`.
+  3. `docker compose up -d --wait`.
+  4. Container-Suite ausführen: im Image `ghcr.io/specrun-lab/devcontainer:1` mit `--network host` und eingehängtem Arbeitsordner.
+  5. Report als Artefakt **`levelboard-container-report`** hochladen (`if: always()`).
+  6. Nur bei Erfolg: mit `GITHUB_TOKEN` bei der GHCR anmelden und pushen.
+- Ziel-Images:
+  - `ghcr.io/specrun-lab/levelboard-<RUN_ID>-frontend:<commit-sha>`
+  - `ghcr.io/specrun-lab/levelboard-<RUN_ID>-backend:<commit-sha>`
+  - zusätzlich jeweils `:main`
+- Am Ende `docker compose down -v` (`if: always()`).
+
+### Container-Suite (`checks/tests/container.spec.ts`, Entwurf, ~6 Checks)
+- Seite über nginx im Container, Quelle „Backend“
+- `/api/health` über 8080 weitergeleitet
+- Meldung über 8080 erscheint ohne Neuladen
+- Daten überstehen einen Neustart des Backend-Containers (`docker compose restart backend`)
+- Cache- und gzip-Regeln wie in Level 2
+- Backend-Container läuft nicht als root
+
+### Lokale Checks für Level 7 (in `make check`, fragen GitHub ab)
+- Job `images` des letzten Laufs ist grün
+- Beide Images mit dem aktuellen Commit-Hash liegen in der GHCR
+- Report der Container-Suite enthält nur bestandene Checks
+
+### Prüfer für Level 7
+1. Die Levels 1–6 müssen bestanden sein.
+2. Dockerfiles und Compose erfüllen die Eckpunkte: Basis-Images, mehrstufig, kein root im Backend, Volume, Healthcheck.
+3. Der Job `images` im letzten Lauf ist `success`. Das Artefakt `levelboard-container-report` belegt die bestandenen Container-Checks.
+4. Beide Images liegen mit dem Tag des aktuellen Commits in der GHCR. Labels `source` und `revision` stimmen.
+5. **Eigene Nachprüfung:** Ein Prüfer-Workflow in GitHub Actions (mit dem Lese-Token) zieht die Images, startet sie mit einer eigenen Compose-Datei und prüft Kernfunktionen. So wird das gemessen, was später ausgeliefert wird.
+6. Nebenwerte: Image-Größen, Dauer des Jobs `images`.
+
+### Nächster Schritt (erst auf dein Go)
+1. Backend um `LEVELBOARD_ADDR` erweitern, Dockerfiles, Compose, Container-Suite und Pipeline in der Referenz bauen.
+2. Im Referenz-Repo ausprobieren, inklusive der Sichtbarkeit der Pakete.
+3. Spec v0.7.0.
+4. Prüfer für Level 7.
+5. Danach gemeinsamer Test: Lauf 005 prüfen und einen neuen Nachbau bis Level 7 starten.
