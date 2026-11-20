@@ -14,6 +14,7 @@ const json = (f) => {
 const meta = json('meta.json') ?? {};
 const claude = json('claude.json');
 const cost = read('cost.txt');
+const tok = json('tokens.json');
 const summary = json('judge/judge-summary.json');
 const levelResults = [];
 for (let n = 1; n <= 10; n++) {
@@ -39,6 +40,13 @@ const agentLines = claude
       `- Turns: ${claude.num_turns ?? '?'}`,
       `- Tokens: Eingabe ${n(u.input_tokens)}, Cache-Lesen ${n(u.cache_read_input_tokens)}, Cache-Schreiben ${n(u.cache_creation_input_tokens)}, Ausgabe ${n(u.output_tokens)}`,
     ]
+  : tok
+    ? [
+        `- Modell: ${tok.modelle.join(', ') || '?'}`,
+        `- Dauer der Session: ${fmtS(tok.dauerS)}; ${tok.antworten} Antworten, ${tok.werkzeugaufrufe} Werkzeugaufrufe`,
+        `- Tokens gesamt: ${n(tok.gesamt.gesamt)} (Eingabe ${n(tok.gesamt.eingabe)}, Cache-Schreiben ${n(tok.gesamt.cacheSchreiben)}, Cache-Lesen ${n(tok.gesamt.cacheLesen)}, Ausgabe ${n(tok.gesamt.ausgabe)})`,
+        `- Laut eigener Prüfsuite erreicht: Level ${tok.erreichtesLevel}`,
+      ]
   : cost
     ? ['- Ausgabe von `/cost`:', '', '```', cost, '```']
     : ['- Kosten, Tokens und Dauer: _nicht erfasst_'];
@@ -61,6 +69,22 @@ const lines = [
   `- Angelegte Dateien: ${files.length}`,
   '',
 ];
+
+if (tok?.phasen?.length) {
+  const pct = (a, b) => (b ? `${Math.round((a / b) * 100)} %` : '–');
+  lines.push(
+    '## Tokens pro Level',
+    '',
+    'Eine Phase reicht bis zu dem Zeitpunkt, an dem `make check` des Agenten das nächste Level erstmals bestanden meldet. „Gesamt“ enthält Cache-Lesen, also den wiederholt mitgeschickten Gesprächsverlauf.',
+    '',
+    '| Phase | Dauer | kumuliert | Antworten | Werkzeugaufrufe | Ausgabe-Tokens | Anteil Ausgabe | Tokens gesamt |',
+    '|---|---|---|---|---|---|---|---|',
+    ...tok.phasen.map((p) => `| ${p.phase} | ${fmtS(p.dauerS)} | ${fmtS(p.kumuliertS)} | ${p.antworten} | ${p.werkzeugaufrufe} | ${n(p.tokens.ausgabe)} | ${pct(p.tokens.ausgabe, tok.gesamt.ausgabe)} | ${n(p.tokens.gesamt)} |`),
+    ...(tok.danach ? [`| danach | ${fmtS(tok.danach.dauerS)} | – | ${tok.danach.antworten} | – | ${n(tok.danach.tokens.ausgabe)} | ${pct(tok.danach.tokens.ausgabe, tok.gesamt.ausgabe)} | ${n(tok.danach.tokens.gesamt)} |`] : []),
+    `| **Summe** | ${fmtS(tok.dauerS)} | | ${tok.antworten} | ${tok.werkzeugaufrufe} | ${n(tok.gesamt.ausgabe)} | 100 % | ${n(tok.gesamt.gesamt)} |`,
+    '',
+  );
+}
 
 for (const r of levelResults) {
   const nw = r.nebenwerte ?? {};

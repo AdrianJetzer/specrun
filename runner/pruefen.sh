@@ -54,6 +54,12 @@ for c in /lauf/cost.txt "$AGENT/cost.txt" /workspace/cost.txt; do [ -f "$c" ] &&
     -not -name cost.txt | sort ) > "$OUT/files.txt"
 echo "  $(wc -l < "$OUT/files.txt") Dateien vom Agenten angelegt"
 
+if ls /lauf/protokoll/*/*.jsonl > /dev/null 2>&1; then
+  node "$KIT/runner/tokens.mjs" /lauf/protokoll > "$OUT/tokens.json" && echo "  Tokens pro Level ausgewertet (tokens.json)"
+else
+  echo "  kein Session-Protokoll in /lauf/protokoll – Tokens pro Level nicht messbar"
+fi
+
 step "4/5 Unabhängige Messung, Level für Level"
 node "$KIT/judge/all.mjs" "$BUILD" "$OUT/judge" $MAX | tee "$OUT/judge.log"
 

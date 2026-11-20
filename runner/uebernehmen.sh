@@ -16,6 +16,16 @@ node "$ROOT/runner/sanitize.mjs" "$DEST" "$ROOT"
 echo "✔ Übernommen: $DEST"
 grep -m1 'Score' "$DEST/report.md" || true
 
+# Bericht auf GitHub: nur den Ordner dieses Laufs committen und pushen (andere Änderungen bleiben unberührt)
+SCORE="$(grep -m1 -oE '\*\*[0-9]+ / 100\*\*' "$DEST/report.md" | tr -d '*' || true)"
+if git -C "$ROOT" add -- "runs/$(basename "$DEST")" \
+   && git -C "$ROOT" commit -q -m "Bericht $(basename "$DEST")${SCORE:+: Score $SCORE}" -- "runs/$(basename "$DEST")" \
+   && git -C "$ROOT" push -q; then
+  echo "✔ Bericht auf GitHub: $(git -C "$ROOT" remote get-url origin | sed -E 's#(git@github.com:|https://github.com/)#https://github.com/#; s#\.git$##')/tree/main/runs/$(basename "$DEST")"
+else
+  echo "⚠ Bericht konnte nicht committet/gepusht werden – bitte von Hand prüfen" >&2
+fi
+
 # Ab Level 6: das GitHub-Repo des Laufs archivieren (nur noch lesbar, bleibt als Nachweis)
 REPO="specrun-lab/levelboard-lauf-$(basename "$LAUF")"
 if gh api "repos/$REPO" --jq .archived > /dev/null 2>&1; then

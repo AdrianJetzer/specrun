@@ -8,6 +8,7 @@
 #   <lauf>/env/.devcontainer/    Container des Agenten   → in VS Code öffnen, Agent baut
 #   <lauf>/work/spec/            Arbeitsordner des Agenten (/workspace), zu Beginn nur spec/
 #   <lauf>/judge/.devcontainer/  Container des Prüfers   → danach in VS Code öffnen, Prüfer misst
+#   <lauf>/protokoll/            Session-Protokolle von Claude (für Tokens pro Level)
 set -euo pipefail
 
 ROOT="$(cd "$(dirname "$0")/.." && pwd)"
@@ -39,7 +40,7 @@ else
 fi
 [ -e "$DIR" ] && { echo "✖ Ordner existiert bereits: $DIR" >&2; exit 1; }
 
-mkdir -p "$DIR/env" "$DIR/work"
+mkdir -p "$DIR/env" "$DIR/work" "$DIR/protokoll"
 cp -R "$ROOT/infra/devcontainer" "$DIR/env/.devcontainer"
 # Lauf-ID für das GitHub-Repo des Agenten (ab Level 6): specrun-lab/levelboard-lauf-<nr>
 sed -i '' "s|__RUN_ID__|lauf-$(basename "$DIR")|g" "$DIR/env/.devcontainer/devcontainer.json"
@@ -61,7 +62,7 @@ So geht es weiter:
 
      Lies spec/00-start.md und folge der Arbeitsanweisung darin vollständig. Baue das Projekt im aktuellen Verzeichnis. Stelle keine Rückfragen.
 
-  3. Nicht eingreifen. Am Ende /cost eingeben und die Ausgabe nach $DIR/cost.txt kopieren.
+  3. Nicht eingreifen. Tokens und Dauer werden automatisch aus $DIR/protokoll ausgewertet.
   4. Container schließen. Dann in VS Code: „Ordner öffnen“ → $DIR/judge → „Reopen in Container“
      und im Container-Terminal:
 

@@ -28,6 +28,10 @@
     "RUN_ID": "__RUN_ID__"
   },
 
+  // Session-Protokolle von Claude landen im Laufordner (<lauf>/protokoll) – für die Messung der Tokens
+  // pro Level. Nur dieser Unterordner wird eingehängt; Memory und Einstellungen bleiben pro Container frisch.
+  "mounts": ["source=${localWorkspaceFolder}/../protokoll,target=/home/dev/.claude/projects,type=bind"],
+
   "forwardPorts": [8080],
 
   "customizations": {

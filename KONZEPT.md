@@ -991,3 +991,26 @@ Im Referenz-Repo sind beide Jobs grün (`check` ~1:20 min, `images` ~2 min). Die
 3. Spec v0.7.0.
 4. Prüfer für Level 7.
 5. Danach gemeinsamer Test: Lauf 005 prüfen und einen neuen Nachbau bis Level 7 starten.
+
+---
+
+## 21. Token-Verbrauch pro Level
+
+**Status (2026-11-20):** gebaut. Erledigt sind:
+- `runner/tokens.mjs`
+- `protokoll/` im Laufordner, eingehängt nach `~/.claude/projects`
+- Auswertung in `pruefen.sh`, Tabelle im Bericht
+- `uebernehmen.sh` committet und pusht den Bericht (nur `runs/lauf-<nr>/`) auf GitHub
+
+**Erkenntnis aus Lauf 007 („Bond“):**
+- 14 Minuten bis Level 7, 39 Antworten, 65 587 Ausgabe-Tokens.
+- 86 % der Ausgabe fielen in die Phase bis Level 1: Der Agent schreibt zuerst den gesamten Code und prüft danach Level für Level.
+- Zweitgrößter Block ist GitHub (Level 6–7, 5 Minuten, vor allem Warten auf die Pipeline).
+- Modell war **`claude-sonnet-5-5`**, der Standard der Kommandozeile im Container. Für vergleichbare Läufe sollte das Modell fest vorgegeben werden (offen).
+
+Ursprüngliche Planung:
+- **Quelle:** das Session-Protokoll von Claude Code im Agent-Container (`~/.claude/projects/…/*.jsonl`). Es enthält pro Antwort die Tokens (Eingabe, Cache-Lesen, Cache-Schreiben, Ausgabe) mit Zeitstempel sowie alle Befehle des Agenten.
+- **Zuordnung zu Levels:** an den Befehlen des Agenten (`make levelN`, `make check`, `git push`, `gh run watch`). Der Abschnitt bis zum ersten erfolgreichen Check eines Levels zählt zu diesem Level.
+- **Ablage:** Jeder Laufordner bekommt `protokoll/`, eingehängt nach `~/.claude/projects` im Agent-Container. So bleibt es pro Lauf erhalten, und es gibt trotzdem kein gemeinsames Gedächtnis zwischen Läufen.
+- **Bericht:** Tabelle je Level mit Tokens, Kosten (aus den Tokens berechnet), Dauer und Pipeline-Versuchen. `/cost` von Hand entfällt.
+- **Lauf 007:** Das Protokoll wird nachträglich mit `podman cp` aus dem gestoppten Container geholt. Den Container bis dahin **nicht entfernen**.
