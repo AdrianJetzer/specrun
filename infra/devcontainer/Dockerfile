@@ -49,5 +49,8 @@ ENV PATH="/home/dev/go/bin:/home/dev/.local/bin:${PATH}"
 
 # Claude Code (CLI) mit dem offiziellen Installer
 RUN curl -fsSL https://claude.ai/install.sh | bash
+# Kein Volume: Der Zustand von Claude lebt nur in diesem Container (leer bei jedem Lauf).
+# Die Ersteinrichtung (Theme, Willkommen) ist vorab erledigt; angemeldet wird per CLAUDE_CODE_OAUTH_TOKEN.
 ENV CLAUDE_CONFIG_DIR=/home/dev/.claude
-RUN mkdir -p /home/dev/.claude
+RUN mkdir -p /home/dev/.claude \
+ && echo '{"hasCompletedOnboarding": true, "theme": "dark"}' > /home/dev/.claude/.claude.json

@@ -436,7 +436,7 @@ Alle vier Schritte sind erledigt.
 
 Offen ist noch der Nachbau-Test bis Level 2 (Lauf 003 läuft).
 
-**Nach Lauf 003 umstellen** (entschieden 2026-11-20): Das Volume `specrun-claude-config` speichert Claudes gesamten Zustand (Memory, Sessions, Plugins) über alle Läufe hinweg. Weil jeder Lauf unter `/workspace` arbeitet, könnte ein späterer Agent sich an frühere Läufe erinnern.
+**Umgestellt nach Lauf 003** (2026-11-20, erledigt): Das Volume `specrun-claude-config` speichert Claudes gesamten Zustand (Memory, Sessions, Plugins) über alle Läufe hinweg. Weil jeder Lauf unter `/workspace` arbeitet, könnte ein späterer Agent sich an frühere Läufe erinnern.
 - **Neu:** kein Volume mehr. Die Anmeldung kommt nur noch über `CLAUDE_CODE_OAUTH_TOKEN` (aus `claude setup-token`, als Umgebungsvariable auf dem Mac).
 - **Dockerfile:** Die Ersteinrichtung wird als erledigt vorgemerkt.
 - **Ergebnis:** Jeder Lauf startet mit leerem Gedächtnis.

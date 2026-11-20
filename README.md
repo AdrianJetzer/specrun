@@ -66,6 +66,15 @@ runner/prepare-run.sh                 # legt specruns_testlaeufe/<nr>/ an: env/,
 runner/uebernehmen.sh <laufordner>    # Bericht nach runs/lauf-<nr>/ übernehmen
 ```
 Der Prüfer läuft in einem eigenen Container aus demselben Image. Er sieht das Werk des Agenten nur lesend und baut es selbst neu.
+
+**Anmeldung von Claude im Agent-Container (einmalig einrichten)**
+
+Der Container speichert keinen Claude-Zustand über Läufe hinweg. Jeder Agent startet ohne Erinnerung an frühere Läufe. Angemeldet wird über ein langlebiges Token:
+1. Auf dem Mac `claude setup-token` ausführen und das angezeigte Token kopieren.
+2. In `~/.zshrc` die Zeile `export CLAUDE_CODE_OAUTH_TOKEN=…` ergänzen. Das Token gehört nie ins Repo.
+3. VS Code komplett beenden und neu starten, damit es die Variable übernimmt.
+
+Hinweis: Der Agent kann das Token in seiner Umgebung sehen. Es berechtigt nur zur Nutzung von Claude und lässt sich jederzeit widerrufen.
 Der Dev Container ([`infra/devcontainer/`](infra/devcontainer/Dockerfile)) enthält genau die Startausrüstung aus der Spec. Er hat keine root-Rechte und kein Docker, und der Agent sieht nichts außer dem Laufordner.
 
 **Nachbau-Lauf ohne Container (headless auf dem Mac)**

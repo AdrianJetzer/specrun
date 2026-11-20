@@ -17,8 +17,10 @@
   "workspaceFolder": "/workspace",
   "workspaceMount": "source=${localWorkspaceFolder}/../work,target=/workspace,type=bind",
 
-  // Anmeldung von Claude bleibt in einem Volume, nie auf dem Mac
-  "mounts": ["source=specrun-claude-config,target=/home/dev/.claude,type=volume"],
+  // Kein Volume für Claude: Jeder Lauf startet mit leerem Gedächtnis (keine Memory, Sessions, Plugins
+  // aus früheren Läufen). Die Anmeldung kommt nur über ein Token, das auf dem Mac als Umgebungsvariable
+  // gesetzt ist (einmalig erzeugt mit `claude setup-token`, siehe README).
+  "containerEnv": { "CLAUDE_CODE_OAUTH_TOKEN": "${localEnv:CLAUDE_CODE_OAUTH_TOKEN}" },
 
   "forwardPorts": [8080],
 
