@@ -132,6 +132,16 @@ export const LEVEL8_CHECKS = [
   'Live-Seite zeigt die Ergebnisse der Pipeline',
 ];
 
+export const LEVEL9_CHECKS = [
+  'Live-Seite zeigt Kopfzeile und 10 Karten',
+  'Cache- und gzip-Regeln gelten live',
+  'Live-API antwortet laut Spec',
+  'Meldung erscheint live ohne Neuladen',
+  'Lasttest: 10 Verbindungen, 30 s, ohne Fehler, p95 unter 1 s',
+];
+
+export const LOADTEST_FIELDS = ['connections', 'durationS', 'requests', 'errors', 'rps', 'p50Ms', 'p95Ms', 'maxMs'];
+
 export const CONTAINER_CHECKS = [
   'Seite läuft im Container und liest aus dem Backend',
   '/api/ wird an den Backend-Container weitergeleitet',

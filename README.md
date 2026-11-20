@@ -6,7 +6,7 @@ Specrun ist ein Experiment. Eine frische Claude-Code-Session erhält ausschließ
 
 Die gebaute App, das **Levelboard**, ist zugleich die Anzeigetafel für die Leistung des Agenten: Sie zeigt, welche Levels er geschafft hat. Ein **unabhängiger Prüfer**, den der Agent nicht sieht, misst anschließend nach. Nur sein Urteil zählt.
 
-> **Stand:** Levels 1–7 sind umgesetzt (Referenz, Prüfer, Dev Container). Level 8 (Deployment, Spec v0.8.0) läuft: Die Referenz ist auf einem Hetzner-Server live und erreicht laut Prüfer Level 8 (Score 80). Die Referenz läuft als echtes Repo [`specrun-lab/levelboard-referenz`](https://github.com/specrun-lab/levelboard-referenz): Die Pipeline testet die Levels 1–5, baut die App-Images, testet sie als Container und veröffentlicht sie in der GHCR. Echte Nachbauten haben Level 1 (Lauf 001) und Level 2 (Lauf 003) laut unabhängigem Prüfer bestanden; Lauf 005 (Levels 1–4) ist gebaut, aber noch nicht geprüft.
+> **Stand:** Levels 1–7 sind umgesetzt (Referenz, Prüfer, Dev Container). Level 8 und 9 laufen (Spec v0.9.0): Die Referenz ist auf einem Hetzner-Server live, prüft sich dort selbst samt Lasttest und erreicht laut Prüfer Level 9 (Score 90). Die Referenz läuft als echtes Repo [`specrun-lab/levelboard-referenz`](https://github.com/specrun-lab/levelboard-referenz): Die Pipeline testet die Levels 1–5, baut die App-Images, testet sie als Container und veröffentlicht sie in der GHCR. Echte Nachbauten haben Level 1 (Lauf 001) und Level 2 (Lauf 003) laut unabhängigem Prüfer bestanden; Lauf 005 (Levels 1–4) ist gebaut, aber noch nicht geprüft.
 
 ## Die 10 Levels
 
@@ -20,7 +20,7 @@ Die gebaute App, das **Levelboard**, ist zugleich die Anzeigetafel für die Leis
 | 6 | Repo + CI | GitHub-Repo, Pipeline baut und testet Levels 1–5 |
 | 7 | Images in der Pipeline | Images nur in der Pipeline gebaut, im Runner getestet, in die GHCR gepusht |
 | 8 | Deployment | Pipeline deployt per SSH auf einen Hetzner-Server, live unter `https://<lauf>.<domain>` |
-| 9 | Live-Prüfung | Agent prüft die Live-Seite inkl. Lasttest |
+| 9 | Live-Prüfung | Agent prüft die Live-Seite inkl. Lasttest und meldet Level 1–9 an die Live-API |
 | 10 | Metriken veröffentlicht | Abschlussbericht auf der Live-Seite |
 
 **Score:** 10 Punkte pro durchgehend bestandenem Level, also 0–100. Beim ersten nicht bestandenen Level ist Schluss. Kosten, Tokens, Dauer, Performance, Optik und die Abweichung zwischen Selbst- und Fremdmessung werden als Nebenwerte protokolliert.

@@ -1075,3 +1075,35 @@ Funde:
 - Die Docker-Gruppe ist praktisch root. Für einen Wegwerf-Server ist das vertretbar.
 - Die Live-API ist ohne Anmeldung beschreibbar (wie lokal). Wer will, kann Ergebnisse fälschen; der Prüfer misst deshalb selbst von außen.
 - Der Host-Schlüssel wird einmalig per `ssh-keyscan` vom Mac übernommen (Vertrauen beim ersten Kontakt). Ein Abgleich in der Hetzner-Konsole ist möglich.
+
+---
+
+## 23. Level 9 im Detail – „Live-Prüfung“
+
+**Status (2026-11-20):** gebaut und live bestätigt. Erledigt sind:
+- Referenz mit Lasttest (`checks/loadtest.mjs`), Live-Suite (`checks/tests/level9.spec.ts`, 5 Checks) und Meldung an die Live-API (`write-results.mjs` mit `REPORT_LIVE`)
+- Spec v0.9.0
+- Prüfer `judge/level9.mjs`
+
+Inkrementell gebaut: Die Referenz bekam nur die neuen Dateien, die laufende App blieb gleich. Getestet wurde direkt gegen die Live-Seite.
+
+### Entscheidungen
+| Thema | Entscheidung |
+|---|---|
+| Live-Suite | **eigene Datei** mit live-tauglichen Checks: Seite und Kopfzeile, Cache und gzip, API-Fehlerfälle, Meldung ohne Neuladen, Lasttest. Lokale Checks (Backend stoppen, nginx-Dateien, Datenbank-Datei) bleiben lokal |
+| Lasttest | **eigenes Node-Skript** ohne Abhängigkeit: 10 Verbindungen, 30 s, abwechselnd `/` und `/api/levels`, p50/p95 nach Nearest-Rank. Bestanden bei 0 Fehlern und p95 < 1 s |
+| Kosten | keine zusätzlichen: Der Hetzner-Preis ist fest, der Lasttest verbraucht wenige MB |
+| Meldung | ab Level 9 meldet `make check` **alle Levels 1–9** zusätzlich an die Live-API, Level 9 mit den Lastwerten als `metrics`. Die Live-Seite zeigt danach 9 / 10 |
+| Prüfer | 1. Live-Stand des Agenten festhalten und bewerten (Selbstmessung); 2. eigene Live-Checks und eigener Lasttest (Fremdmessung), danach sofort den Live-Stand wiederherstellen; 3. `make level9` + `make check`; 4. falls nötig nochmals wiederherstellen. Die Abweichung der Lastwerte wird nur protokolliert |
+
+### Ergebnis
+- Referenz: Level 1–9 bestanden, alle 9 Levels live gemeldet.
+- Lasttest vom Mac (Container) nach Helsinki: rund 5 200 Anfragen in 30 s, 0 Fehler, 173 Anfragen/s, p50 57 ms, p95 66 ms.
+- Prüfer: alle 3 Kriterien bestanden. Abweichung Agent zu Prüfer: 0–3 %. Die Referenz erreicht **Level 9 (Score 90)**.
+- Gegenprobe: Eine gefälschte Level-9-Meldung (falsche Checks, 3 Fehler) wird in K1 erkannt; der Live-Stand ist danach wieder korrekt.
+
+### Funde
+- **gzip live:** nginx komprimiert weitergeleitete Anfragen nicht (Caddy setzt `Via`, `gzip_proxied` ist aus). Jetzt komprimiert Caddy (`encode zstd gzip`, ab 256 Bytes wie in der Spec; Caddys Standard von 512 Bytes hätte die 443 Bytes große Startseite ausgelassen). Das Caddyfile musste per Hand auf den Server (Root-Zugriff gehört dir).
+- **Prüfer-Reihenfolge:** Die Probe-Meldung des Prüfers leert live die höheren Levels. Danach scheiterte der Level-8-Check im folgenden `make check`. Lösung: Der Prüfer stellt den Live-Stand direkt nach der Probe wieder her.
+- **Einmaliger Wackler:** In einem Prüferlauf scheiterte Level 4 lokal; in drei weiteren Läufen nicht mehr. Ursache unklar, beobachten.
+- Mein eigener Fehler: In `write-results.mjs` kollidierte die neue Funktion mit der Variablen `report`, und die Pipeline scheiterte. Seither läuft vor jedem Push Level 1–5 im Container.
