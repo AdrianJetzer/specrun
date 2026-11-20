@@ -1,7 +1,7 @@
 // Gemeinsame Daten des Prüfers: feste Titel, Startzustand, Testdaten.
 export const TITLES = [
   'Statische Seite', 'Webserver', 'REST-Backend', 'Datenbank', 'Frontend + Backend',
-  'Docker-Images', 'Repo + Pipeline', 'Deployment', 'Live-Prüfung', 'Metriken veröffentlicht',
+  'Repo + CI', 'Images in der Pipeline', 'Deployment', 'Live-Prüfung', 'Metriken veröffentlicht',
 ];
 
 export const LEVEL1_CHECKS = [
@@ -59,3 +59,13 @@ export function invalidVariants() {
     'falscher Typ bei durationMs': JSON.stringify((() => { const d = s(); d.levels[0].durationMs = 'schnell'; return d; })()),
   };
 }
+
+export const LEVEL2_CHECKS = [
+  'Antwort kommt von nginx',
+  'results.json wird nicht zwischengespeichert',
+  'index.html wird nicht zwischengespeichert',
+  'Assets werden ein Jahr zwischengespeichert',
+  'Fehlende Datei ergibt 404',
+  'Antworten sind gzip-komprimiert',
+  'Seite funktioniert über nginx',
+];

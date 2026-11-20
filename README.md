@@ -6,19 +6,19 @@ Specrun ist ein Experiment. Eine frische Claude-Code-Session erhält ausschließ
 
 Die gebaute App, das **Levelboard**, ist zugleich die Anzeigetafel für die Leistung des Agenten: Sie zeigt, welche Levels er geschafft hat. Ein **unabhängiger Prüfer**, den der Agent nicht sieht, misst anschließend nach. Nur sein Urteil zählt.
 
-> **Stand:** Level 1 ist umgesetzt: Spec v0.1.0, Referenz, Prüfer und Nachbau-Skript. Ein echter Nachbau-Lauf steht noch aus.
+> **Stand:** Levels 1 und 2 sind umgesetzt (Spec v0.2.0, Referenz, Prüfer, Dev Container). Der erste echte Nachbau hat Level 1 laut unabhängigem Prüfer bestanden; der Nachbau-Test für Level 2 steht aus.
 
 ## Die 10 Levels
 
 | # | Level | Kurz |
 |---|---|---|
 | 1 | Statische Seite | Vite + React, lokal gestartet, eigene Playwright-Prüfsuite |
-| 2 | Webserver | nginx liefert die Seite aus |
+| 2 | Webserver | lokal installiertes nginx liefert die Seite aus |
 | 3 | REST-Backend | Go-Service mit `/api/levels` |
 | 4 | Datenbank | SQLite im Arbeitsspeicher |
 | 5 | Frontend + Backend | Seite liest Ergebnisse von der API |
-| 6 | Docker-Images | Frontend- und Backend-Image, `docker compose` |
-| 7 | Repo + Pipeline | GitHub-Repo, Actions baut und pusht Images |
+| 6 | Repo + CI | GitHub-Repo, Pipeline baut und testet Levels 1–5 |
+| 7 | Images in der Pipeline | Images nur in der Pipeline gebaut, im Runner getestet, in die GHCR gepusht |
 | 8 | Deployment | Auslieferung auf einen eigenen Server per SSH |
 | 9 | Live-Prüfung | Agent prüft die Live-Seite inkl. Lasttest |
 | 10 | Metriken veröffentlicht | Abschlussbericht auf der Live-Seite |
@@ -33,7 +33,8 @@ Alle Entscheidungen und ihre Begründungen stehen in [`KONZEPT.md`](KONZEPT.md).
 spec/        Spezifikation – die einzige Eingabe für den Agenten
 reference/   unsere Referenz-Implementierung des Levelboards
 judge/       unabhängiger Prüfer (für den Agenten unsichtbar)
-runner/      Nachbau-Skript, Bericht, Bereinigung persönlicher Pfade
+runner/      Lauf vorbereiten, prüfen, Bericht, Bereinigung persönlicher Pfade
+infra/       Dev Container (Startausrüstung für den Agenten)
 runs/        Berichte der Nachbau-Läufe
 KONZEPT.md   Konzept und Entscheidungen
 ```
@@ -53,10 +54,19 @@ make down      # stoppt alles
 **Unabhängigen Prüfer gegen die Referenz laufen lassen**
 ```bash
 cd judge && npm ci
-node level1.mjs ../reference
+node all.mjs ../reference      # prüft Level für Level, bricht beim ersten Fehler ab
 ```
+Für Level 2 braucht der Prüfer `nginx` auf dem Mac (`brew install nginx`).
 
-**Nachbau-Lauf**
+**Nachbau-Lauf im Dev Container (empfohlen)**
+```bash
+runner/prepare-run.sh                 # legt specruns_testlaeufe/<nr>/ mit spec/ und .devcontainer/ an
+# … in VS Code im Container öffnen, Claude den Auftrag geben (siehe Ausgabe des Skripts) …
+runner/judge-run.sh <laufordner>      # Prüfer misst alle Levels, Bericht in runs/
+```
+Der Dev Container ([`infra/devcontainer/`](infra/devcontainer/Dockerfile)) enthält genau die Startausrüstung aus der Spec. Er hat keine root-Rechte und kein Docker, und der Agent sieht nichts außer dem Laufordner.
+
+**Nachbau-Lauf ohne Container (headless auf dem Mac)**
 ```bash
 runner/run.sh --fake      # Probelauf ohne Agent (Referenz als Attrappe), kostet nichts
 runner/run.sh             # echter Lauf: frische Claude-Session baut aus spec/

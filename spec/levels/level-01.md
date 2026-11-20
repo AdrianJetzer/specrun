@@ -24,7 +24,7 @@
 2. `make check` → 5/5 Checks bestanden, Ausgabe `Level 1: bestanden (5/5 Checks)`.
 3. Seite neu laden → Level 1 „Bestanden“, Checks `5/5`, Erreichtes Level `1 / 10`.
 4. `make level1` erneut → wieder alles „Offen“ (Neustart setzt zurück).
-5. Am Ende `make level1` und `make check` ausführen und die Seite laufen lassen.
+5. Wenn es weitere Levels gibt, mit dem nächsten Level weitermachen; was am Ende laufen soll, steht in `00-start.md`.
 
 ## Bestanden, wenn (Prüfer)
 1. `make level1` endet erfolgreich, und Port 8080 antwortet innerhalb von 60 s.

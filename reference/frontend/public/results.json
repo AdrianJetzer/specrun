@@ -53,7 +53,7 @@
     },
     {
       "level": 6,
-      "title": "Docker-Images",
+      "title": "Repo + CI",
       "status": "offen",
       "checkedAt": null,
       "durationMs": null,
@@ -62,7 +62,7 @@
     },
     {
       "level": 7,
-      "title": "Repo + Pipeline",
+      "title": "Images in der Pipeline",
       "status": "offen",
       "checkedAt": null,
       "durationMs": null,

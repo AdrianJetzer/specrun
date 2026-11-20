@@ -45,15 +45,16 @@ Ein **unabhängiger Prüfer** misst danach nach, ob die Levels wirklich geschaff
 | Frontend | **Vite + React** (TypeScript) |
 | Backend | **Go**, nur Standardbibliothek (`net/http`) für die REST-API |
 | Datenbank | **SQLite im Arbeitsspeicher**, als reine Go-Bibliothek (`modernc.org/sqlite`, ohne C-Compiler) |
-| Webserver | **nginx**, ab Level 2. Zuerst das offizielle Docker-Image mit eingehängtem Build-Ordner; dieselbe `nginx.conf` wandert in Level 6 ins eigene Image |
+| Webserver | **nginx**, ab Level 2, **lokal installiert** (kein Docker). Dieselbe `nginx.conf` wandert in Level 7 ins Image |
+| Lokales Docker | **keins** (entschieden 2026-11-20): Der Agent startet lokal nie Container. Images werden nur in der Pipeline gebaut und dort im Runner getestet, live laufen sie erst beim Hoster |
 | Prüfskripte des Agenten | vorgegeben: **Playwright (TypeScript)**; ab Level 1 vorhanden und Level für Level erweitert |
 | Level 9 | der **Coding-Agent prüft seine eigene Live-Seite** |
 | Scheitern | **Schluss beim ersten Fehler**; Score = höchstes durchgehend geschafftes Level |
-| Images bauen | Level 6 **lokal** (Docker auf dem Mac), ab Level 7 baut **GitHub Actions** |
+| Images bauen | ausschließlich **GitHub Actions** (Level 7); Test der Images per `docker compose` im Runner |
 | Registry | **GitHub Container Registry (GHCR)** |
 | Hosting | **eigener kleiner Server (VPS) bei Hetzner**. Die Pipeline deployt per SSH mit `docker compose` |
 | Zugangsdaten | als **Organisations-Secrets der GitHub-Test-Organisation**. Der Agent sieht weder SSH-Schlüssel noch Server-Zugang |
-| Unabhängiger Prüfer | Level 1–6 **lokal auf dem Mac**, Level 7–10 und der Lasttest in einem **Prüfer-Workflow in GitHub Actions** |
+| Unabhängiger Prüfer | Level 1–5 **lokal auf dem Mac**, Level 6–10 und der Lasttest in einem **Prüfer-Workflow in GitHub Actions** |
 | Grenzwerte | **locker starten**: zuerst nur messen und protokollieren; feste Grenzen erst nach den ersten Durchläufen. Von Anfang an gelten nur ein Zeit- und ein Kostenlimit |
 | Optik | wird bewertet, aber nur als **Nebenwert** (zählt nicht zum Score) |
 | Design-Stil | **technisch-sachlich**, wie ein Monitoring-Dashboard: dunkel, klare Statusfarben, Zahlen im Vordergrund |
@@ -79,10 +80,10 @@ Für jedes Level gilt dasselbe Schema:
 - **Bestanden, wenn:** alle Prüfungen grün sind.
 
 ### Level 2 – Seite läuft im Webserver
-- **Ziel:** `dist/` wird von **nginx** ausgeliefert, über das offizielle Docker-Image mit eingehängtem Ordner und eigener `nginx.conf`. Port 8080, Start mit `make level2`.
-- **Selbstprüfung:** HTTP 200, richtiger Content-Type, Antwortzeit. Die Playwright-Suite läuft gegen nginx.
-- **Nachprüfung:** Der Prüfer startet mit `make level2` und prüft URL, Statuscode, Inhalt und Caching-Header der Assets.
-- **Bestanden, wenn:** die Seite über nginx identisch zu Level 1 funktioniert.
+- **Ziel:** `dist/` wird von einem **lokal installierten nginx** ausgeliefert (kein Docker), mit eigener `nginx.conf` im Projekt. Port 8080, Start mit `make level2`. Dieselbe Konfiguration wird in Level 7 ins Image übernommen.
+- **Selbstprüfung:** HTTP 200, richtiger Content-Type, Header für Caching und Komprimierung, echter 404 für fehlende Dateien. Die Playwright-Suite läuft gegen nginx; `make check` prüft dabei alle gebauten Levels.
+- **Nachprüfung:** Der Prüfer startet mit `make level2`, prüft, dass wirklich nginx antwortet, kontrolliert die Header und wiederholt die Darstellungstests aus Level 1.
+- **Bestanden, wenn:** die Seite über nginx identisch zu Level 1 funktioniert und die Header-Regeln erfüllt sind.
 
 ### Level 3 – REST-Backend
 - **Ziel:** Ein Go-Service auf Port 8081. Er liefert `GET /api/health` sowie `GET /api/levels` und `POST /api/levels/{n}/result`. Die Daten liegen vorerst im Speicher.
@@ -102,24 +103,21 @@ Für jedes Level gilt dasselbe Schema:
 - **Nachprüfung:** Der Prüfer schreibt ein Test-Ergebnis per API und prüft im Browser, dass es angezeigt wird.
 - **Bestanden, wenn:** die Daten vollständig von der API bis zur Anzeige durchkommen.
 
-### Level 6 – Docker-Images
-- **Ziel:** Zwei Images, lokal gebaut:
-  - **frontend:** mehrstufiger Build. Node baut `dist/`, danach nginx mit `dist/` und der Proxy-Konfiguration.
+### Level 6 – Repo + CI
+- **Ziel:** Der Agent legt per `gh` in der Test-Organisation ein Repo an (Name: `levelboard-<durchlauf-id>`) und pusht den Code. Eine GitHub-Actions-Pipeline baut Frontend und Backend und führt die Prüfsuite für die Levels 1–5 im Runner aus (nginx und Backend direkt im Runner, ohne Images).
+- **Selbstprüfung:** Der Agent wartet auf den Pipeline-Lauf (`gh run watch`) und liest dessen Ergebnis aus.
+- **Nachprüfung:** Der Prüfer liest über die GitHub-API den Status des Pipeline-Laufs und prüft, dass die Tests darin wirklich gelaufen sind (Test-Report als Artefakt).
+- **Bestanden, wenn:** die Pipeline grün ist und der Test-Report alle Checks der Levels 1–5 enthält.
+
+### Level 7 – Images in der Pipeline
+- **Ziel:** Zwei Images, **nur in der Pipeline gebaut** (lokal nie gestartet):
+  - **frontend:** mehrstufiger Build. Node baut `dist/`, danach nginx mit `dist/` und der `nginx.conf` aus Level 2/5.
   - **backend:** mehrstufiger Build. Go kompiliert eine einzige Datei, die in einem schlanken Basis-Image landet.
 
-  Dazu eine `docker-compose.yml`, die beides startet.
-- **Selbstprüfung:** `docker compose up`, danach alle Prüfungen von Level 2 bis 5 gegen die Container wiederholen. Die Image-Größen werden gemessen.
-- **Nachprüfung:** Der Prüfer baut die Images selbst neu (ohne Cache) und wiederholt Level 2 bis 5 gegen die Container.
-- **Bestanden, wenn:** alles in den Containern läuft. Die Image-Größen werden vorerst nur protokolliert.
-
-### Level 7 – GitHub: Repo und Pipeline
-- **Ziel:** Der Agent legt per `gh` in der Test-Organisation ein Repo an (Name: `levelboard-<durchlauf-id>`) und pusht den Code. Eine GitHub-Actions-Pipeline:
-  1. führt die Prüfsuite aus,
-  2. baut beide Images,
-  3. pusht sie mit dem Commit-Hash als Tag in die GHCR.
-- **Selbstprüfung:** Der Agent wartet auf den Pipeline-Lauf (`gh run watch`) und prüft, dass die Images in der GHCR liegen.
-- **Nachprüfung:** Der Prüfer liest über die GitHub-API den Status des Pipeline-Laufs und prüft die Images in der GHCR. Er zieht ein Image und startet es testweise.
-- **Bestanden, wenn:** die Pipeline grün ist und beide Images abrufbar sind.
+  Die Pipeline startet beide per `docker compose` **im Runner**, lässt die Prüfsuite dagegen laufen und pusht die Images erst danach mit dem Commit-Hash als Tag in die GHCR.
+- **Selbstprüfung:** Der Agent wartet auf den Pipeline-Lauf und prüft, dass die Images in der GHCR liegen.
+- **Nachprüfung:** Der Prüfer liest Pipeline-Status und Test-Report, prüft die Images in der GHCR und startet sie in einem eigenen Prüfer-Workflow in GitHub Actions.
+- **Bestanden, wenn:** die Pipeline grün ist, die Tests gegen die Container gelaufen sind und beide Images abrufbar sind. Die Image-Größen werden vorerst nur protokolliert.
 
 ### Level 8 – Deployment auf den Hetzner-Server
 - **Ziel:** Ein Deploy-Job in der Pipeline verbindet sich per SSH mit dem Server. Er überträgt die `docker-compose.yml`, zieht die Images aus der GHCR und startet sie. Danach ist die Seite unter der öffentlichen Adresse erreichbar. Die Zugangsdaten kommen ausschließlich aus den Org-Secrets.
@@ -185,8 +183,8 @@ Weitere Festlegungen in der Spec:
    - Lokal nur `GH_TOKEN` setzen.
 2. **Agent baut:** `claude -p` mit einem festen Start-Prompt, Zeit- und Kostenlimit, Ausgabe als JSON (Kosten, Tokens, Turns).
 3. **Prüfer misst:**
-   - Level 1–6 lokal auf dem Mac.
-   - Level 7–10 über den Prüfer-Workflow in GitHub Actions.
+   - Level 1–5 lokal auf dem Mac.
+   - Level 6–10 über den Prüfer-Workflow in GitHub Actions.
    - Abbruch beim ersten Fehler.
 4. **Optik-Bewertung:** Ein Bewertungs-Agent beurteilt Screenshots (hell, dunkel, mobil). Das Ergebnis ist ein Nebenwert.
 5. **Bericht:** `runs/<id>/report.md`. Inhalt:
@@ -227,7 +225,7 @@ Die Kosten kennt nur unser Runner, nicht der Agent selbst. Sie erscheinen deshal
 Da es keine Rückfragen gibt, muss alles vorbereitet sein. Die Spec listet es auf, `run.sh` prüft es vorab.
 
 **Auf dem Mac**
-- Docker (Desktop), Go, Node, `gh`, `make`
+- Node, Go, nginx, `gh`, `make` – **kein Docker** (Images entstehen nur in der Pipeline). Der Agent arbeitet im Dev Container; der Prüfer braucht dieselben Werkzeuge auf dem Mac.
 - Playwright-Browser
 - Genaue Versionen legen wir noch fest.
 
@@ -281,7 +279,7 @@ Das sind keine Konzeptfragen mehr, sondern Voraussetzungen, die nur du schaffen 
 3. **GitHub:** Ist `specrun-lab` als Organisation frei? Legst du sie an (kostenloser Plan reicht vermutlich)?
 4. **Unser eigenes Repo:** Soll Specrun selbst in ein (privates) GitHub-Repo, oder bleibt es vorerst lokal?
 
-Diese Punkte brauchen wir erst ab Level 7. Level 1 bis 6 laufen komplett lokal.
+Diese Punkte brauchen wir erst ab Level 6. Level 1 bis 5 laufen komplett lokal.
 
 ---
 
@@ -418,8 +416,94 @@ Eine Level-Datei beschreibt nur, was in diesem Level **neu** dazukommt, und verw
 - `06-design.md`: Design-Tokens, Layout, Komponenten, Texte, `data-testid`s
 - `levels/level-01.md`
 
+### Ergebnis
+Alle vier Schritte sind erledigt.
+- **Erster Nachbau** am 2026-11-20: manuell in einem Dev Container gestartet.
+- **Ergebnis laut Prüfer:** Level 1 bestanden (K1–K6), Score 10/100, keine Abweichung zwischen Selbst- und Fremdmessung. Der Code ist eigenständig geschrieben, nicht von der Referenz kopiert.
+- **Bericht:** `runs/2026-11-20-01-container/`.
+- **Einschränkung:** Der Lauf fand in einem bestehenden Projekt mit eigener `CLAUDE.md` statt.
+
+---
+
+## 14. Level 2 im Detail – „Seite läuft im Webserver“
+
+**Status (2026-11-20):** gebaut. Erledigt sind:
+- Dev Container (`infra/devcontainer/`, mit Podman getestet)
+- Referenz (`reference/`, auf macOS und im Container unter Linux grün)
+- Spec v0.2.0
+- Prüfer `judge/level2.mjs` und `judge/all.mjs`; die Gegenprobe findet beide eingebauten nginx-Fehler
+- Runner für Container-Läufe (`runner/prepare-run.sh`, `runner/judge-run.sh`)
+
+Offen ist noch der Nachbau-Test bis Level 2.
+
+### Entscheidungen
+| Thema | Entscheidung |
+|---|---|
+| Docker | **kein lokales Docker**, siehe Abschnitt 3; nginx ist im Dev Container installiert |
+| Startausrüstung | **eigener Dev Container in Specrun** (`infra/devcontainer/`), versioniert, ohne `CLAUDE.md`. Die Spec beschreibt ihn exakt |
+| nginx-Regeln | siehe unten (Caching, 404, gzip, Server-Version ausgeblendet) |
+| `make check` | prüft **alle gebauten Levels** (ab jetzt 1 und 2) und schreibt für jedes ein Ergebnis. Ein Fehler sperrt alle höheren Levels |
+| Prüfer | weiterhin **auf dem Mac**. Er braucht dafür nginx (Homebrew) |
+
+### Dev Container (`infra/devcontainer/`)
+- Linux-Basis-Image mit festen Versionen von:
+  - Node.js und npm
+  - Go (für Level 3)
+  - nginx
+  - Systembibliotheken für Playwright-Chromium (vorinstalliert)
+  - `make`, `curl`, `git`, `gh`
+- **Kein** Docker bzw. Podman im Container.
+- Benutzer `dev`, ohne root-Rechte. Der Agent kann also nichts nachinstallieren.
+- **Keine `CLAUDE.md`, keine Projekt-Templates.**
+- **Ordner pro Lauf:** `specruns_testlaeufe/<nr>/` enthält `spec/` als Unterordner. Genau dieser Ordner ist im Container der Arbeitsordner.
+- `spec/02-startausruestung.md` beschreibt diesen Container statt macOS.
+
+### Was nginx können muss
+| Regel | Prüfung |
+|---|---|
+| liefert `dist/` auf Port 8080 aus, `127.0.0.1` | HTTP 200 auf `/` |
+| `results.json`: kein Cache | `Cache-Control: no-store` |
+| `index.html`: kein Cache | `Cache-Control: no-cache` |
+| Dateien unter `/assets/` (mit Hash im Namen): lange cachen | `Cache-Control: public, max-age=31536000, immutable` |
+| fehlende Datei → echter 404, kein Fallback auf `index.html` | `GET /gibt-es-nicht.json` → 404 |
+| gzip für HTML, JS, CSS, JSON | `Content-Encoding: gzip` bei `Accept-Encoding: gzip` |
+| Server-Version ausgeblendet | `Server: nginx` ohne Versionsnummer |
+
+- Die Konfiguration liegt in `frontend/nginx.conf`. Sie läuft ohne root, mit PID-, Log- und Temp-Dateien in `.run/`.
+- Dieselbe Datei wird in Level 7 ins Image übernommen. Deshalb arbeitet sie mit relativen bzw. per Variable gesetzten Pfaden.
+
+### Makefile ab Level 2
+| Befehl | Wirkung |
+|---|---|
+| `make level1` | wie bisher (`vite preview`) |
+| `make level2` | `make down`, baut das Frontend und startet nginx mit `frontend/nginx.conf` auf Port 8080 im Hintergrund |
+| `make check` | prüft Level 1 und 2 gegen die laufende Seite und schreibt beide Ergebnisse |
+| `make down` | stoppt `vite preview` **und** nginx |
+
+### Selbstprüfung (neue Checks für Level 2)
+- Antwort kommt von nginx (Header `Server`)
+- Cache-Header für `results.json`, `index.html` und Assets
+- 404 für eine fehlende Datei
+- gzip-Komprimierung
+- alle Darstellungschecks aus Level 1, diesmal gegen nginx
+
+### Prüfer für Level 2
+1. Er prüft zuerst Level 1 wie bisher; scheitert es, ist Schluss.
+2. Dann startet er `make level2` und prüft die nginx-Regeln aus der Tabelle.
+3. Er wiederholt die Darstellungstests K2–K4 gegen nginx, also auch die fehlende Datei: Mit echtem 404 muss die Seite „Datei fehlt“ zeigen.
+4. `make check`: Exit 0, Level 1 und 2 bestanden, die Checks wörtlich wie in der Spec.
+
+**Risiko:** Der Prüfer nutzt das nginx vom Mac (Homebrew). Seine Version und Module können vom Dev Container abweichen. Eine Konfiguration, die im Container läuft, könnte auf dem Mac scheitern oder umgekehrt. Deshalb werden in der Spec nur gängige Direktiven verlangt.
+
+### Auswirkungen auf die Spec (v0.2.0)
+- Level-Titel 6 und 7 ändern sich zu „Repo + CI“ und „Images in der Pipeline“. Betroffen sind Spec, Referenz und die Testdaten des Prüfers.
+- `02-startausruestung.md` beschreibt den Dev Container.
+- `03-architektur.md`: `make level2`, `nginx.conf`, `make check` für alle Levels.
+- `levels/level-02.md` kommt neu dazu.
+
 ### Nächster Schritt (erst auf dein Go)
-1. Referenz für Level 1 bauen.
-2. Daraus die Spec schärfen.
-3. Prüfer für Level 1 bauen.
-4. Erster Nachbau-Test bis Level 1.
+1. Dev Container in `infra/devcontainer/` aufsetzen.
+2. Referenz für Level 2 bauen.
+3. Spec v0.2.0 schreiben.
+4. Prüfer für Level 2 bauen.
+5. Nachbau-Test bis Level 2 im neuen Dev Container.

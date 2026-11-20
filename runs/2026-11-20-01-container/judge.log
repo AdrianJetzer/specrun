@@ -1,0 +1,11 @@
+Prüfer Level 1 → ~/Documents/Claude/specruns_testlaeufe/001/blueprint-vscode
+
+✅ K1 make level1 startet die Seite auf Port 8080 – 3.5 s
+✅ K2 gültige Testdaten werden korrekt dargestellt – 5 Tests
+✅ K3 fehlende/ungültige Datei → richtiger Hinweis und Leerzustand – 7 Tests
+✅ K4 data-testids, keine Konsolenfehler, Raster responsiv – 3 Tests
+✅ K5 make check: Exit 0, schemagültig, Level 1 bestanden mit den 5 Checks
+✅ K6 public/results.json bleibt im Startzustand
+
+Level 1 laut Prüfer: BESTANDEN
+Ergebnis: <specrun>/runs/2026-11-20-01-container/judge/judge-level1.json

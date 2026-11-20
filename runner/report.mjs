@@ -1,4 +1,4 @@
-// Erzeugt runs/<id>/report.md aus meta.json, claude.json und dem Prüfer-Ergebnis.
+// Erzeugt runs/<id>/report.md aus meta.json, claude.json bzw. cost.txt und den Prüfer-Ergebnissen.
 // Aufruf: node runner/report.mjs <run-dir>
 import fs from 'node:fs';
 import path from 'node:path';
@@ -13,70 +13,87 @@ const json = (f) => {
 
 const meta = json('meta.json') ?? {};
 const claude = json('claude.json');
-const judge = json('judge/judge-level1.json');
+const cost = read('cost.txt');
+const summary = json('judge/judge-summary.json');
+const levelResults = [];
+for (let n = 1; n <= 10; n++) {
+  const r = json(`judge/judge-level${n}.json`);
+  if (r) levelResults.push(r);
+}
+// Alte Läufe (nur Level 1, ohne Zusammenfassung) weiterhin auswerten
+const reached = summary?.reachedLevel ?? (levelResults[0]?.passed ? 1 : 0);
+const score = reached * 10;
+
 const seconds = Number(read('agent_seconds.txt') ?? NaN);
 const timeout = read('agent_timeout.txt') !== null;
 const files = (read('files.txt') ?? '').split('\n').filter(Boolean);
-
-// Score: 10 Punkte pro durchgehend bestandenem Level (bisher nur Level 1 prüfbar)
-const levelsPassed = judge?.passed ? 1 : 0;
-const score = levelsPassed * 10;
-
 const u = claude?.usage ?? {};
 const n = (v) => (typeof v === 'number' ? v.toLocaleString('de-CH') : '?');
 const fmtS = (s) => (Number.isFinite(s) ? `${Math.floor(s / 60)} min ${s % 60} s` : '?');
-const nw = judge?.nebenwerte ?? {};
+
+const agentLines = claude
+  ? [
+      `- Ergebnis: ${timeout ? '⏱ **Zeitlimit erreicht**' : claude.subtype ?? '?'}${claude.is_error ? ' (mit Fehler)' : ''}`,
+      `- Dauer: ${fmtS(seconds)} (Limit ${meta.timeoutMin ?? '?'} min)`,
+      `- Kosten: ${typeof claude.total_cost_usd === 'number' ? `$${claude.total_cost_usd.toFixed(2)}` : '?'} (Budget $${meta.budgetUsd ?? '?'})`,
+      `- Turns: ${claude.num_turns ?? '?'}`,
+      `- Tokens: Eingabe ${n(u.input_tokens)}, Cache-Lesen ${n(u.cache_read_input_tokens)}, Cache-Schreiben ${n(u.cache_creation_input_tokens)}, Ausgabe ${n(u.output_tokens)}`,
+    ]
+  : cost
+    ? ['- Ausgabe von `/cost`:', '', '```', cost, '```']
+    : ['- Kosten, Tokens und Dauer: _nicht erfasst_'];
 
 const lines = [
   `# Durchlauf ${meta.runId ?? path.basename(dir)}${meta.fake ? ' (FAKE – Referenz statt Agent)' : ''}`,
   '',
   '| | |',
   '|---|---|',
-  `| **Score** | **${score} / 100** (erreichtes Level: ${levelsPassed}) |`,
+  `| **Score** | **${score} / 100** (erreichtes Level: ${reached}) |`,
   `| Spec-Version | ${meta.specVersion ?? '?'} |`,
   `| Modell | ${meta.model ?? '?'} |`,
-  `| Claude Code | ${meta.claudeCode ?? '?'} |`,
-  `| Start | ${meta.startedAt ?? '?'} |`,
+  ...(meta.claudeCode ? [`| Claude Code | ${meta.claudeCode} |`] : []),
   `| Bauordner | \`${meta.buildDir ?? '?'}\` |`,
+  ...(meta.notes ? [`| Hinweis | ${meta.notes} |`] : []),
   '',
   '## Agent',
   '',
-  `- Ergebnis: ${timeout ? '⏱ **Zeitlimit erreicht**' : claude?.subtype ?? (claude ? '?' : 'keine Ausgabe')}${claude?.is_error ? ' (mit Fehler)' : ''}`,
-  `- Dauer: ${fmtS(seconds)} (Limit ${meta.timeoutMin ?? '?'} min)`,
-  `- Kosten: ${typeof claude?.total_cost_usd === 'number' ? `$${claude.total_cost_usd.toFixed(2)}` : '?'} (Budget $${meta.budgetUsd ?? '?'})`,
-  `- Turns: ${claude?.num_turns ?? '?'}`,
-  `- Tokens: Eingabe ${n(u.input_tokens)}, Cache-Lesen ${n(u.cache_read_input_tokens)}, Cache-Schreiben ${n(u.cache_creation_input_tokens)}, Ausgabe ${n(u.output_tokens)}`,
+  ...agentLines,
   `- Angelegte Dateien: ${files.length}`,
   '',
-  '## Level 1 laut Prüfer',
-  '',
-  judge ? `**${judge.passed ? '✅ bestanden' : '❌ nicht bestanden'}**` : '_kein Prüfer-Ergebnis_',
-  '',
-  ...(judge?.criteria ?? []).map((c) => `- ${c.ok ? '✅' : '❌'} **${c.id}** ${c.name}${c.detail ? ` – ${c.detail}` : ''}`),
-  '',
-  '## Selbst- vs. Fremdmessung',
-  '',
-  `- Agent meldet: ${nw.selbstmessung ?? '–'}`,
-  `- Prüfer misst: ${nw.fremdmessung ?? '–'}`,
-  `- Abweichung: ${nw.abweichung === undefined ? '–' : nw.abweichung ? '⚠ ja' : 'nein'}`,
-  '',
+];
+
+for (const r of levelResults) {
+  const nw = r.nebenwerte ?? {};
+  lines.push(
+    `## Level ${r.level} laut Prüfer: ${r.passed ? '✅ bestanden' : '❌ nicht bestanden'}`,
+    '',
+    ...(r.criteria ?? []).map((c) => `- ${c.ok ? '✅' : '❌'} **${c.id}** ${c.name}${c.detail ? ` – ${c.detail}` : ''}`),
+    '',
+    `Selbstmessung: ${nw.selbstmessung ?? '–'} · Fremdmessung: ${nw.fremdmessung ?? '–'} · Abweichung: ${nw.abweichung === undefined ? '–' : nw.abweichung ? '⚠ ja' : 'nein'}`,
+    '',
+  );
+  const failed = (nw.judgeTests ?? []).filter((t) => !t.ok);
+  if (failed.length) {
+    lines.push('Fehlgeschlagene Prüfer-Tests:', ...failed.map((t) => `- ${t.title}\n  \`${(t.error || '').split('\n')[0].slice(0, 200)}\``), '');
+  }
+}
+
+const nw1 = levelResults[0]?.nebenwerte ?? {};
+const nw2 = levelResults[1]?.nebenwerte ?? {};
+lines.push(
   '## Nebenwerte',
   '',
-  `- \`make level1\`: ${nw.makeLevel1Ms ? `${(nw.makeLevel1Ms / 1000).toFixed(1)} s` : '–'}`,
-  `- \`make check\`: ${nw.makeCheckMs ? `${(nw.makeCheckMs / 1000).toFixed(1)} s` : '–'}`,
-  `- Bundle (dist/assets): ${nw.bundleBytes ? `${(nw.bundleBytes / 1024).toFixed(1)} KB` : '–'}`,
-  `- Screenshots: \`judge/screenshots/\` (Optik-Bewertung offen)`,
-  '',
-  '## Fehlgeschlagene Prüfer-Tests',
-  '',
-  ...((nw.judgeTests ?? []).filter((t) => !t.ok).map((t) => `- ${t.title}\n  \`${(t.error || '').split('\n')[0].slice(0, 200)}\``)),
-  ...((nw.judgeTests ?? []).some((t) => !t.ok) ? [] : ['_keine_']),
+  `- \`make level1\`: ${nw1.makeLevel1Ms ? `${(nw1.makeLevel1Ms / 1000).toFixed(1)} s` : '–'}`,
+  ...(nw2.makeLevel2Ms ? [`- \`make level2\`: ${(nw2.makeLevel2Ms / 1000).toFixed(1)} s`] : []),
+  `- \`make check\`: ${(nw2.makeCheckMs ?? nw1.makeCheckMs) ? `${((nw2.makeCheckMs ?? nw1.makeCheckMs) / 1000).toFixed(1)} s` : '–'}`,
+  `- Bundle (dist/assets): ${nw1.bundleBytes ? `${(nw1.bundleBytes / 1024).toFixed(1)} KB` : '–'}`,
+  '- Screenshots: `judge/screenshots/` (Optik-Bewertung offen)',
   '',
   '## Spec-Lücken (→ nächste Iteration)',
   '',
   '_nach Durchsicht ergänzen_',
   '',
-];
+);
 
 fs.writeFileSync(path.join(dir, 'report.md'), lines.join('\n'));
 console.log(`Score: ${score} / 100`);

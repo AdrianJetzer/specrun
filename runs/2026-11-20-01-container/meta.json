@@ -1,0 +1,14 @@
+{
+  "runId": "2026-11-20-01-container",
+  "specVersion": "0.1.0",
+  "model": "unbekannt (interaktive Session im Dev Container)",
+  "budgetUsd": null,
+  "timeoutMin": null,
+  "fake": false,
+  "buildDir": "~/Documents/Claude/specruns_testlaeufe/001/blueprint-vscode",
+  "node": "Container (unbekannt)",
+  "npm": "Container (unbekannt)",
+  "claudeCode": "unbekannt",
+  "startedAt": "2026-11-20T07:11:00Z",
+  "notes": "Manuell im Dev Container gestartet, Bauordner = bestehendes Projekt blueprint-vscode mit eigener CLAUDE.md, Spec unter /home/dev/spec"
+}

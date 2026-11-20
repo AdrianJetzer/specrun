@@ -58,22 +58,25 @@ Die Prüfung ist **streng**: Jede Abweichung vom Schema macht die ganze Datei un
 Im Zustand `loading`, `missing` und `invalid` zeigt die Seite den Leerzustand: `run.id` und `run.version` als „–“, `updatedAt` als „–“, alle 10 Levels `offen`.
 
 ## Ergebnis schreiben: `checks/write-results.mjs`
-Aufruf: `node write-results.mjs <level>` (in Level 1: `1`). Ablauf:
+Aufruf: `node write-results.mjs <level> [<level> …]`, z. B. `node write-results.mjs 1 2`. Ablauf:
 1. Liest `checks/.out/playwright.json`, den JSON-Report von Playwright.
-2. Sammelt alle Tests aus der `describe`-Gruppe `level-<level>`. Jeder Test ergibt einen Check `{ name: <Testtitel>, ok: <spec.ok> }`, in Report-Reihenfolge. Findet es keinen Check, bricht es mit Fehler ab.
+2. Sammelt für jedes angegebene Level alle Tests aus der `describe`-Gruppe `level-<n>`:
+   - Jeder Test ergibt einen Check `{ name: <Testtitel>, ok: <spec.ok> }`, in Report-Reihenfolge.
+   - Die Dauer des Levels ist die Summe der Testdauern (`results[].duration`) dieser Gruppe, gerundet.
+   - Findet es für ein angegebenes Level keinen Check, bricht es mit Fehler ab.
 3. Liest `frontend/dist/results.json`, also den ausgelieferten Build, **nicht** `public/`.
-4. Setzt für das Level:
+4. Geht die Levels **aufsteigend** durch. Für jedes angegebene Level, solange noch keines fehlgeschlagen ist:
    - `status`: `bestanden`, wenn alle Checks ok sind, sonst `fehlgeschlagen`
    - `checkedAt`: jetzt
-   - `durationMs`: `Math.round(report.stats.duration)`
+   - `durationMs`: die Dauer aus Schritt 2
    - `checks`: die gesammelten Checks
-5. Setzt alle **höheren** Levels auf:
-   - `offen`, wenn das Level bestanden ist,
-   - `gesperrt`, wenn es fehlgeschlagen ist,
+5. Alle übrigen Levels **oberhalb des kleinsten angegebenen Levels** werden gesetzt auf:
+   - `gesperrt`, wenn ein Level fehlgeschlagen ist,
+   - sonst `offen`,
 
-   jeweils mit `checkedAt: null`, `durationMs: null`, `checks: []`. Niedrigere Levels bleiben unverändert.
+   jeweils mit `checkedAt: null`, `durationMs: null`, `checks: []`. Das gilt auch für angegebene Levels nach einem Fehler. Levels unterhalb des kleinsten angegebenen bleiben unverändert.
 6. Setzt `run.updatedAt` auf denselben Zeitpunkt. Ist `RUN_ID` gesetzt, wird `run.id` auf deren Wert gesetzt.
 7. Schreibt die Datei zurück (`JSON.stringify(…, null, 2)` + Zeilenumbruch).
-8. Gibt `Level <n>: bestanden (x/y Checks)` bzw. `Level <n>: fehlgeschlagen (x/y Checks)` aus und endet mit Exit-Code 0 bzw. 1.
+8. Gibt pro angegebenem Level eine Zeile aus: `Level <n>: <status> (x/y Checks)`, bzw. ohne Klammer, wenn das Level keine Checks hat. Endet mit Exit-Code 0, wenn kein Level fehlgeschlagen ist, sonst 1.
 
 `vite preview` liefert die geänderte Datei sofort aus. Nach einem Neuladen zeigt die Seite das neue Ergebnis.

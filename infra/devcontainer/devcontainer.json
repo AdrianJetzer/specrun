@@ -1,0 +1,28 @@
+{
+  // Specrun: Umgebung für einen Nachbau-Lauf.
+  // Wird von runner/prepare-run.sh in jeden Laufordner kopiert.
+  "name": "specrun",
+  "build": { "dockerfile": "Dockerfile" },
+
+  "remoteUser": "dev",
+  "containerUser": "dev",
+  "updateRemoteUserUID": false,
+
+  // Podman (rootless): Mac-Benutzer wird im Container zu "dev" (UID 1000)
+  "runArgs": ["--userns=keep-id:uid=1000,gid=1000"],
+
+  // Der Laufordner (mit spec/ darin) ist der Arbeitsordner
+  "workspaceFolder": "/workspace",
+  "workspaceMount": "source=${localWorkspaceFolder},target=/workspace,type=bind",
+
+  // Anmeldung von Claude bleibt in einem Volume, nie auf dem Mac
+  "mounts": ["source=specrun-claude-config,target=/home/dev/.claude,type=volume"],
+
+  "forwardPorts": [8080],
+
+  "customizations": {
+    "vscode": { "extensions": ["anthropic.claude-code"] }
+  },
+
+  "postCreateCommand": "node -v && npm -v && go version && nginx -v && gh --version | head -1 && claude --version"
+}

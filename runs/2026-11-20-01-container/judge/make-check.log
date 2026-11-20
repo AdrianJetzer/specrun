@@ -1,0 +1,12 @@
+cd checks && npx playwright install chromium
+
+Running 5 tests using 1 worker
+
+  ✓  1 tests/level1.spec.ts:12:3 › level-1 › Seite antwortet mit HTTP 200 (20ms)
+  ✓  2 tests/level1.spec.ts:18:3 › level-1 › Titel ist „Levelboard“ (76ms)
+  ✓  3 tests/level1.spec.ts:23:3 › level-1 › 10 Level-Karten sichtbar (83ms)
+  ✓  4 tests/level1.spec.ts:33:3 › level-1 › Keine Konsolenfehler (69ms)
+  ✓  5 tests/level1.spec.ts:44:3 › level-1 › Handy-Ansicht: Karten einspaltig (120ms)
+
+  5 passed (671ms)
+Level 1: bestanden (5/5 Checks)

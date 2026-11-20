@@ -16,8 +16,8 @@ Die Daten stammen aus der Prüfsuite des Projekts selbst. Das Levelboard misst s
 | 3 | REST-Backend |
 | 4 | Datenbank |
 | 5 | Frontend + Backend |
-| 6 | Docker-Images |
-| 7 | Repo + Pipeline |
+| 6 | Repo + CI |
+| 7 | Images in der Pipeline |
 | 8 | Deployment |
 | 9 | Live-Prüfung |
 | 10 | Metriken veröffentlicht |

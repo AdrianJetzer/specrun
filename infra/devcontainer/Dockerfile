@@ -1,0 +1,53 @@
+# Specrun – Startausrüstung für den Agenten (beschrieben in spec/02-startausruestung.md).
+# Linux, feste Versionen, kein Docker, keine root-Rechte für den Agenten.
+FROM ubuntu:24.04
+
+ARG NODE_VERSION=26.13.0
+ARG GO_VERSION=1.27.4
+ARG PLAYWRIGHT_VERSION=1.65.1
+ARG TARGETARCH
+
+ENV DEBIAN_FRONTEND=noninteractive \
+    PLAYWRIGHT_BROWSERS_PATH=/ms-playwright
+
+# Grundwerkzeuge
+RUN apt-get update \
+ && apt-get install -y --no-install-recommends \
+      ca-certificates curl gnupg xz-utils git make procps less jq ripgrep libatomic1 \
+ && rm -rf /var/lib/apt/lists/*
+
+# nginx (Mainline von nginx.org, damit die Version zum Prüfer passt) und GitHub-CLI
+RUN curl -fsSL https://nginx.org/keys/nginx_signing.key | gpg --dearmor -o /usr/share/keyrings/nginx.gpg \
+ && echo "deb [signed-by=/usr/share/keyrings/nginx.gpg] https://nginx.org/packages/mainline/ubuntu noble nginx" > /etc/apt/sources.list.d/nginx.list \
+ && curl -fsSL https://cli.github.com/packages/githubcli-archive-keyring.gpg -o /usr/share/keyrings/githubcli.gpg \
+ && echo "deb [signed-by=/usr/share/keyrings/githubcli.gpg] https://cli.github.com/packages stable main" > /etc/apt/sources.list.d/github-cli.list \
+ && apt-get update \
+ && apt-get install -y --no-install-recommends nginx gh \
+ && rm -rf /var/lib/apt/lists/*
+
+# Node.js und Go (offizielle Binärpakete, Architektur automatisch)
+RUN case "${TARGETARCH:-$(dpkg --print-architecture)}" in \
+      amd64) NARCH=x64;   GARCH=amd64 ;; \
+      arm64) NARCH=arm64; GARCH=arm64 ;; \
+      *) echo "Architektur nicht unterstützt" >&2; exit 1 ;; \
+    esac \
+ && curl -fsSL "https://nodejs.org/dist/v${NODE_VERSION}/node-v${NODE_VERSION}-linux-${NARCH}.tar.xz" | tar -xJ -C /usr/local --strip-components=1 \
+ && curl -fsSL "https://go.dev/dl/go${GO_VERSION}.linux-${GARCH}.tar.gz" | tar -xz -C /usr/local
+ENV PATH="/usr/local/go/bin:${PATH}"
+
+# Playwright: Systembibliotheken und Chromium vorinstalliert (Ordner gehört später „dev“)
+RUN npx -y "playwright@${PLAYWRIGHT_VERSION}" install --with-deps chromium \
+ && rm -rf /root/.npm
+
+# Benutzer ohne root-Rechte und ohne sudo
+RUN userdel -r ubuntu 2>/dev/null || true \
+ && useradd --create-home --uid 1000 --shell /bin/bash dev \
+ && chown -R dev:dev /ms-playwright
+USER dev
+WORKDIR /home/dev
+ENV PATH="/home/dev/go/bin:/home/dev/.local/bin:${PATH}"
+
+# Claude Code (CLI) mit dem offiziellen Installer
+RUN curl -fsSL https://claude.ai/install.sh | bash
+ENV CLAUDE_CONFIG_DIR=/home/dev/.claude
+RUN mkdir -p /home/dev/.claude
