@@ -1,0 +1,13 @@
+{
+  "name": "specrun-judge",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "level1": "node level1.mjs"
+  },
+  "devDependencies": {
+    "@playwright/test": "1.65.1",
+    "ajv": "8.17.1",
+    "ajv-formats": "3.0.1"
+  }
+}

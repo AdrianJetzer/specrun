@@ -1,0 +1,15 @@
+# Abhängigkeiten und Build-Ausgaben
+node_modules/
+dist/
+
+# Laufzeit- und Testausgaben
+.run/
+.out/
+test-results/
+playwright-report/
+
+# System
+.DS_Store
+
+# Probeläufe ohne Agent (runner/run.sh --fake)
+runs/*-fake/
