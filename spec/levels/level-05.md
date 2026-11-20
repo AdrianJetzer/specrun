@@ -44,7 +44,7 @@ Die Levels 1–4 bleiben **unverändert** prüfbar. Die Seite kennt deshalb zwei
 2. Seite im Browser offen lassen und `make check` ausführen → die Karten springen ohne Neuladen nach und nach auf „Bestanden“. Ausgabe: Levels 1–5 bestanden, danach `Level n an das Backend gemeldet` für 1–5. Exit-Code 0.
 3. `make stop-backend` → die Seite zeigt nach höchstens 5 s den Hinweis „Backend nicht erreichbar“. `make restart-backend` → der Hinweis verschwindet, die Daten sind wieder da.
 4. `make level4` → die Seite zeigt wieder „Quelle: Datei“.
-5. Am Ende `make level5` und `make check`, dann alles laufen lassen.
+5. Wenn es weitere Levels gibt, mit dem nächsten Level weitermachen; was am Ende laufen soll, steht in `00-start.md`.
 
 ## Bestanden, wenn (Prüfer)
 1. Level 1–4 sind bestanden (damit ist auch der Datei-Modus geprüft).

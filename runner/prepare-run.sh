@@ -41,6 +41,8 @@ fi
 
 mkdir -p "$DIR/env" "$DIR/work"
 cp -R "$ROOT/infra/devcontainer" "$DIR/env/.devcontainer"
+# Lauf-ID für das GitHub-Repo des Agenten (ab Level 6): specrun-lab/levelboard-lauf-<nr>
+sed -i '' "s|__RUN_ID__|lauf-$(basename "$DIR")|g" "$DIR/env/.devcontainer/devcontainer.json"
 cp -R "$ROOT/spec" "$DIR/work/spec"
 DIR="$(cd "$DIR" && pwd)"
 add_judge "$DIR"

@@ -20,7 +20,13 @@
   // Kein Volume für Claude: Jeder Lauf startet mit leerem Gedächtnis (keine Memory, Sessions, Plugins
   // aus früheren Läufen). Die Anmeldung kommt nur über ein Token, das auf dem Mac als Umgebungsvariable
   // gesetzt ist (einmalig erzeugt mit `claude setup-token`, siehe README).
-  "containerEnv": { "CLAUDE_CODE_OAUTH_TOKEN": "${localEnv:CLAUDE_CODE_OAUTH_TOKEN}" },
+  // GH_TOKEN: eng begrenztes Token des Agenten für die Organisation specrun-lab (ab Level 6)
+  // RUN_ID: Kennung des Laufs (setzt runner/prepare-run.sh ein), Repo heißt specrun-lab/levelboard-<RUN_ID>
+  "containerEnv": {
+    "CLAUDE_CODE_OAUTH_TOKEN": "${localEnv:CLAUDE_CODE_OAUTH_TOKEN}",
+    "GH_TOKEN": "${localEnv:SPECRUN_AGENT_GH_TOKEN}",
+    "RUN_ID": "__RUN_ID__"
+  },
 
   "forwardPorts": [8080],
 

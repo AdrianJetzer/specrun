@@ -15,3 +15,15 @@ mkdir -p "$DEST"
 node "$ROOT/runner/sanitize.mjs" "$DEST" "$ROOT"
 echo "✔ Übernommen: $DEST"
 grep -m1 'Score' "$DEST/report.md" || true
+
+# Ab Level 6: das GitHub-Repo des Laufs archivieren (nur noch lesbar, bleibt als Nachweis)
+REPO="specrun-lab/levelboard-lauf-$(basename "$LAUF")"
+if gh api "repos/$REPO" --jq .archived > /dev/null 2>&1; then
+  if [ "$(gh api "repos/$REPO" --jq .archived)" = "true" ]; then
+    echo "  Repo $REPO ist bereits archiviert"
+  elif gh repo archive "$REPO" --yes > /dev/null 2>&1; then
+    echo "✔ Repo archiviert: https://github.com/$REPO"
+  else
+    echo "⚠ Repo $REPO konnte nicht archiviert werden (Rechte von gh prüfen)" >&2
+  fi
+fi

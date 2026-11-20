@@ -17,7 +17,9 @@ Du arbeitest in einem **Linux-Container** (Dev Container). Diese Werkzeuge sind 
 
 **Nicht** vorhanden: Docker, Podman oder eine andere Container-Laufzeit. Du startest keine Container.
 
-Internetzugang für `npm` ist vorhanden.
+Internetzugang (npm, GitHub) ist vorhanden.
+
+Dasselbe Container-Image ist öffentlich als **`ghcr.io/specrun-lab/devcontainer:1`** verfügbar (für die Pipeline ab Level 6).
 
 ## Arbeitsordner
 Dein Arbeitsverzeichnis ist der Projektordner `/workspace`. Er enthält zu Beginn nur `spec/`. Lege das Projekt direkt darin an.
@@ -27,5 +29,6 @@ Die Seite auf Port 8080 wird an den Rechner des Benutzers weitergeleitet. Binde 
 ## Umgebungsvariablen
 | Variable | Bedeutung |
 |---|---|
-| `RUN_ID` | optional: ID des Durchlaufs, z. B. `2026-11-21-01`. Ist sie gesetzt, schreibt die Prüfsuite sie in `run.id` (siehe `05-datenmodell.md`). |
+| `RUN_ID` | ID des Durchlaufs, z. B. `lauf-006`. Die Prüfsuite schreibt sie in `run.id` (siehe `05-datenmodell.md`); ab Level 6 bestimmt sie den Namen des GitHub-Repos. |
+| `GH_TOKEN` | ab Level 6: Token für die GitHub-Organisation `specrun-lab` (Repos anlegen, pushen, Workflows schreiben, Läufe lesen). `gh` nutzt es automatisch. **Nie** in Dateien, Commits oder Ausgaben schreiben. |
 | `PLAYWRIGHT_BROWSERS_PATH` | `/ms-playwright` – vorgegeben, nicht ändern |

@@ -13,7 +13,7 @@ ENV DEBIAN_FRONTEND=noninteractive \
 # Grundwerkzeuge
 RUN apt-get update \
  && apt-get install -y --no-install-recommends \
-      ca-certificates curl gnupg xz-utils git make procps less jq ripgrep libatomic1 \
+      ca-certificates curl gnupg xz-utils unzip git make procps less jq ripgrep libatomic1 \
  && rm -rf /var/lib/apt/lists/*
 
 # nginx (Mainline von nginx.org, damit die Version zum Prüfer passt) und GitHub-CLI
@@ -25,14 +25,18 @@ RUN curl -fsSL https://nginx.org/keys/nginx_signing.key | gpg --dearmor -o /usr/
  && apt-get install -y --no-install-recommends nginx gh \
  && rm -rf /var/lib/apt/lists/*
 
-# Node.js und Go (offizielle Binärpakete, Architektur automatisch)
+# Node.js (offizielles Binärpaket, Architektur automatisch)
 RUN case "${TARGETARCH:-$(dpkg --print-architecture)}" in \
-      amd64) NARCH=x64;   GARCH=amd64 ;; \
-      arm64) NARCH=arm64; GARCH=arm64 ;; \
+      amd64) NARCH=x64 ;; \
+      arm64) NARCH=arm64 ;; \
       *) echo "Architektur nicht unterstützt" >&2; exit 1 ;; \
     esac \
- && curl -fsSL "https://nodejs.org/dist/v${NODE_VERSION}/node-v${NODE_VERSION}-linux-${NARCH}.tar.xz" | tar -xJ -C /usr/local --strip-components=1 \
- && curl -fsSL "https://go.dev/dl/go${GO_VERSION}.linux-${GARCH}.tar.gz" | tar -xz -C /usr/local
+ && curl -fsSL "https://nodejs.org/dist/v${NODE_VERSION}/node-v${NODE_VERSION}-linux-${NARCH}.tar.xz" | tar -xJ -C /usr/local --strip-components=1
+
+# Go aus dem offiziellen Go-Image auf Docker Hub (passende Architektur automatisch).
+# Grund: Die Downloads von Google (dl.google.com, storage.googleapis.com) waren wiederholt gestört (403/404).
+COPY --from=docker.io/library/golang:1.27.4 /usr/local/go /usr/local/go
+RUN /usr/local/go/bin/go version
 ENV PATH="/usr/local/go/bin:${PATH}"
 
 # Playwright: Systembibliotheken und Chromium vorinstalliert (Ordner gehört später „dev“)
@@ -49,8 +53,10 @@ ENV PATH="/home/dev/go/bin:/home/dev/.local/bin:${PATH}"
 
 # Go-Module für Level 4 vorhalten (modernc.org/sqlite samt Abhängigkeiten) und den Build-Cache füllen:
 # Builds funktionieren damit ohne Go-Proxy, der sporadisch mit 403 antwortet.
+# Beim Füllen: fällt der Proxy aus, lädt Go die Module direkt aus den Quell-Repos („|direct“).
 ARG SQLITE_VERSION=v1.62.0
 RUN mkdir -p /tmp/vorrat && cd /tmp/vorrat \
+ && export GOPROXY='https://proxy.golang.org|direct' \
  && go mod init vorrat > /dev/null 2>&1 \
  && printf 'package main\n\nimport _ "modernc.org/sqlite"\n\nfunc main() {}\n' > main.go \
  && for i in 1 2 3 4 5; do go get "modernc.org/sqlite@${SQLITE_VERSION}" && go mod tidy && go build -o /dev/null . && break; echo "Versuch $i fehlgeschlagen, neuer Versuch"; sleep 5; done \

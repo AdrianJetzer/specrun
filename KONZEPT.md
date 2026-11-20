@@ -836,3 +836,76 @@ Noch offen ist die **Prüfung von Lauf 005** (Nachbau der Levels 1–4 mit Spec 
 1. Referenz für Level 5 bauen.
 2. Spec v0.5.0 schreiben.
 3. Prüfer für Level 5 bauen, mit Gegenprobe.
+
+---
+
+## 19. Level 6 im Detail – „Repo + CI“
+
+**Status (2026-11-20):** gebaut. Erledigt sind:
+- Organisation `specrun-lab` und zwei Tokens
+- Image `ghcr.io/specrun-lab/devcontainer:1` (amd64 + arm64, öffentlich, ohne Zugangsdaten geprüft)
+- Referenz als echtes Repo [`specrun-lab/levelboard-referenz`](https://github.com/specrun-lab/levelboard-referenz), Pipeline grün in rund 80 s
+- Spec v0.6.0
+- Prüfer `judge/level6.mjs`
+
+Die Referenz erreicht Level 6 (Score 60). Die Gegenprobe (nicht gepusht, falsches Image, ohne `if: always()`, unechtes Token in der Historie) wird vollständig erkannt.
+
+**Funde:**
+- **VPN:** Mit aktivem VPN sperrt Google seinen Speicher („not available in your location“). Das betrifft Go-Proxy, Go-Downloads und Chromium und war die Ursache aller `403` der letzten Stunden. Go kommt jetzt zusätzlich aus dem Docker-Hub-Image `golang:1.27.4`.
+- **`go build` im Container-Job:** „error obtaining VCS status“, weil Git als root den Arbeitsordner eines anderen Eigentümers ablehnt. Abhilfe ist `GOFLAGS: … -buildvcs=false`; das steht jetzt in der Spec.
+- **Aktionen:** `checkout` und `upload-artifact` auf **v7** (v4 nutzt das veraltete Node 20).
+- **Paket-Sichtbarkeit:** GitHub legt Pakete privat an. Umstellen geht nur in der Weboberfläche (einmalig erledigt).
+
+### Entscheidungen
+| Thema | Entscheidung |
+|---|---|
+| Sichtbarkeit | Die Repos in `specrun-lab` sind **öffentlich**. Actions ist dann kostenlos, und der Code der Agenten ist einsehbar |
+| CI-Umgebung | die Pipeline läuft **in unserem Container-Image**, einmalig veröffentlicht als `ghcr.io/specrun-lab/devcontainer:<version>`, also mit gleichen Versionen wie Agent und Prüfer |
+| Aufräumen | nach der Prüfung **archiviert** `uebernehmen.sh` das Repo: nur noch lesbar, bleibt als Nachweis |
+| Vorgaben | **feste Eckpunkte** (Datei, Auslöser, Job, Image, Schritte, Artefakt); das YAML selbst schreibt der Agent |
+
+### Was du vorab bereitstellen musst
+1. **GitHub-Organisation `specrun-lab`** (kostenloser Plan). Unter Einstellungen „Personal access tokens“ müssen fein granulierte Tokens erlaubt sein.
+2. **Token für den Agenten** (fein granuliert):
+   - Besitzer: `specrun-lab`, „All repositories“, Laufzeit z. B. 30 Tage.
+   - Rechte auf Repos: Administration *lesen/schreiben* (zum Anlegen), Contents *lesen/schreiben*, Workflows *lesen/schreiben*, Actions *lesen*, Metadata *lesen*.
+   - Auf dem Mac als `SPECRUN_AGENT_GH_TOKEN` setzen (wie das Claude-Token).
+3. **Token für den Prüfer**: nur lesen (Contents, Actions, Metadata). Auf dem Mac als `SPECRUN_JUDGE_GH_TOKEN`. Artefakte lassen sich auch bei öffentlichen Repos nur mit Token herunterladen.
+4. **Container-Image in der GHCR** veröffentlichen (einmalig, mit deinem eigenen Login) und als Paket **öffentlich** stellen.
+
+### Was der Agent tut
+- Im Container stehen `GH_TOKEN` (aus `SPECRUN_AGENT_GH_TOKEN`) und `RUN_ID` (z. B. `lauf-006`, von `prepare-run.sh` gesetzt) bereit.
+- Er legt **öffentlich** `specrun-lab/levelboard-<RUN_ID>` an (`gh repo create`). Git-Identität: `Levelboard Agent <agent@specrun.invalid>`. Danach pusht er nach `main`, mit `gh auth setup-git` und HTTPS.
+- **Pipeline** `.github/workflows/ci.yml`, feste Eckpunkte:
+  - Name `CI`; Auslöser `push` auf `main` und `workflow_dispatch`
+  - ein Job `check` auf `ubuntu-latest` mit `container: image: ghcr.io/specrun-lab/devcontainer:<version>`, `options: --user root`
+  - `GOMODCACHE` und `GOCACHE` zeigen auf den Vorrat im Image, `PLAYWRIGHT_BROWSERS_PATH` bleibt
+  - Schritte: Checkout → `make level5` → `make check` → Artefakt `levelboard-report` hochladen (`frontend/dist/results.json` und `checks/.out/playwright.json`), **auch wenn `make check` scheitert** (`if: always()`)
+  - der Job ist nur grün, wenn `make check` grün ist
+- `make level6` = `make level5` plus `6` nach `.run/level`. In der Pipeline läuft nur bis Level 5, keine Rekursion.
+- **Checks für Level 6** (laufen lokal in `make check` und fragen GitHub ab), Entwurf:
+  - Repo existiert und ist öffentlich
+  - Lokaler Stand ist gepusht
+  - Letzter Pipeline-Lauf ist grün
+  - Report enthält Level 1–5 bestanden
+- Zugangsdaten nie in Dateien, Logs oder Commits schreiben.
+
+### Prüfer für Level 6
+1. Die Levels 1–5 müssen bestanden sein (lokal).
+2. Das Repo `specrun-lab/levelboard-<RUN_ID>` existiert, ist öffentlich und hat einen `main`-Branch. Der lokale `HEAD` des Agenten entspricht `origin/main`.
+3. `.github/workflows/ci.yml` erfüllt die Eckpunkte: Image, Auslöser, Job, `if: always()` beim Artefakt.
+4. Der **letzte Lauf** von `CI` für den Commit von `main` ist `completed/success`.
+5. Das **Artefakt** `levelboard-report` existiert. Seine `results.json` meldet Level 1–5 als `bestanden`, mit den Checks wörtlich aus der Spec; `playwright.json` passt dazu.
+6. **Keine Zugangsdaten** im Repo, in der ganzen Git-Historie und in den Logs des Laufs (Suche nach Token-Mustern wie `github_pat_`, `ghp_`, `sk-ant-`).
+7. Selbstmessung: `make check` meldet Level 1–6 bestanden.
+8. Nebenwerte: Dauer des Pipeline-Laufs, Anzahl der Pipeline-Läufe (Versuche des Agenten), Anzahl der Commits.
+
+### Risiken
+- Der Agent bekommt echte Schreibrechte in `specrun-lab`. Begrenzt wird das durch Token-Rechte, die Beschränkung auf die eine Organisation und die Laufzeit.
+- Die Pipeline-Läufe kosten Zeit, oft mehrere Minuten pro Versuch. Das Zeitlimit des Laufs sollte das berücksichtigen.
+
+### Nächster Schritt (erst auf dein Go)
+1. Du legst Organisation und Tokens an (Anleitung folgt).
+2. Ich veröffentliche das Image (mit deinem Login) und baue die Referenz für Level 6 als echtes Repo in `specrun-lab`.
+3. Spec v0.6.0.
+4. Prüfer für Level 6, mit Gegenprobe.

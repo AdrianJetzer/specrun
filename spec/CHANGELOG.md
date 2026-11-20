@@ -1,5 +1,9 @@
 # Spec-Changelog
 
+## 0.6.0 – 2026-11-20
+- Neu: **Level 6** (Repo + CI): `levels/level-06.md`. Öffentliches Repo `specrun-lab/levelboard-<RUN_ID>`; Pipeline `.github/workflows/ci.yml` mit festen Eckpunkten im Image `ghcr.io/specrun-lab/devcontainer:1`; Artefakt `levelboard-report`; `make level6`; 4 neue Checks über `gh`.
+- 02: `GH_TOKEN` und `RUN_ID` in der Umgebung; Regeln für Zugangsdaten; Image öffentlich in der GHCR.
+
 ## 0.5.0 – 2026-11-20
 - Neu: **Level 5** (Frontend + Backend): `levels/level-05.md`; `config.json` legt die Datenquelle fest (Datei bzw. Backend); im API-Modus Abfrage alle 5 s; Zustand `unavailable` mit Hinweis; Quelle in der Kopfzeile (`run-source`); `nginx-api.conf` mit Weiterleitung `/api/` (inkl. `charset off`); `make level5`, `make stop-backend`; `write-results.mjs` meldet ab Level 5 auch an die API; 5 neue Checks.
 - 02/03: `/config.json` ohne Cache auch in `nginx.conf`.

@@ -103,3 +103,17 @@ export const LEVEL5_CHECKS = [
   'Backend-Ausfall wird angezeigt',
   'Meldungen über nginx landen in der Historie',
 ];
+
+export const LEVEL6_CHECKS = [
+  'Repo existiert und ist öffentlich',
+  'Lokaler Stand ist gepusht',
+  'Letzter Pipeline-Lauf ist grün',
+  'Report enthält Level 1–5 bestanden',
+];
+
+// Muster für Zugangsdaten (Level 6: Suche in Repo, Historie und Pipeline-Logs)
+export const SECRET_PATTERNS = [
+  /github_pat_[A-Za-z0-9_]{20,}/,
+  /\bgh[opsur]_[A-Za-z0-9]{30,}/,
+  /sk-ant-[A-Za-z0-9_-]{20,}/,
+];

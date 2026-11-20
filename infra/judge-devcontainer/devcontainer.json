@@ -21,7 +21,12 @@
     "source=__SPECRUN__,target=/specrun,type=bind,readonly"
   ],
 
-  "containerEnv": { "SPECRUN_LAUF": "__LAUF__" },
+  // GH_TOKEN: Lese-Token des Prüfers für specrun-lab (Pipeline, Artefakte; ab Level 6)
+  "containerEnv": {
+    "SPECRUN_LAUF": "__LAUF__",
+    "RUN_ID": "lauf-__LAUF__",
+    "GH_TOKEN": "${localEnv:SPECRUN_JUDGE_GH_TOKEN}"
+  },
 
   "postCreateCommand": "echo 'Prüfer bereit. Starten mit: /specrun/runner/pruefen.sh'"
 }
