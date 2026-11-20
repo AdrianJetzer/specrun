@@ -1025,7 +1025,7 @@ Ursprüngliche Planung:
 
 ## 22. Level 8 im Detail – „Deployment“
 
-**Status (2026-11-20):** gebaut, noch nicht live getestet. Erledigt sind:
+**Status (2026-11-20):** gebaut und live bestätigt. Erledigt sind:
 - Server-Einrichtung `infra/server/` (cloud-init, Setup-Skript, Caddy)
 - Referenz mit Commit in API und Kopfzeile, `deploy/compose.yml`, `report-live.mjs`, Job `deploy`
 - Spec v0.8.0
@@ -1037,7 +1037,15 @@ Lokal getestet:
 - Referenz: Level 1–5 weiterhin bestanden; Commit in `/api/health`, `run.commit` und Kopfzeile; `report-live.mjs` meldet Level 1–5.
 - Prüfer: Die Dateiprüfung (L8-K1) besteht mit der Referenz. Die Gegenprobe (falscher Alias, `StrictHostKeyChecking no`, fehlender Commit im Image) wird erkannt.
 
-Noch offen: Server anlegen, Secrets setzen, Referenz-Repo deployen, Prüfer gegen die Live-Seite laufen lassen.
+Live-Test (2026-11-20):
+- Server `specrun-1`: Hetzner CX23 (2 vCPU, 4 GB, x86) in Helsinki, Ubuntu 24.04, rund 7.70 USD pro Monat. CX23 war in Nürnberg nicht verfügbar. Die Einrichtung per cloud-init klappte auf Anhieb.
+- Von außen: HTTP leitet auf HTTPS um; `referenz.…` bekommt ein Zertifikat, fremde Namen nicht; Port 5555 ist nicht erreichbar.
+- Referenz-Repo: Alle drei Jobs grün (`check`, `images`, `deploy`). Die Referenz ist live unter `https://referenz.<domain>` mit dem richtigen Commit.
+- Prüfer Level 8: alle 4 Kriterien bestanden, `make check` Level 1–8 bestanden. Die Referenz erreicht **Level 8 (Score 80)**.
+
+Funde:
+- Ein neues Hetzner-Konto muss vor dem ersten Projekt verifiziert werden (Kreditkarte oder Ausweis).
+- Org-Secrets setzen braucht im `gh`-Login den Scope `admin:org` (`gh auth refresh -s admin:org`).
 
 ### Entscheidungen
 | Thema | Entscheidung |

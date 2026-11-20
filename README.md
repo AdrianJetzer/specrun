@@ -6,7 +6,7 @@ Specrun ist ein Experiment. Eine frische Claude-Code-Session erhält ausschließ
 
 Die gebaute App, das **Levelboard**, ist zugleich die Anzeigetafel für die Leistung des Agenten: Sie zeigt, welche Levels er geschafft hat. Ein **unabhängiger Prüfer**, den der Agent nicht sieht, misst anschließend nach. Nur sein Urteil zählt.
 
-> **Stand:** Levels 1–7 sind umgesetzt (Referenz, Prüfer, Dev Container). Level 8 (Deployment, Spec v0.8.0) ist gebaut, wartet aber noch auf den Server und den ersten echten Test. Die Referenz läuft als echtes Repo [`specrun-lab/levelboard-referenz`](https://github.com/specrun-lab/levelboard-referenz): Die Pipeline testet die Levels 1–5, baut die App-Images, testet sie als Container und veröffentlicht sie in der GHCR. Echte Nachbauten haben Level 1 (Lauf 001) und Level 2 (Lauf 003) laut unabhängigem Prüfer bestanden; Lauf 005 (Levels 1–4) ist gebaut, aber noch nicht geprüft.
+> **Stand:** Levels 1–7 sind umgesetzt (Referenz, Prüfer, Dev Container). Level 8 (Deployment, Spec v0.8.0) läuft: Die Referenz ist auf einem Hetzner-Server live und erreicht laut Prüfer Level 8 (Score 80). Die Referenz läuft als echtes Repo [`specrun-lab/levelboard-referenz`](https://github.com/specrun-lab/levelboard-referenz): Die Pipeline testet die Levels 1–5, baut die App-Images, testet sie als Container und veröffentlicht sie in der GHCR. Echte Nachbauten haben Level 1 (Lauf 001) und Level 2 (Lauf 003) laut unabhängigem Prüfer bestanden; Lauf 005 (Levels 1–4) ist gebaut, aber noch nicht geprüft.
 
 ## Die 10 Levels
 
