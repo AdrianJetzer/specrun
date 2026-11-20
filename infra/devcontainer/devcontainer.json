@@ -24,11 +24,13 @@
   // RUN_ID: Kennung des Laufs (setzt runner/prepare-run.sh ein), Repo heißt specrun-lab/levelboard-<RUN_ID>
   // ANTHROPIC_MODEL: fest vorgegebenes Modell für vergleichbare Läufe (setzt runner/prepare-run.sh ein,
   // Standard claude-sonnet-5-5, wählbar mit --modell)
+  // LIVE_DOMAIN: Adresse des Servers (ab Level 8), Live-Seite unter https://<RUN_ID>.<LIVE_DOMAIN>
   "containerEnv": {
     "CLAUDE_CODE_OAUTH_TOKEN": "${localEnv:CLAUDE_CODE_OAUTH_TOKEN}",
     "GH_TOKEN": "${localEnv:SPECRUN_AGENT_GH_TOKEN}",
     "RUN_ID": "__RUN_ID__",
-    "ANTHROPIC_MODEL": "__MODEL__"
+    "ANTHROPIC_MODEL": "__MODEL__",
+    "LIVE_DOMAIN": "${localEnv:SPECRUN_LIVE_DOMAIN}"
   },
 
   // Session-Protokolle von Claude landen im Laufordner (<lauf>/protokoll) – für die Messung der Tokens

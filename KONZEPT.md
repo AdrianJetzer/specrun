@@ -1020,3 +1020,50 @@ Ursprüngliche Planung:
 - **Ablage:** Jeder Laufordner bekommt `protokoll/`, eingehängt nach `~/.claude/projects` im Agent-Container. So bleibt es pro Lauf erhalten, und es gibt trotzdem kein gemeinsames Gedächtnis zwischen Läufen.
 - **Bericht:** Tabelle je Level mit Tokens, Kosten (aus den Tokens berechnet), Dauer und Pipeline-Versuchen. `/cost` von Hand entfällt.
 - **Lauf 007:** Das Protokoll wird nachträglich mit `podman cp` aus dem gestoppten Container geholt. Den Container bis dahin **nicht entfernen**.
+
+---
+
+## 22. Level 8 im Detail – „Deployment“
+
+**Status (2026-11-20):** gebaut, noch nicht live getestet. Erledigt sind:
+- Server-Einrichtung `infra/server/` (cloud-init, Setup-Skript, Caddy)
+- Referenz mit Commit in API und Kopfzeile, `deploy/compose.yml`, `report-live.mjs`, Job `deploy`
+- Spec v0.8.0
+- Prüfer `judge/level8.mjs`
+
+Lokal getestet:
+- Caddyfile mit Caddy 2.11.9 (Podman): Freigabe nur für `lauf-<nr>` und `referenz`, Weiterleitung an `<RUN_ID>-web:8080` (200), fehlender Lauf ergibt 502, HTTP leitet auf HTTPS um.
+- Die cloud-init-Datei ist gültiges YAML und enthält die Dateien unverändert.
+- Referenz: Level 1–5 weiterhin bestanden; Commit in `/api/health`, `run.commit` und Kopfzeile; `report-live.mjs` meldet Level 1–5.
+- Prüfer: Die Dateiprüfung (L8-K1) besteht mit der Referenz. Die Gegenprobe (falscher Alias, `StrictHostKeyChecking no`, fehlender Commit im Image) wird erkannt.
+
+Noch offen: Server anlegen, Secrets setzen, Referenz-Repo deployen, Prüfer gegen die Live-Seite laufen lassen.
+
+### Entscheidungen
+| Thema | Entscheidung |
+|---|---|
+| Adresse | **sslip.io**, keine eigene Domain: `https://<RUN_ID>.<ip-mit-strichen>.sslip.io`. Eine eigene Domain lässt sich später einsetzen (`vorbereiten.sh <domain>` plus Wildcard-DNS) |
+| Pro Lauf | **eigene Adresse** pro Lauf. Alte Läufe bleiben live, bis wir aufräumen; der Prüfer kann auch später noch messen |
+| Routing | Caddy und alle Läufe im Docker-Netz `web`. Caddy leitet nach dem ersten Namensteil an `<RUN_ID>-web:8080` weiter. **On-Demand TLS** mit Freigabe-Endpunkt: Zertifikate nur für `lauf-<nr>.<domain>` und `referenz.<domain>`. Keine Ports pro Lauf |
+| Vorgabe an den Agenten | **feste Eckpunkte**: `~/runs/<RUN_ID>/`, Projektname `RUN_ID`, Alias `<RUN_ID>-web`, keine Ports, Image-Tag = Commit, Namen der Secrets, `StrictHostKeyChecking yes` |
+| Commit-Nachweis | `LEVELBOARD_COMMIT` (aus dem Build-Argument `REVISION`) → `/api/health.commit` und `run.commit`; die Kopfzeile zeigt die ersten 7 Zeichen (`run-commit`) |
+| Live-Daten | SQLite in einem Volume pro Lauf. Der Job `deploy` meldet nach dem Deployment die Ergebnisse von Level 1–5 aus dem Job `check` an die Live-API (`report-live.mjs`) |
+| Server | wird **in der Hetzner-Konsole** von Hand angelegt, mit unserer cloud-init-Datei. Kein Hetzner-Token auf dem Mac |
+| Zugangsdaten | Org-Secrets `DEPLOY_HOST`, `DEPLOY_USER`, `DEPLOY_SSH_KEY`, `DEPLOY_KNOWN_HOSTS`, Org-Variable `LIVE_DOMAIN`. Gesetzt von `verbinden.sh` mit dem eigenen `gh`-Login. Lokal bekommen Agent und Prüfer nur `LIVE_DOMAIN` |
+
+### Server (`infra/server/`)
+- `vorbereiten.sh` erzeugt einen eigenen ed25519-Schlüssel nur für `deploy` und die cloud-init-Datei. Beides liegt in `~/.specrun/server/`, außerhalb des Repos.
+- Die cloud-init-Datei richtet ein:
+  - Docker aus dem offiziellen Paketarchiv
+  - Benutzer `deploy` (nur Docker)
+  - SSH nur mit Schlüssel
+  - ufw: 22, 80, 443
+  - Netz `web`
+  - Caddy 2.11.9 (`compose.yml`, `Caddyfile`)
+- Die Domain ergibt sich aus der öffentlichen IP (Hetzner-Metadaten).
+- `verbinden.sh <ip>` liest den Host-Schlüssel, wartet auf das Ende der Einrichtung, zeigt Docker- und Caddy-Status und setzt nach Rückfrage Secrets und Variable.
+
+### Bewusst in Kauf genommen
+- Die Docker-Gruppe ist praktisch root. Für einen Wegwerf-Server ist das vertretbar.
+- Die Live-API ist ohne Anmeldung beschreibbar (wie lokal). Wer will, kann Ergebnisse fälschen; der Prüfer misst deshalb selbst von außen.
+- Der Host-Schlüssel wird einmalig per `ssh-keyscan` vom Mac übernommen (Vertrauen beim ersten Kontakt). Ein Abgleich in der Hetzner-Konsole ist möglich.

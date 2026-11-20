@@ -80,7 +80,8 @@ addFormats(ajv);
 const vResults = ajv.compile(schema);
 const vLevel = ajv.compile({ ...schema.$defs.level, $id: 'level' });
 const vError = ajv.compile({ type: 'object', additionalProperties: false, required: ['error'], properties: { error: { type: 'string', minLength: 1 } } });
-const vHealth = ajv.compile({ type: 'object', additionalProperties: false, required: ['status', 'version'], properties: { status: { const: 'ok' }, version: { type: 'string', minLength: 1 } } });
+// commit: ab Spec 0.8.0 (lokal null); ältere Läufe ohne das Feld bleiben gültig
+const vHealth = ajv.compile({ type: 'object', additionalProperties: false, required: ['status', 'version'], properties: { status: { const: 'ok' }, version: { type: 'string', minLength: 1 }, commit: { type: ['string', 'null'] } } });
 
 const publicFile = path.join(target, 'frontend/public/results.json');
 const distFile = path.join(target, 'frontend/dist/results.json');

@@ -1,0 +1,26 @@
+# Specrun – Caddy auf dem Hetzner-Server (Level 8). Liegt dort unter /opt/specrun/caddy/.
+# Das Netz „web“ legt das Setup-Skript an; die Läufe hängen ihren Frontend-Container dort ein.
+services:
+  caddy:
+    image: caddy:2.11.9-alpine
+    restart: unless-stopped
+    ports:
+      - "80:80"
+      - "443:443"
+      - "443:443/udp"
+    environment:
+      LIVE_DOMAIN: ${LIVE_DOMAIN:?LIVE_DOMAIN fehlt in .env}
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddy-data:/data
+      - caddy-config:/config
+    networks:
+      - web
+
+networks:
+  web:
+    external: true
+
+volumes:
+  caddy-data:
+  caddy-config:

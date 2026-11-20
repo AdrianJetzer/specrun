@@ -25,7 +25,8 @@
   "containerEnv": {
     "SPECRUN_LAUF": "__LAUF__",
     "RUN_ID": "lauf-__LAUF__",
-    "GH_TOKEN": "${localEnv:SPECRUN_JUDGE_GH_TOKEN}"
+    "GH_TOKEN": "${localEnv:SPECRUN_JUDGE_GH_TOKEN}",
+    "LIVE_DOMAIN": "${localEnv:SPECRUN_LIVE_DOMAIN}"
   },
 
   "postCreateCommand": "echo 'Prüfer bereit. Starten mit: /specrun/runner/pruefen.sh'"

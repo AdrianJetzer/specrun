@@ -6,7 +6,7 @@ Specrun ist ein Experiment. Eine frische Claude-Code-Session erhält ausschließ
 
 Die gebaute App, das **Levelboard**, ist zugleich die Anzeigetafel für die Leistung des Agenten: Sie zeigt, welche Levels er geschafft hat. Ein **unabhängiger Prüfer**, den der Agent nicht sieht, misst anschließend nach. Nur sein Urteil zählt.
 
-> **Stand:** Levels 1–7 sind umgesetzt (Spec v0.7.0, Referenz, Prüfer, Dev Container). Die Referenz läuft als echtes Repo [`specrun-lab/levelboard-referenz`](https://github.com/specrun-lab/levelboard-referenz): Die Pipeline testet die Levels 1–5, baut die App-Images, testet sie als Container und veröffentlicht sie in der GHCR. Echte Nachbauten haben Level 1 (Lauf 001) und Level 2 (Lauf 003) laut unabhängigem Prüfer bestanden; Lauf 005 (Levels 1–4) ist gebaut, aber noch nicht geprüft.
+> **Stand:** Levels 1–7 sind umgesetzt (Referenz, Prüfer, Dev Container). Level 8 (Deployment, Spec v0.8.0) ist gebaut, wartet aber noch auf den Server und den ersten echten Test. Die Referenz läuft als echtes Repo [`specrun-lab/levelboard-referenz`](https://github.com/specrun-lab/levelboard-referenz): Die Pipeline testet die Levels 1–5, baut die App-Images, testet sie als Container und veröffentlicht sie in der GHCR. Echte Nachbauten haben Level 1 (Lauf 001) und Level 2 (Lauf 003) laut unabhängigem Prüfer bestanden; Lauf 005 (Levels 1–4) ist gebaut, aber noch nicht geprüft.
 
 ## Die 10 Levels
 
@@ -19,7 +19,7 @@ Die gebaute App, das **Levelboard**, ist zugleich die Anzeigetafel für die Leis
 | 5 | Frontend + Backend | Live-Dashboard: Seite liest alle 5 s aus dem Backend, nginx leitet /api/ weiter |
 | 6 | Repo + CI | GitHub-Repo, Pipeline baut und testet Levels 1–5 |
 | 7 | Images in der Pipeline | Images nur in der Pipeline gebaut, im Runner getestet, in die GHCR gepusht |
-| 8 | Deployment | Auslieferung auf einen eigenen Server per SSH |
+| 8 | Deployment | Pipeline deployt per SSH auf einen Hetzner-Server, live unter `https://<lauf>.<domain>` |
 | 9 | Live-Prüfung | Agent prüft die Live-Seite inkl. Lasttest |
 | 10 | Metriken veröffentlicht | Abschlussbericht auf der Live-Seite |
 
@@ -34,7 +34,7 @@ spec/        Spezifikation – die einzige Eingabe für den Agenten
 reference/   unsere Referenz-Implementierung des Levelboards
 judge/       unabhängiger Prüfer (für den Agenten unsichtbar)
 runner/      Lauf vorbereiten, prüfen, Bericht, Bereinigung persönlicher Pfade
-infra/       Dev Container (Startausrüstung für den Agenten)
+infra/       Dev Container (Startausrüstung für den Agenten), Server-Einrichtung (infra/server)
 runs/        Berichte der Nachbau-Läufe
 KONZEPT.md   Konzept und Entscheidungen
 ```
@@ -69,6 +69,16 @@ runner/uebernehmen.sh <laufordner>    # Bericht nach runs/lauf-<nr>/ übernehmen
 Das Modell des Agenten ist pro Lauf fest vorgegeben (`ANTHROPIC_MODEL` im Agent-Container, Standard `claude-sonnet-5-5`). Der Bericht zeigt das vorgegebene und das laut Protokoll tatsächlich verwendete Modell.
 
 Der Prüfer läuft in einem eigenen Container aus demselben Image. Er sieht das Werk des Agenten nur lesend und baut es selbst neu.
+
+**Server für Level 8 (einmalig einrichten)**
+
+Ein kleiner Hetzner-Server nimmt die Läufe auf. Jeder Lauf ist unter `https://<RUN_ID>.<LIVE_DOMAIN>` erreichbar, ohne eigene Domain z. B. `https://lauf-008.89-67-45-123.sslip.io`. Caddy auf dem Server holt die Zertifikate.
+```bash
+infra/server/vorbereiten.sh           # Deploy-Schlüssel und cloud-init-Datei in ~/.specrun/server/
+# Hetzner-Konsole: Server mit Ubuntu 24.04 (x86) anlegen, cloud-init.yaml bei „Cloud config“ einfügen
+infra/server/verbinden.sh <server-ip> # wartet auf die Einrichtung, setzt Org-Secrets und LIVE_DOMAIN
+```
+Danach in `~/.zshrc` die ausgegebene Zeile `export SPECRUN_LIVE_DOMAIN=…` ergänzen und VS Code neu starten. Agent- und Prüfer-Container bekommen den Wert als `LIVE_DOMAIN`. Der private Schlüssel bleibt in `~/.specrun/server/` und in den Org-Secrets, nie im Repo.
 
 **Anmeldung von Claude im Agent-Container (einmalig einrichten)**
 

@@ -116,12 +116,20 @@ export const SECRET_PATTERNS = [
   /github_pat_[A-Za-z0-9_]{20,}/,
   /\bgh[opsur]_[A-Za-z0-9]{30,}/,
   /sk-ant-[A-Za-z0-9_-]{20,}/,
+  /-----BEGIN [A-Z ]*PRIVATE KEY-----/,
 ];
 
 export const LEVEL7_CHECKS = [
   'Job images des letzten Laufs ist grün',
   'Beide Images liegen öffentlich in der GHCR',
   'Report der Container-Suite enthält nur bestandene Checks',
+];
+
+export const LEVEL8_CHECKS = [
+  'Job deploy des letzten Laufs ist grün',
+  'Live-Seite antwortet über HTTPS',
+  'Live-Seite meldet den aktuellen Commit',
+  'Live-Seite zeigt die Ergebnisse der Pipeline',
 ];
 
 export const CONTAINER_CHECKS = [
