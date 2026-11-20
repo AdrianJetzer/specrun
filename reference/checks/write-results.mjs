@@ -20,17 +20,20 @@ const walk = (suite) => {
   if (!byLevel.has(n)) return;
   for (const spec of suite.specs ?? []) {
     const entry = byLevel.get(n);
-    entry.checks.push({ name: spec.title, ok: spec.ok });
+    // Nur ein Test, der wirklich gelaufen und bestanden ist, zählt: Playwright meldet übersprungene Tests mit ok: true
+    const ran = (spec.tests ?? []).length > 0 && spec.tests.every((t) => t.status === 'expected' || t.status === 'flaky');
+    entry.checks.push({ name: spec.title, ok: spec.ok && ran });
     entry.durationMs += (spec.tests ?? []).flatMap((t) => t.results ?? []).reduce((s, r) => s + (r.duration ?? 0), 0);
   }
 };
 report.suites.forEach(walk);
 for (const [n, e] of byLevel) if (e.checks.length === 0) throw new Error(`Keine Checks für Level ${n} gefunden`);
 
-// Ab Level 9: Ergebnis des Lasttests (von tests/level9.spec.ts geschrieben) als metrics von Level 9
+// metrics: Level 9 = Lasttest (tests/level9.spec.ts), Level 10 = Kennzahlen des Abschlussberichts (tests/level10.spec.ts)
+const METRICS_FILES = { 9: '.out/loadtest.json', 10: '.out/report.json' };
 const metricsOf = (n) => {
-  if (n !== 9) return {};
-  try { return JSON.parse(fs.readFileSync(path.join(here, '.out/loadtest.json'), 'utf8')); } catch { return {}; }
+  if (!METRICS_FILES[n]) return {};
+  try { return JSON.parse(fs.readFileSync(path.join(here, METRICS_FILES[n]), 'utf8')); } catch { return {}; }
 };
 
 const now = new Date().toISOString();

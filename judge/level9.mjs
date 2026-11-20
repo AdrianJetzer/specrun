@@ -197,7 +197,10 @@ if (!RUN_ID || !process.env.GH_TOKEN || !LIVE_DOMAIN) {
   run('make', ['down']);
 
   // ---- Live-Stand wiederherstellen, falls nötig (Meldungen aus dem festgehaltenen Stand, aufsteigend) ----
-  if (!allPassed(await liveLevels(), 9) && snapshot?.levels) {
+  // Auch nötig, wenn der festgehaltene Stand schon weiter war (z. B. Level 10): make check bis Level 9 leert es live.
+  const reached = (d) => { let n = 0; for (const l of d?.levels ?? []) { if (l.status !== 'bestanden') break; n = l.level; } return n; };
+  const now = await liveLevels();
+  if ((!allPassed(now, 9) || reached(snapshot) > reached(now)) && snapshot?.levels) {
     await restoreLive(snapshot);
     nebenwerte.liveWiederhergestellt = true;
     console.log('  Live-Stand aus der Selbstmessung wiederhergestellt');

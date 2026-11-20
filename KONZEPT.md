@@ -1107,3 +1107,31 @@ Inkrementell gebaut: Die Referenz bekam nur die neuen Dateien, die laufende App 
 - **Prüfer-Reihenfolge:** Die Probe-Meldung des Prüfers leert live die höheren Levels. Danach scheiterte der Level-8-Check im folgenden `make check`. Lösung: Der Prüfer stellt den Live-Stand direkt nach der Probe wieder her.
 - **Einmaliger Wackler:** In einem Prüferlauf scheiterte Level 4 lokal; in drei weiteren Läufen nicht mehr. Ursache unklar, beobachten.
 - Mein eigener Fehler: In `write-results.mjs` kollidierte die neue Funktion mit der Variablen `report`, und die Pipeline scheiterte. Seither läuft vor jedem Push Level 1–5 im Container.
+
+---
+
+## 24. Level 10 im Detail – „Metriken veröffentlicht“
+
+**Status (2026-11-20):** gebaut und live bestätigt. Erledigt sind:
+- Referenz mit Abschnitt „Abschlussbericht“ (`Report.tsx`), `collect-report.mjs`, `level10.spec.ts`, Nachprüfung `live-report.spec.ts`
+- Spec v1.0.0, die nun alle 10 Levels beschreibt
+- Prüfer `judge/level10.mjs`
+
+### Entscheidungen
+| Thema | Entscheidung |
+|---|---|
+| Darstellung | **Abschnitt unter den Karten** mit 4 Kacheln (Ergebnis, Lasttest, Images, Pipeline) und der Liste der 10 Levels. Ohne vollständiges Level 10 erscheint der Hinweis „Noch kein Abschlussbericht …“ |
+| Datenquelle | **Der Agent sammelt** in `make check`: Pipeline-Dauer je Job und gesamt (`gh api`), Image-Größen (GHCR ohne Anmeldung, linux/amd64, Summe der Layer), Lasttest aus Level 9. Er meldet alles als `metrics` von Level 10. Eine neue API braucht es nicht |
+| Henne-Ei-Problem | **Zwei Schritte:** Die Level-10-Tests prüfen die Darstellung auf der Live-Seite mit ersetzter API-Antwort. Nach der Meldung prüft `make check` die echte Live-Seite nach (`live-report.spec.ts`, kein eigenes Level) |
+| Prüfer | vergleicht die Kennzahlen mit eigener Messung (Pipeline und Images exakt, Lasttest gleich Level 9), prüft die Live-Seite im Browser und lässt `make level10` + `make check` laufen |
+
+### Ergebnis
+- Referenz: Level 1–10 bestanden, live 10 / 10 mit Abschlussbericht. Pipeline `check` 89 s, `images` 83 s, `deploy` 27 s, gesamt 208 s; Images 25,2 MB (Frontend) und 8,3 MB (Backend); Lasttest p95 67 ms.
+- Prüfer Level 9 und 10: bestanden. Die Referenz erreicht **Score 100**.
+- Gegenprobe: Ein Level 10 mit geschönter Image-Größe (5,0 statt 25,2 MB) wird in K1 erkannt.
+
+### Funde
+- **Reihenfolge der Testdateien:** Playwright sortiert alphabetisch, `level10` läuft vor `level2` und damit vor dem Lasttest. Lösung: Projekte in `playwright.config.ts`; `level-10` hängt von `levels` ab. Eine Abhängigkeit lässt **alle** Tests des Projekts laufen, deshalb umfasst `levels` genau `level1`–`level9`, und `container`/`live-report` stehen im Projekt `weitere`.
+- **Geschönte Selbstmessung entdeckt:** `write-results.mjs` übernahm `spec.ok`. Playwright meldet übersprungene Tests aber mit `ok: true`. So wurde ein übersprungenes Level 10 als „bestanden (3/3)“ gemeldet. Jetzt zählt ein Check nur, wenn der Test wirklich gelaufen ist (`status` `expected` oder `flaky`). Die Regel steht in Spec 05 und gilt für alle Levels.
+- **Prüfer-Reihenfolge:** `make check` bis Level 9 (im Prüfer für Level 9) leert live Level 10. Der Prüfer für Level 9 stellt deshalb auch höhere Levels aus dem festgehaltenen Stand wieder her.
+- **Schlüsselreihenfolge:** Das Go-Backend speichert `metrics` mit sortierten Schlüsseln. Der Prüfer vergleicht deshalb unabhängig von der Reihenfolge.

@@ -140,6 +140,12 @@ export const LEVEL9_CHECKS = [
   'Lasttest: 10 Verbindungen, 30 s, ohne Fehler, p95 unter 1 s',
 ];
 
+export const LEVEL10_CHECKS = [
+  'Kennzahlen für den Bericht gesammelt',
+  'Abschlussbericht wird dargestellt',
+  'Ohne Level 10 erscheint der Hinweis',
+];
+
 export const LOADTEST_FIELDS = ['connections', 'durationS', 'requests', 'errors', 'rps', 'p50Ms', 'p95Ms', 'maxMs'];
 
 export const CONTAINER_CHECKS = [
