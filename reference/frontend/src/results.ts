@@ -51,7 +51,44 @@ export type LoadState =
   | { kind: 'loading' }
   | { kind: 'ok'; results: Results }
   | { kind: 'missing' }
-  | { kind: 'invalid' };
+  | { kind: 'invalid' }
+  | { kind: 'unavailable' };
+
+/** Datenquelle: Datei (results.json, Level 1–4) oder Backend (/api/levels, ab Level 5). */
+export type Source = 'file' | 'api';
+
+/** Liest /config.json. Fehlt sie oder ist sie ungültig, gilt „file“. */
+export async function loadSource(url = '/config.json'): Promise<Source> {
+  try {
+    const res = await fetch(url, { cache: 'no-store' });
+    if (!res.ok || (res.headers.get('content-type') ?? '').includes('text/html')) return 'file';
+    const data = (await res.json()) as { source?: unknown };
+    return data && data.source === 'api' ? 'api' : 'file';
+  } catch {
+    return 'file';
+  }
+}
+
+/** Lädt den Stand aus dem Backend. Nicht erreichbar, 5xx oder HTML → „unavailable“. */
+export async function loadFromApi(url = '/api/levels'): Promise<LoadState> {
+  let res: Response;
+  try {
+    res = await fetch(url, { cache: 'no-store' });
+  } catch {
+    return { kind: 'unavailable' };
+  }
+  const isHtml = (res.headers.get('content-type') ?? '').includes('text/html');
+  if (!res.ok || isHtml) return { kind: 'unavailable' };
+  try {
+    const parsed = parseResults(await res.json());
+    return parsed ? { kind: 'ok', results: parsed } : { kind: 'invalid' };
+  } catch {
+    return { kind: 'invalid' };
+  }
+}
+
+/** Abfrage-Intervall im API-Modus. */
+export const POLL_MS = 5000;
 
 /** Leerer Zustand: alle Levels offen. */
 export function emptyResults(): Results {

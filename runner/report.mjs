@@ -82,6 +82,7 @@ const nw1 = levelResults[0]?.nebenwerte ?? {};
 const nw2 = levelResults[1]?.nebenwerte ?? {};
 const nw3 = levelResults[2]?.nebenwerte ?? {};
 const nw4 = levelResults[3]?.nebenwerte ?? {};
+const nw5 = levelResults[4]?.nebenwerte ?? {};
 lines.push(
   '## Nebenwerte',
   '',
@@ -89,8 +90,10 @@ lines.push(
   ...(nw2.makeLevel2Ms ? [`- \`make level2\`: ${(nw2.makeLevel2Ms / 1000).toFixed(1)} s`] : []),
   ...(nw3.makeLevel3Ms ? [`- \`make level3\`: ${(nw3.makeLevel3Ms / 1000).toFixed(1)} s`] : []),
   ...(nw4.makeLevel4Ms ? [`- \`make level4\`: ${(nw4.makeLevel4Ms / 1000).toFixed(1)} s`] : []),
+  ...(nw5.makeLevel5Ms ? [`- \`make level5\`: ${(nw5.makeLevel5Ms / 1000).toFixed(1)} s`] : []),
+  ...(nw5.liveVerzoegerungMs ? [`- Live-Anzeige: erste Änderung nach ${(nw5.liveVerzoegerungMs / 1000).toFixed(1)} s sichtbar`] : []),
   ...((nw4.goCoverage ?? nw3.goCoverage) !== undefined ? [`- Go-Testabdeckung: ${(nw4.goCoverage ?? nw3.goCoverage) ?? '?'} % (${(nw4.goTestFiles ?? nw3.goTestFiles) ?? '?'} Testdateien)`] : []),
-  `- \`make check\`: ${(nw4.makeCheckMs ?? nw3.makeCheckMs ?? nw2.makeCheckMs ?? nw1.makeCheckMs) ? `${((nw4.makeCheckMs ?? nw3.makeCheckMs ?? nw2.makeCheckMs ?? nw1.makeCheckMs) / 1000).toFixed(1)} s` : '–'}`,
+  `- \`make check\`: ${(nw5.makeCheckMs ?? nw4.makeCheckMs ?? nw3.makeCheckMs ?? nw2.makeCheckMs ?? nw1.makeCheckMs) ? `${((nw5.makeCheckMs ?? nw4.makeCheckMs ?? nw3.makeCheckMs ?? nw2.makeCheckMs ?? nw1.makeCheckMs) / 1000).toFixed(1)} s` : '–'}`,
   `- Bundle (dist/assets): ${nw1.bundleBytes ? `${(nw1.bundleBytes / 1024).toFixed(1)} KB` : '–'}`,
   '- Screenshots: `judge/screenshots/` (Optik-Bewertung offen)',
   '',

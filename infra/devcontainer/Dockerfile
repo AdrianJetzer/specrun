@@ -47,6 +47,16 @@ USER dev
 WORKDIR /home/dev
 ENV PATH="/home/dev/go/bin:/home/dev/.local/bin:${PATH}"
 
+# Go-Module für Level 4 vorhalten (modernc.org/sqlite samt Abhängigkeiten) und den Build-Cache füllen:
+# Builds funktionieren damit ohne Go-Proxy, der sporadisch mit 403 antwortet.
+ARG SQLITE_VERSION=v1.62.0
+RUN mkdir -p /tmp/vorrat && cd /tmp/vorrat \
+ && go mod init vorrat > /dev/null 2>&1 \
+ && printf 'package main\n\nimport _ "modernc.org/sqlite"\n\nfunc main() {}\n' > main.go \
+ && for i in 1 2 3 4 5; do go get "modernc.org/sqlite@${SQLITE_VERSION}" && go mod tidy && go build -o /dev/null . && break; echo "Versuch $i fehlgeschlagen, neuer Versuch"; sleep 5; done \
+ && go build -o /dev/null . \
+ && cd / && rm -rf /tmp/vorrat
+
 # Claude Code (CLI) mit dem offiziellen Installer
 RUN curl -fsSL https://claude.ai/install.sh | bash
 # Kein Volume: Der Zustand von Claude lebt nur in diesem Container (leer bei jedem Lauf).

@@ -51,4 +51,25 @@ for (const n of levels) {
   const ok = l.checks.filter((c) => c.ok).length;
   console.log(`Level ${n}: ${l.status}${l.checks.length ? ` (${ok}/${l.checks.length} Checks)` : ''}`);
 }
-process.exit(failedAt === null ? 0 : 1);
+
+// Ab Level 5 (REPORT_API=1): jedes geprüfte Level aufsteigend ans Backend melden, nach dem ersten Fehlschlag aufhören.
+let apiOk = true;
+if (process.env.REPORT_API === '1') {
+  const api = process.env.API_URL ?? 'http://127.0.0.1:8081';
+  for (const n of levels) {
+    const e = byLevel.get(n);
+    const res = await fetch(`${api}/api/levels/${n}/result`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ checks: e.checks, durationMs: Math.round(e.durationMs) }),
+    }).catch((err) => ({ ok: false, status: 0, text: async () => String(err) }));
+    if (!res.ok) {
+      console.log(`Meldung an das Backend für Level ${n} fehlgeschlagen: ${res.status} ${await res.text()}`);
+      apiOk = false;
+      break;
+    }
+    console.log(`Level ${n} an das Backend gemeldet`);
+    if (!e.checks.every((c) => c.ok)) break;
+  }
+}
+process.exit(failedAt === null && apiOk ? 0 : 1);

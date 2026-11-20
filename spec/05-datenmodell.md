@@ -55,7 +55,35 @@ Die Prüfung ist **streng**: Jede Abweichung vom Schema macht die ganze Datei un
 - doppelten oder fehlenden Nummern,
 - Zeitangaben, die `Date.parse` nicht lesen kann.
 
-Im Zustand `loading`, `missing` und `invalid` zeigt die Seite den Leerzustand: `run.id` und `run.version` als „–“, `updatedAt` als „–“, alle 10 Levels `offen`.
+Im Zustand `loading`, `missing`, `invalid` und `unavailable` zeigt die Seite den Leerzustand: `run.id` und `run.version` als „–“, `updatedAt` als „–“, alle 10 Levels `offen`.
+
+## Datenquelle: `config.json` (ab Level 5)
+- `frontend/public/config.json` enthält `{"source":"file"}` (mit Zeilenumbruch) und gehört damit zu jedem Build. Die Prüfsuite verändert die Datei nie.
+- `make level5` überschreibt nach dem Build **`frontend/dist/config.json`** mit `{"source":"api"}`.
+- Die Seite lädt **vor allem anderen** `fetch('/config.json', { cache: 'no-store' })`:
+  - `source` ist `"api"` → **API-Modus**
+  - sonst, oder bei Fehler, 404, HTML oder ungültigem JSON → **Datei-Modus**
+- **Datei-Modus:** unverändert wie oben (`/results.json`, einmalig).
+- **API-Modus:** `fetch('/api/levels', { cache: 'no-store' })` über dieselbe Adresse wie die Seite, danach **alle 5000 ms** erneut. Der nächste Abruf startet 5000 ms nach dem Ende des vorigen. Ladezustand:
+
+  | Fall | Zustand |
+  |---|---|
+  | Anfrage läuft (nur beim ersten Mal) | `loading` |
+  | Netzwerkfehler, HTTP-Status außerhalb 2xx, oder Antwort mit `Content-Type` `text/html` | `unavailable` |
+  | JSON nicht lesbar oder Schema verletzt (gleiche strenge Prüfung wie oben) | `invalid` |
+  | gültige Daten | `ok` |
+
+  - Bei `unavailable` zeigt die Seite **keine** veralteten Daten, sondern den Leerzustand.
+  - Ist das Backend wieder erreichbar, wechselt der nächste Abruf zurück zu `ok`.
+
+## Melden an das Backend (ab Level 5)
+`write-results.mjs` meldet zusätzlich ans Backend, wenn die Umgebungsvariable `REPORT_API=1` gesetzt ist. `make check` setzt sie ab Level 5. Ablauf:
+1. Zuerst wie oben `frontend/dist/results.json` schreiben und die Zeilen `Level <n>: …` ausgeben.
+2. Dann für die angegebenen Levels **aufsteigend** je `POST <API_URL>/api/levels/<n>/result` mit `{"checks": [...], "durationMs": <dauer>}`. `API_URL` ist Standard `http://127.0.0.1:8081`; die Checks und die Dauer sind dieselben wie in `results.json`.
+3. Nach jeder erfolgreichen Meldung die Zeile `Level <n> an das Backend gemeldet` ausgeben.
+4. Nach einem Level mit nicht bestandenem Check **aufhören**, weil höhere Meldungen ohnehin 409 ergäben.
+5. Antwortet das Backend nicht mit 200, die Zeile `Meldung an das Backend für Level <n> fehlgeschlagen: <status> <text>` ausgeben und aufhören.
+6. Exit-Code 0 nur, wenn kein Level fehlgeschlagen ist **und** alle Meldungen angenommen wurden.
 
 ## Ergebnis schreiben: `checks/write-results.mjs`
 Aufruf: `node write-results.mjs <level> [<level> …]`, z. B. `node write-results.mjs 1 2`. Ablauf:

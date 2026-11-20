@@ -22,6 +22,8 @@ Alle relativen Pfade in der Datei beziehen sich auf den Projektordner. Die Datei
 - kein `user`-Eintrag
 - nginx läuft als Hintergrundprozess (Standard, kein `daemon off`)
 
+Ab Spec 0.5.0 bekommt `/config.json` wie `/results.json` den Header `Cache-Control: no-store` (eigener `location = /config.json`-Block).
+
 Verhalten, das geprüft wird (Header-Werte **exakt**):
 
 | Anfrage | Erwartung |

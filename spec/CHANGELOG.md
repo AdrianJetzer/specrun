@@ -1,5 +1,10 @@
 # Spec-Changelog
 
+## 0.5.0 – 2026-11-20
+- Neu: **Level 5** (Frontend + Backend): `levels/level-05.md`; `config.json` legt die Datenquelle fest (Datei bzw. Backend); im API-Modus Abfrage alle 5 s; Zustand `unavailable` mit Hinweis; Quelle in der Kopfzeile (`run-source`); `nginx-api.conf` mit Weiterleitung `/api/` (inkl. `charset off`); `make level5`, `make stop-backend`; `write-results.mjs` meldet ab Level 5 auch an die API; 5 neue Checks.
+- 02/03: `/config.json` ohne Cache auch in `nginx.conf`.
+- 02: Der Go-Modul-Cache im Container enthält `modernc.org/sqlite` v1.62.0 samt Abhängigkeiten, Builds klappen damit auch ohne Go-Proxy.
+
 ## 0.4.0 – 2026-11-20
 - Neu: **Level 4** (Datenbank): `levels/level-04.md`, SQLite-Datei `.run/levelboard.db`, exaktes Schema mit Migration (`05-datenmodell.md`), Historie `GET /api/levels/{n}/history`, `make level4` und `make restart-backend`, 5 neue Checks.
 - Erste Abhängigkeit: `modernc.org/sqlite` v1.62.0 (reines Go). Vorgaben gegen SQLite-Fallen: eine Verbindung, WAL, busy_timeout, Meldung in einer Transaktion.

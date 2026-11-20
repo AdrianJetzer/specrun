@@ -37,13 +37,13 @@ Dazu `color-scheme: dark` auf `:root`.
 <div class="app" data-testid="board" data-state="…">
   <header class="header"> … </header>
   <main class="main">
-    [Hinweis]       – nur bei data-state missing/invalid
+    [Hinweis]       – nur bei data-state missing/invalid/unavailable
     [Zusammenfassung]
     [Raster mit 10 Karten]
   </main>
 </div>
 ```
-`data-state` am Wurzelelement ist einer der Ladezustände `loading`, `ok`, `missing` oder `invalid` (siehe `05-datenmodell.md`).
+`data-state` am Wurzelelement ist einer der Ladezustände `loading`, `ok`, `missing`, `invalid` oder `unavailable` (siehe `05-datenmodell.md`).
 
 `main`: max. 1200 px breit, horizontal zentriert, Innenabstand 24 px, Spalten-Flexbox mit 24 px Abstand.
 
@@ -53,17 +53,19 @@ Dazu `color-scheme: dark` auf `:root`.
 - **Links (Marke):** Flexbox mit 12 px Abstand.
   - Zeichen `▮▮▮` (`aria-hidden`) in `--st-bestanden`, 12 px, `letter-spacing: -2px`.
   - Daneben „Levelboard“, 16 px, Gewicht 600, `letter-spacing: 0.01em`.
-- **Rechts:** eine `<dl>` mit zwei Paaren, 24 px Abstand. Jedes Paar ist eine Flexbox mit Grundlinien-Ausrichtung und 8 px Abstand.
-  - `<dt>` „Durchlauf“ und „Version“: 12 px, `--muted`.
-  - `<dd>` mit `run.id` bzw. `run.version`: Schrift `--mono`, 13 px.
+- **Rechts:** eine `<dl>` mit drei Paaren, 24 px Abstand. Jedes Paar ist eine Flexbox mit Grundlinien-Ausrichtung und 8 px Abstand.
+  - `<dt>` „Durchlauf“, „Version“ und „Quelle“: 12 px, `--muted`.
+  - `<dd>` mit `run.id`, `run.version` bzw. der Quelle: Schrift `--mono`, 13 px.
+  - Quelle (ab Spec 0.5.0): „Datei“ im Datei-Modus, „Backend“ im API-Modus, „–“ solange `config.json` noch nicht geladen ist. Das `<dd>` hat `data-testid="run-source"` und `data-source="file"`, `"api"` bzw. leer.
 
-## Hinweis (nur bei `missing` und `invalid`)
+## Hinweis (nur bei `missing`, `invalid` und `unavailable`)
 - `role="alert"`, Flexbox, vertikal zentriert, 12 px Abstand, Innenabstand 12 / 16 px.
 - 1 px Rahmen `--st-fehlgeschlagen`, Radius 8, Hintergrund `rgba(240, 82, 79, 0.08)`.
 - Links ein runder Kreis, 20 × 20 px, Hintergrund `--st-fehlgeschlagen`, darin „!“ in `--bg`, fett, 12 px, `aria-hidden`.
 - Texte (wörtlich):
   - `missing`: „Keine Ergebnisse gefunden. Die Datei results.json fehlt.“
-  - `invalid`: „Die Ergebnisdatei ist ungültig. Es werden keine Ergebnisse angezeigt.“
+  - `invalid`: „Die Ergebnisdatei ist ungültig. Es werden keine Ergebnisse angezeigt.“ (auch im API-Modus)
+  - `unavailable`: „Backend nicht erreichbar. Neuer Versuch alle 5 Sekunden.“
 
 ## Zusammenfassung
 - `<section aria-label="Zusammenfassung">`.
@@ -107,7 +109,7 @@ Dazu `color-scheme: dark` auf `:root`.
 |---|---|
 | ab 1200 px | 5 Spalten |
 | 640–1199 px | Raster mit 2 Spalten |
-| unter 640 px | Raster mit 1 Spalte und 12 px Abstand; `main` mit 16 px Innenabstand und 16 px Abstand; Kopfzeile mit 0 / 16 px Innenabstand und 16 px Abstand zwischen den Paaren; die `<dt>` der Kopfzeile ausgeblendet; Zusammenfassung untereinander (Spalte, gestreckt) mit 16 px Abstand und 16 px Innenabstand |
+| unter 640 px | Raster mit 1 Spalte und 12 px Abstand; `main` mit 16 px Innenabstand und 16 px Abstand; Kopfzeile mit 0 / 16 px Innenabstand und 16 px Abstand zwischen den Paaren; die `<dt>` der Kopfzeile ausgeblendet; das Paar „Quelle“ ganz ausgeblendet (das `<dd>` bleibt im DOM); Zusammenfassung untereinander (Spalte, gestreckt) mit 16 px Abstand und 16 px Innenabstand |
 
 Bei 375 px Breite darf es kein horizontales Scrollen geben.
 
@@ -117,6 +119,7 @@ Bei 375 px Breite darf es kein horizontales Scrollen geben.
 | `board` | Wurzelelement, mit `data-state` |
 | `run-id` | `<dd>` mit der Durchlauf-ID |
 | `run-version` | `<dd>` mit der Version |
+| `run-source` | `<dd>` mit der Quelle, mit `data-source` (ab Level 5) |
 | `notice` | Hinweis, mit `data-kind="missing"` bzw. `"invalid"` |
 | `summary-reached` | Element mit dem Wert „<n> / 10“ (Textinhalt z. B. `2 / 10`) |
 | `summary-progress` | Fortschrittsbalken |

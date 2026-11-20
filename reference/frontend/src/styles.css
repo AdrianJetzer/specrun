@@ -318,6 +318,10 @@ dd {
     display: none;
   }
 
+  .run-source {
+    display: none !important;
+  }
+
   .main {
     padding: 16px;
     gap: 16px;

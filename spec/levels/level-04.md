@@ -44,7 +44,7 @@ Außerdem: `checks/playwright.config.ts` bekommt `workers: 1`. Die Testdateien l
 2. `make check` → Level 1 (5/5), 2 (7/7), 3 (8/8) und 4 (5/5) bestanden, Exit-Code 0.
 3. `make restart-backend` → das Backend läuft wieder, die Daten sind erhalten.
 4. `make level4` erneut → wieder der Startzustand.
-5. Am Ende `make level4` und `make check`, dann alles laufen lassen.
+5. Wenn es weitere Levels gibt, mit dem nächsten Level weitermachen; was am Ende laufen soll, steht in `00-start.md`.
 
 ## Bestanden, wenn (Prüfer)
 1. Level 1–3 sind bestanden.

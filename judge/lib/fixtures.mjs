@@ -95,3 +95,11 @@ export const DB_SCHEMA = {
   reports: [['id', 'INTEGER', 0, 1], ['level', 'INTEGER', 1, 0], ['status', 'TEXT', 1, 0], ['checked_at', 'TEXT', 1, 0], ['duration_ms', 'INTEGER', 1, 0], ['checks', 'TEXT', 1, 0], ['metrics', 'TEXT', 1, 0]],
   meta: [['key', 'TEXT', 0, 1], ['value', 'TEXT', 0, 0]],
 };
+
+export const LEVEL5_CHECKS = [
+  'Seite liest aus dem Backend',
+  'nginx leitet /api/ an das Backend weiter',
+  'Gemeldetes Ergebnis erscheint ohne Neuladen',
+  'Backend-Ausfall wird angezeigt',
+  'Meldungen über nginx landen in der Historie',
+];

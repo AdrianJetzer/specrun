@@ -6,7 +6,7 @@ Specrun ist ein Experiment. Eine frische Claude-Code-Session erhält ausschließ
 
 Die gebaute App, das **Levelboard**, ist zugleich die Anzeigetafel für die Leistung des Agenten: Sie zeigt, welche Levels er geschafft hat. Ein **unabhängiger Prüfer**, den der Agent nicht sieht, misst anschließend nach. Nur sein Urteil zählt.
 
-> **Stand:** Levels 1–4 sind umgesetzt (Spec v0.4.0, Referenz, Prüfer, Dev Container). Echte Nachbauten haben Level 1 (Lauf 001) und Level 2 (Lauf 003) laut unabhängigem Prüfer bestanden; der Nachbau-Test für die Levels 1–4 steht aus.
+> **Stand:** Levels 1–5 sind umgesetzt (Spec v0.5.0, Referenz, Prüfer, Dev Container). Echte Nachbauten haben Level 1 (Lauf 001) und Level 2 (Lauf 003) laut unabhängigem Prüfer bestanden; Lauf 005 (Levels 1–4) ist gebaut, aber noch nicht geprüft.
 
 ## Die 10 Levels
 
@@ -16,7 +16,7 @@ Die gebaute App, das **Levelboard**, ist zugleich die Anzeigetafel für die Leis
 | 2 | Webserver | lokal installiertes nginx liefert die Seite aus |
 | 3 | REST-Backend | Go-Service mit `/api/levels` |
 | 4 | Datenbank | SQLite-Datei mit Historie, übersteht Neustarts des Backends |
-| 5 | Frontend + Backend | Seite liest Ergebnisse von der API |
+| 5 | Frontend + Backend | Live-Dashboard: Seite liest alle 5 s aus dem Backend, nginx leitet /api/ weiter |
 | 6 | Repo + CI | GitHub-Repo, Pipeline baut und testet Levels 1–5 |
 | 7 | Images in der Pipeline | Images nur in der Pipeline gebaut, im Runner getestet, in die GHCR gepusht |
 | 8 | Deployment | Auslieferung auf einen eigenen Server per SSH |

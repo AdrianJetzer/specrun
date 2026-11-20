@@ -760,3 +760,79 @@ Der Pfad der Datenbank kommt über die Umgebungsvariable `LEVELBOARD_DB` (Standa
 2. Spec v0.4.0 schreiben.
 3. Prüfer für Level 4 bauen, mit Gegenprobe.
 4. Nachbau-Test bis Level 4 (Lauf 004 neu).
+
+---
+
+## 18. Level 5 im Detail – „Frontend + Backend“
+
+**Status (2026-11-20):** gebaut. Erledigt sind:
+- Referenz (Live-Dashboard, `nginx-api.conf`, Meldung an die API)
+- Spec v0.5.0
+- Prüfer `judge/level5.mjs` mit Browser
+
+Die Referenz erreicht im Container Level 5 (Score 50); die Live-Anzeige reagiert nach rund 5 s. Die Gegenprobe (keine Abfrage, alte Daten bei Ausfall, fehlendes `charset off`) wird vollständig erkannt.
+
+**Funde beim Bauen:**
+- nginx hängt wegen `charset_types` an weitergeleitete JSON-Antworten `; charset=utf-8` an. Abhilfe ist `charset off` im Block `/api/`; das steht jetzt in der Spec.
+- Der Go-Proxy lieferte erneut `403` und ließ einen Prüferlauf scheitern. Entschieden: Die Go-Module (`modernc.org/sqlite` v1.62.0 samt Abhängigkeiten) liegen jetzt **im Image**. Builds laufen damit ohne Proxy, Agent und Prüfer sind nicht mehr vom Netz abhängig.
+- Im Prüfer war ein eigener Fehler: Meldungen ohne Body. Er prüft jetzt, dass seine eigenen Meldungen angenommen werden.
+
+Noch offen ist die **Prüfung von Lauf 005** (Nachbau der Levels 1–4 mit Spec 0.4.0). Der Lauf ist durchgelaufen, aber noch nicht geprüft.
+
+### Entscheidungen
+| Thema | Entscheidung |
+|---|---|
+| Datenquelle | **feste Einstellung** über `config.json` im Build: `{"source":"file"}` (Level 1–4) bzw. `{"source":"api"}` (Level 5). Fällt das Backend aus, zeigt die Seite einen Hinweis, nicht still alte Daten |
+| Aktualisierung | im API-Modus **alle 5 Sekunden** `/api/levels` abfragen, also ein Live-Dashboard. Im Datei-Modus wie bisher einmalig |
+| Melden | `make check` schreibt **weiter `results.json`** und meldet ab Level 5 **zusätzlich** jedes geprüfte Level per `POST` ans Backend (aufsteigend, Abbruch nach dem ersten Fehlschlag) |
+| nginx | **eigene Datei** `frontend/nginx-api.conf` = Regeln aus Level 2 plus `location /api/` → `127.0.0.1:8081`. `nginx.conf` bleibt für Level 2–4 unverändert |
+
+### Frontend
+- `public/config.json` mit `{"source":"file"}` gehört zum Build. `make level5` überschreibt `dist/config.json` mit `{"source":"api"}`.
+- Beim Start lädt die Seite `/config.json` (`no-store`). Fehlt die Datei oder ist sie ungültig, gilt `file`.
+- **Datei-Modus:** unverändert wie in Level 1–4.
+- **API-Modus:** `GET /api/levels` über dieselbe Adresse (Port 8080, nginx leitet weiter), danach alle 5 s erneut.
+  - Antwort gültig → Anzeige wie bisher (`data-state="ok"`).
+  - Netzwerkfehler, 5xx oder HTML statt JSON → `data-state="unavailable"`, Hinweis „Backend nicht erreichbar. Neuer Versuch alle 5 Sekunden.“ und Leerzustand (alle offen). Keine veralteten Daten.
+  - Daten verletzen das Schema → `invalid` wie bisher.
+  - Ist das Backend wieder da, verschwindet der Hinweis beim nächsten Abruf.
+- In der Kopfzeile steht zusätzlich die **Quelle**: „Quelle: Datei“ bzw. „Quelle: Backend“ (`data-testid="run-source"`, `data-source="file|api"`).
+
+### nginx (`frontend/nginx-api.conf`)
+- Alle Regeln aus Level 2 bleiben: Cache, 404, gzip, `server_tokens off`.
+- `location /api/` → `proxy_pass http://127.0.0.1:8081`. Statuscodes, JSON und Header des Backends werden durchgereicht. Bei `/api/` kommt also auch ein 404 als JSON vom Backend.
+- `Cache-Control: no-store` für `/api/` und für `/config.json` (`/config.json` auch in `nginx.conf`).
+
+### Makefile ab Level 5
+| Befehl | Wirkung |
+|---|---|
+| `make level5` | wie `make level4`, aber nginx mit `frontend/nginx-api.conf`. Schreibt `{"source":"api"}` nach `frontend/dist/config.json` und `5` nach `.run/level` |
+| `make stop-backend` | **jetzt öffentlich**: beendet nur das Backend (für den Prüfer: Ausfall nachstellen) |
+| `make check` | prüft die Levels 1–N. Ab Level 5 meldet `write-results.mjs` zusätzlich an `API_URL` |
+
+### Prüfsuite des Agenten (neue Checks für Level 5, Entwurf)
+- Seite liest aus dem Backend
+- nginx leitet /api/ an das Backend weiter
+- Gemeldetes Ergebnis erscheint ohne Neuladen
+- Backend-Ausfall wird angezeigt (Ausfall in Playwright durch Abfangen der Anfrage nachgestellt; das echte Backend läuft weiter)
+- Ergebnisse werden ans Backend gemeldet (nach dem Lauf von `write-results.mjs` nicht prüfbar, deshalb als Probe-Meldung über die Weiterleitung)
+
+### Prüfer für Level 5
+1. Die Levels 1–4 müssen bestanden sein. Damit ist auch der Datei-Modus weiter geprüft.
+2. `make level5`: 8080 und 8081 antworten, `/config.json` liefert `{"source":"api"}`, die Kopfzeile zeigt „Quelle: Backend“.
+3. **Weiterleitung:** `/api/health`, `/api/levels` und Fehlerfälle über 8080 sind identisch zum direkten Aufruf (Status, JSON, `Content-Type`). Die Regeln aus Level 2 gelten mit `nginx-api.conf` weiterhin.
+4. **Live-Anzeige:** Der Prüfer meldet eigene Ergebnisse (bestanden, fehlgeschlagen, gesperrt). Die Seite zeigt sie **ohne Neuladen** innerhalb von 7 s richtig an.
+5. **Ausfall:** Nach `make stop-backend` erscheint innerhalb von 7 s der Hinweis samt Leerzustand. Nach `make restart-backend` sind die Daten wieder da und der Hinweis ist weg.
+6. **`make check`:** Exit 0. `results.json` **und** `/api/levels` melden die Levels 1–5 als bestanden, mit den Checks wörtlich wie in der Spec. Die Historie enthält die Meldungen.
+7. `public/results.json` und `public/config.json` sind unverändert. `make down` gibt die Ports frei.
+
+### Auswirkungen auf die Spec (v0.5.0)
+- `05-datenmodell.md`: `config.json`, Ladezustände im API-Modus, Melden an die API.
+- `06-design.md`: Quelle in der Kopfzeile, Hinweis „Backend nicht erreichbar“, `data-testid` `run-source`.
+- `03-architektur.md`: `make level5`, `make stop-backend`, `nginx-api.conf`.
+- `levels/level-05.md` kommt neu dazu.
+
+### Nächster Schritt (erst auf dein Go)
+1. Referenz für Level 5 bauen.
+2. Spec v0.5.0 schreiben.
+3. Prüfer für Level 5 bauen, mit Gegenprobe.
