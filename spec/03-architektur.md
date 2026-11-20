@@ -3,7 +3,7 @@
 ## Projektstruktur (im Arbeitsverzeichnis)
 ```
 Makefile
-.gitignore                 – node_modules/, dist/, .run/, .out/, test-results/
+.gitignore                 – node_modules/, dist/, .run/, .out/, test-results/, *.tsbuildinfo, backend/bin/
 frontend/
   package.json
   package-lock.json        – durch npm install erzeugt, wird von npm ci benötigt
@@ -24,7 +24,11 @@ checks/
   playwright.config.ts
   tests/level1.spec.ts
   tests/level2.spec.ts     – ab Level 2
+  tests/level3.spec.ts     – ab Level 3
   write-results.mjs
+backend/                   – ab Level 3: Go-Modul (siehe levels/level-03.md)
+  go.mod
+  *.go, *_test.go
 ```
 
 ## Frontend
@@ -120,10 +124,12 @@ Der Prüfer nutzt ausschließlich diese Befehle. Sie müssen aus dem Arbeitsverz
 |---|---|
 | `make level1` | ruft zuerst `make down` auf. Dann in `frontend/`: `npm ci`, `npm run build`. Danach startet es `vite preview` **im Hintergrund**: Prozessnummer in `.run/frontend.pid`, Ausgabe in `.run/frontend.log`, stdin von `/dev/null`. Es schreibt `1` in die Datei `.run/level`. Es wartet höchstens 60 s, bis `http://127.0.0.1:8080/` antwortet, und gibt dann `Levelboard läuft auf http://127.0.0.1:8080` aus. Antwortet der Port nicht, gibt es die Logs aus `.run/` aus und endet mit Fehlercode. Der Befehl kehrt zurück, während die Seite weiterläuft. |
 | `make level2` | ruft zuerst `make down` auf, baut das Frontend wie `level1` und startet dann nginx aus dem Projektordner mit `nginx -p "$(CURDIR)/" -e .run/nginx-error.log -c frontend/nginx.conf`. Vorher legt es `.run/nginx-tmp/` an. nginx schreibt seine Prozessnummer selbst nach `.run/nginx.pid`. Es schreibt `2` nach `.run/level` und wartet wie `level1` auf Port 8080 (gleiche Meldung). |
-| `make check` | prüft **alle Levels von 1 bis zum zuletzt gestarteten** (Wert aus `.run/level`; fehlt die Datei: das höchste gebaute Level, derzeit 2). Es installiert die Abhängigkeiten in `checks/`, falls `node_modules` fehlt (`npm ci`), und führt `npx playwright install chromium` aus. Dann lässt es genau die Dateien `tests/level1.spec.ts` … `tests/level<N>.spec.ts` mit `BASE_URL=$(URL)` laufen (Make-Variable `URL`, Standard `http://127.0.0.1:8080`). Danach führt es **immer** `node write-results.mjs 1 … N` aus, auch wenn Tests fehlschlagen. Der Exit-Code ist 0 genau dann, wenn alle Checks bestanden sind. |
-| `make down` | beendet die Prozesse aus `.run/frontend.pid` und `.run/nginx.pid`, falls vorhanden, und löscht beide PID-Dateien sowie `.run/level`. Ohne laufenden Prozess ist es ohne Fehler. |
+| `make check` | prüft **alle Levels von 1 bis zum zuletzt gestarteten** (Wert aus `.run/level`; fehlt die Datei: das höchste gebaute Level, derzeit 3). Es installiert die Abhängigkeiten in `checks/`, falls `node_modules` fehlt (`npm ci`), und führt `npx playwright install chromium` aus. Dann lässt es genau die Dateien `tests/level1.spec.ts` … `tests/level<N>.spec.ts` mit `BASE_URL=$(URL)` laufen (Make-Variable `URL`, Standard `http://127.0.0.1:8080`). Ab Level 3 setzt es zusätzlich `API_URL=$(API_URL)` (Standard `http://127.0.0.1:8081`). Danach führt es **immer** `node write-results.mjs 1 … N` aus, auch wenn Tests fehlschlagen. Der Exit-Code ist 0 genau dann, wenn alle Checks bestanden sind. |
+| `make level3` | wie `make level2` (inklusive `make down` und Frontend-Build). Zusätzlich baut es das Backend mit `go build -o bin/levelboard-backend .` in `backend/` und startet es im Hintergrund: Prozessnummer in `.run/backend.pid`, Ausgabe in `.run/backend.log`, stdin von `/dev/null`. Es schreibt `3` nach `.run/level` und wartet höchstens 60 s auf `http://127.0.0.1:8080/` und `http://127.0.0.1:8081/api/health`. Danach gibt es die Zeilen `Levelboard läuft auf http://127.0.0.1:8080` und `Backend läuft auf http://127.0.0.1:8081` aus. |
+| `make down` | beendet die Prozesse aus `.run/frontend.pid`, `.run/nginx.pid` und `.run/backend.pid`, falls vorhanden, und löscht die PID-Dateien sowie `.run/level`. Ohne laufenden Prozess ist es ohne Fehler. |
 
 ## Ports
 | Port | Dienst |
 |---|---|
-| 8080 | Levelboard-Seite, nur auf `127.0.0.1` (Level 1: `vite preview`, Level 2: nginx) |
+| 8080 | Levelboard-Seite, nur auf `127.0.0.1` (Level 1: `vite preview`, ab Level 2: nginx) |
+| 8081 | Backend (REST-API), nur auf `127.0.0.1`, ab Level 3 |

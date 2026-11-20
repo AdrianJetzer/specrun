@@ -80,12 +80,15 @@ for (const r of levelResults) {
 
 const nw1 = levelResults[0]?.nebenwerte ?? {};
 const nw2 = levelResults[1]?.nebenwerte ?? {};
+const nw3 = levelResults[2]?.nebenwerte ?? {};
 lines.push(
   '## Nebenwerte',
   '',
   `- \`make level1\`: ${nw1.makeLevel1Ms ? `${(nw1.makeLevel1Ms / 1000).toFixed(1)} s` : '–'}`,
   ...(nw2.makeLevel2Ms ? [`- \`make level2\`: ${(nw2.makeLevel2Ms / 1000).toFixed(1)} s`] : []),
-  `- \`make check\`: ${(nw2.makeCheckMs ?? nw1.makeCheckMs) ? `${((nw2.makeCheckMs ?? nw1.makeCheckMs) / 1000).toFixed(1)} s` : '–'}`,
+  ...(nw3.makeLevel3Ms ? [`- \`make level3\`: ${(nw3.makeLevel3Ms / 1000).toFixed(1)} s`] : []),
+  ...(nw3.goCoverage !== undefined ? [`- Go-Testabdeckung: ${nw3.goCoverage ?? '?'} % (${nw3.goTestFiles ?? '?'} Testdateien)`] : []),
+  `- \`make check\`: ${(nw3.makeCheckMs ?? nw2.makeCheckMs ?? nw1.makeCheckMs) ? `${((nw3.makeCheckMs ?? nw2.makeCheckMs ?? nw1.makeCheckMs) / 1000).toFixed(1)} s` : '–'}`,
   `- Bundle (dist/assets): ${nw1.bundleBytes ? `${(nw1.bundleBytes / 1024).toFixed(1)} KB` : '–'}`,
   '- Screenshots: `judge/screenshots/` (Optik-Bewertung offen)',
   '',

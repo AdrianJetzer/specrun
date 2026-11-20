@@ -1,5 +1,11 @@
 # Spec-Changelog
 
+## 0.3.0 – 2026-11-20
+- Neu: **Level 3** (REST-Backend in Go): `levels/level-03.md`, `04-api.md`, `openapi.yaml`, `make level3`, Port 8081, 8 neue Checks.
+- Das Backend setzt die Regeln beim Melden selbst durch (Status, Zeitpunkt, Sperren, 409 bei falscher Reihenfolge).
+- Go-Tests sind Pflicht und laufen als Check in `make check`.
+- 03: `.gitignore` zusätzlich `*.tsbuildinfo` (Lücke aus Lauf 003) und `backend/bin/`.
+
 ## 0.2.1 – 2026-11-20
 - 02: Der Arbeitsordner `/workspace` enthält zu Beginn nur `spec/`; die Container-Konfiguration liegt außerhalb (neuer Laufordner-Aufbau `env/` + `work/`).
 

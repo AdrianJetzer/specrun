@@ -56,7 +56,7 @@ Wegen des echten 404 zeigt die Seite bei fehlender `results.json` den Hinweis �
 3. Seite neu laden → Level 1 und 2 „Bestanden“, Erreichtes Level `2 / 10`.
 4. `make level1` und danach `make check` → nur Level 1 wird geprüft, Level 2 bleibt „Offen“.
 5. `make down` → weder `vite preview` noch nginx laufen noch.
-6. Am Ende `make level2` und `make check` ausführen und die Seite laufen lassen.
+6. Wenn es weitere Levels gibt, mit dem nächsten Level weitermachen; was am Ende laufen soll, steht in `00-start.md`.
 
 ## Bestanden, wenn (Prüfer)
 1. Level 1 ist bestanden.

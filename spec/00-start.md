@@ -1,6 +1,6 @@
 # 00 – Start
 
-**Spec-Version:** 0.2.1 (umfasst Level 1–2)
+**Spec-Version:** 0.3.0 (umfasst Level 1–3)
 
 Du baust das **Levelboard**: eine Web-App, die zeigt, wie weit ein Coding-Agent auf einem Pfad aus 10 Levels gekommen ist, und die sich dabei selbst misst. Du bist dieser Agent.
 
@@ -10,12 +10,13 @@ Du baust das **Levelboard**: eine Web-App, die zeigt, wie weit ein Coding-Agent 
    2. `01-produkt.md` – was das Levelboard ist
    3. `02-startausruestung.md` – welche Werkzeuge vorhanden sind
    4. `03-architektur.md` – Projektstruktur, Befehle, Ports
-   5. `05-datenmodell.md` und `results.schema.json` – Datenformat
-   6. `06-design.md` – Aussehen, Texte, `data-testid`s
-   7. `levels/` – eine Datei pro Level, in aufsteigender Reihenfolge
+   5. `04-api.md` und `openapi.yaml` – REST-API (ab Level 3)
+   6. `05-datenmodell.md` und `results.schema.json` – Datenformat
+   7. `06-design.md` – Aussehen, Texte, `data-testid`s
+   8. `levels/` – eine Datei pro Level, in aufsteigender Reihenfolge
 2. Baue **alle Levels, für die es eine Datei in `levels/` gibt**, eines nach dem anderen.
 3. Prüfe jedes Level mit deiner eigenen Prüfsuite (`make check`), bevor du zum nächsten gehst.
-4. Lass am Ende die Seite des **höchsten** gebauten Levels laufen (ab Level 2: `make level2`) und führe danach einmal `make check` aus.
+4. Lass am Ende die Seite des **höchsten** gebauten Levels laufen (z. B. `make level3`) und führe danach einmal `make check` aus.
 
 ## Regeln
 - **Keine Rückfragen.** Ist etwas nicht festgelegt, triff die einfachste, naheliegendste Entscheidung und arbeite weiter.

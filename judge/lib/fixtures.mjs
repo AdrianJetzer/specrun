@@ -69,3 +69,14 @@ export const LEVEL2_CHECKS = [
   'Antworten sind gzip-komprimiert',
   'Seite funktioniert über nginx',
 ];
+
+export const LEVEL3_CHECKS = [
+  'Backend antwortet auf /api/health',
+  'GET /api/levels liefert alle 10 Levels im Schema',
+  'Ergebnis melden setzt Status und Zeitpunkt',
+  'Fehlschlag sperrt höhere Levels',
+  'Falsche Reihenfolge ergibt 409',
+  'Ungültige Anfragen ergeben 400',
+  'Unbekanntes Level ergibt 404',
+  'Go-Tests bestehen',
+];

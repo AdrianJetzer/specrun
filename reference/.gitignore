@@ -3,3 +3,5 @@ dist/
 .run/
 .out/
 test-results/
+*.tsbuildinfo
+backend/bin/

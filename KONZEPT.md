@@ -551,3 +551,103 @@ Danach übernimmt `runner/uebernehmen.sh <lauf>` (auf dem Mac) das Ergebnis nach
 - keine persönlichen Pfade im Bericht
 
 Der frühere Weg über `runner/judge-run.sh` auf dem Mac ist entfernt.
+
+---
+
+## 16. Level 3 im Detail – „REST-Backend“
+
+**Status (2026-11-20):** gebaut. Erledigt sind:
+- Referenz (`reference/backend`, Go-Abdeckung 83,5 %; im Container grün)
+- Spec v0.3.0 mit `openapi.yaml` und `04-api.md`
+- Prüfer `judge/level3.mjs`; die Gegenprobe findet alle drei eingebauten Fehler
+
+Offen ist noch der Nachbau-Test bis Level 3.
+
+Zusätzlich zum Entwurf unten gibt es einen 8. Check: „Falsche Reihenfolge ergibt 409“.
+
+### Entscheidungen
+| Thema | Entscheidung |
+|---|---|
+| Logik | **Regeln im Backend**: Status aus den Checks, Zeitpunkt vom Server, Sperren höherer Levels. Die Regeln aus `write-results.mjs` gelten dort gleich |
+| Schnittstelle | **OpenAPI** (`spec/openapi.yaml`) als verbindlicher Vertrag, dazu `spec/04-api.md` mit Regeln und Beispielen |
+| Go-Tests | **Pflicht**: `make check` führt `go test ./...` aus; schlägt das fehl, scheitert Level 3. Die Abdeckung wird als Nebenwert gemessen |
+| `make level3` | startet **nginx (wie Level 2) und das Backend** |
+| Ergebnisse | `make check` schreibt **weiter in `results.json`**. Die Seite liest erst ab Level 5 von der API |
+
+### Backend
+- `backend/`, Go 1.27.4, **nur Standardbibliothek**: `go.mod` ohne `require`, Routing mit den Mustern von `net/http`, z. B. `GET /api/levels/{n}`.
+- Port **8081**, nur an `127.0.0.1` gebunden. Log nach `.run/backend.log`.
+- Daten **im Arbeitsspeicher**, abgesichert für gleichzeitige Zugriffe (Mutex).
+- **Startzustand:** wie `public/results.json`, also alle 10 Levels offen. `run.id` kommt aus `RUN_ID`, sonst `lokal`.
+- Ein Neustart setzt alles zurück.
+- Bei SIGTERM beendet sich das Backend sauber; `make down` nutzt das.
+
+### Endpunkte (Entwurf)
+| Methode | Pfad | Antwort |
+|---|---|---|
+| `GET` | `/api/health` | 200 `{"status":"ok","version":"<run.version>"}` |
+| `GET` | `/api/levels` | 200, exakt das Format von `results.json` (`results.schema.json`) |
+| `GET` | `/api/levels/{n}` | 200, ein Level-Objekt; 404 bei `n` außerhalb 1–10 oder keine Zahl |
+| `POST` | `/api/levels/{n}/result` | 200, der neue Gesamtstand (wie `GET /api/levels`) |
+
+**Body von `POST /api/levels/{n}/result`:** `{"checks":[{"name":"…","ok":true}], "durationMs": 1234, "metrics": {}}`
+- `checks`: mindestens 1, höchstens 100 Einträge, `name` nicht leer.
+- `durationMs`: ganze Zahl ≥ 0.
+- `metrics`: optional, ein Objekt.
+
+**Regeln beim Melden:**
+- `status` ist `bestanden`, wenn alle Checks ok sind, sonst `fehlgeschlagen`.
+- `checkedAt` und `run.updatedAt` setzt der Server.
+- Alle höheren Levels werden auf `offen` gesetzt, bei einem Fehlschlag auf `gesperrt`.
+- Liegt ein **niedrigeres Level nicht auf `bestanden`**, antwortet der Server mit **409** und ändert nichts. Die Reihenfolge 1 → 2 → 3 ist also Pflicht.
+
+**Fehler** (immer `{"error":"<Text>"}`, `Content-Type: application/json`):
+| Code | Fall |
+|---|---|
+| 400 | ungültiges JSON, fehlende oder falsche Felder |
+| 404 | unbekanntes Level oder unbekannter Pfad unter `/api/` |
+| 405 | falsche Methode, mit `Allow`-Header |
+| 409 | ein niedrigeres Level ist nicht bestanden |
+| 413 | Body größer als 64 KB |
+| 415 | `Content-Type` ist nicht `application/json` |
+
+### Makefile ab Level 3
+| Befehl | Wirkung |
+|---|---|
+| `make level3` | `make down`, Frontend bauen, nginx starten (wie Level 2), Backend bauen (`go build`) und im Hintergrund starten (`.run/backend.pid`), auf 8080 **und** 8081 warten; schreibt `3` nach `.run/level` |
+| `make check` | prüft die Levels 1 bis `.run/level`. Ab Level 3 läuft dazu `go test ./...` |
+| `make down` | stoppt zusätzlich das Backend |
+
+### Prüfsuite des Agenten (neue Checks für Level 3, Entwurf)
+- Backend antwortet auf `/api/health`
+- `GET /api/levels` liefert alle 10 Levels im Schema
+- Ergebnis melden setzt Status und Zeitpunkt
+- Fehlschlag sperrt höhere Levels
+- Ungültige Anfragen ergeben 400
+- Unbekanntes Level ergibt 404
+- Go-Tests bestehen
+
+### Prüfer für Level 3
+1. Level 1 und 2 müssen bestanden sein.
+2. `make level3`: Ports 8080 und 8081 antworten.
+3. Eigene API-Tests gegen die OpenAPI-Datei:
+   - jede Antwort gegen das Schema,
+   - alle Regeln und Fehlerfälle (400, 404, 405, 409, 413, 415),
+   - die Reihenfolge-Regel.
+4. **Gleichzeitige Meldungen**, z. B. 50 parallele POSTs: kein Absturz, ein konsistenter Endzustand.
+5. Neustart setzt zurück: nach `make down` und `make level3` ist alles wieder offen.
+6. `go.mod` ohne Abhängigkeiten, `go vet` sauber, eigenes `go test` grün. Die Abdeckung ist ein Nebenwert.
+7. `make check` meldet Level 1–3 bestanden, mit den Checks wörtlich wie in der Spec.
+8. `make down` beendet nginx und Backend; die Ports sind danach frei.
+
+### Auswirkungen auf die Spec (v0.3.0)
+- Neu sind `04-api.md`, `openapi.yaml` und `levels/level-03.md`.
+- `02`: Go wird ab jetzt genutzt.
+- `03`: `backend/`, `make level3`, Port 8081.
+- Korrekturen aus Lauf 003: `*.tsbuildinfo` in die `.gitignore`.
+
+### Nächster Schritt (erst auf dein Go)
+1. Referenz für Level 3 bauen.
+2. Spec v0.3.0 schreiben.
+3. Prüfer für Level 3 bauen, mit Gegenprobe.
+4. Nachbau-Test bis Level 3.

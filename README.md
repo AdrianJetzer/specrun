@@ -6,7 +6,7 @@ Specrun ist ein Experiment. Eine frische Claude-Code-Session erhält ausschließ
 
 Die gebaute App, das **Levelboard**, ist zugleich die Anzeigetafel für die Leistung des Agenten: Sie zeigt, welche Levels er geschafft hat. Ein **unabhängiger Prüfer**, den der Agent nicht sieht, misst anschließend nach. Nur sein Urteil zählt.
 
-> **Stand:** Levels 1 und 2 sind umgesetzt (Spec v0.2.0, Referenz, Prüfer, Dev Container). Der erste echte Nachbau hat Level 1 laut unabhängigem Prüfer bestanden; der Nachbau-Test für Level 2 steht aus.
+> **Stand:** Levels 1–3 sind umgesetzt (Spec v0.3.0, Referenz, Prüfer, Dev Container). Echte Nachbauten haben Level 1 (Lauf 001) und Level 2 (Lauf 003) laut unabhängigem Prüfer bestanden; der Nachbau-Test für Level 3 steht aus.
 
 ## Die 10 Levels
 

@@ -7,7 +7,7 @@ Du arbeitest in einem **Linux-Container** (Dev Container). Diese Werkzeuge sind 
 | Ubuntu | 24.04 LTS | arm64 oder amd64 |
 | Node.js | 26.13.0 | |
 | npm | 11.20.0 | |
-| Go | 1.27.4 | ab Level 3 |
+| Go | 1.27.4 | ab Level 3; ohne C-Compiler (kein `-race`, kein cgo) |
 | nginx | 1.31.9 (Mainline) | als Programm `nginx` im Pfad, läuft ohne root |
 | GNU Make | 4.3 | |
 | curl | 8.5 | |
