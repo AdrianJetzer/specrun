@@ -3,11 +3,21 @@
 import fs from 'node:fs';
 import path from 'node:path';
 
+// [Eingabe, Cache schreiben 5 min, 1 h, Cache lesen, Ausgabe] in USD pro Mio. Tokens
 const PREIS = {
   'claude-opus-5-5': [4, 5, 8, 0.2, 20],
   'claude-sonnet-5-5': [2, 2.5, 4, 0.1, 10],
   'claude-haiku-5-5': [0.1, 0.125, 0.2, 0.01, 0.5],
 };
+// Haiku 5.5 ab Spec 1.4.0: Anfragen mit Prompt über 100'000 Tokens (Eingabe + Cache) zahlen die höheren Preise
+const PREIS_LANG = { 'claude-haiku-5-5': { ab: 100_000, preis: [0.5, 0.625, 1, 0.05, 2.5] } };
+let preisstufen = true;
+/** Für Läufe vor Spec 1.4.0: Haiku immer zum Grundpreis rechnen (wie deren Spec es vorschrieb). */
+export function setzePreisstufen(an) { preisstufen = an; }
+export function hatPreisstufen(target) {
+  const v = specVersion(target);
+  return !v || v[0] > 1 || (v[0] === 1 && v[1] >= 4);
+}
 
 function dateien(d, acc = []) {
   if (!fs.existsSync(d)) return acc;
@@ -29,7 +39,8 @@ function summe(liste) {
     const v = [u.input_tokens ?? 0, w5, w1, u.cache_read_input_tokens ?? 0, u.output_tokens ?? 0];
     v.forEach((x, i) => { s[i] += x; });
     modelle.add(modell);
-    const p = PREIS[modell];
+    const lang = preisstufen ? PREIS_LANG[modell] : undefined;
+    const p = lang && v[0] + v[1] + v[2] + v[3] > lang.ab ? lang.preis : PREIS[modell];
     kosten += p ? v.reduce((a, x, i) => a + x * p[i], 0) / 1e6 : NaN;
   }
   const iso = (t) => (t === undefined ? null : new Date(t).toISOString());

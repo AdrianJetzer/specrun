@@ -1187,9 +1187,15 @@ Inkrementell gebaut: Die Referenz bekam nur die neuen Dateien, die laufende App 
 ## 26. Lauf 008: Haiku 5.5 erreicht 100 / 100 (Spec 1.2.0, 2026-11-21)
 - **Ergebnis laut unabhängigem Prüfer:** Score 100, alle 10 Levels bestanden. Keine Abweichung zwischen Selbst- und Fremdmessung, auch nicht bei den Tokens pro Level. Lasttest Agent/Prüfer: p95 68/66 ms, 0 Fehler.
 - **Aufwand:** 43 min Session, 94 Antworten, 132 Werkzeugaufrufe, 242’522 Ausgabe-Tokens. Level 1 dauerte 9:54 min und brauchte 62 % der Ausgabe; die Levels 6–10 dauerten zusammen ~29 min (Pipeline, Deploy, Warten).
-- **Kosten:** laut Tabelle 0,47 USD. Das ist zu tief, denn Haiku kostet bei Prompts über 100k Tokens das Fünffache, und der Lauf las im Schnitt ~300k Tokens pro Antwort aus dem Cache. Realistisch sind es ~2–2,50 USD. **Offen:** die Haiku-Preisstufe über 100k in die Preistabelle aufnehmen (pro Antwort nach Prompt-Größe).
+- **Kosten:** laut Tabelle 0,47 USD. Das ist zu tief, denn Haiku kostet bei Prompts über 100k Tokens das Fünffache, und der Lauf las im Schnitt ~300k Tokens pro Antwort aus dem Cache. Realistisch sind es ~2–2,50 USD. Erledigt mit Spec 1.4.0 (siehe unten).
 - **Funde im Prüfer (nicht beim Agenten):**
   - Der Prüfer für Level 6 kannte den Job `deploy` nicht (seit Level 8 nötig, nie mit allen Levels gegen die Referenz geprüft). Korrigiert.
   - `pruefen.sh` ließ Prozesse früherer Prüfungen im selben Container weiterlaufen, deren PID-Dateien beim Neuaufbau verloren gehen. Jetzt räumt es vor jeder Prüfung auf.
   - Zwei Prüfungen gleichzeitig im selben Container stören sich (gleicher Build-Ordner, gleiche Ports). Regel: immer nur eine.
   - **Lehre:** Bei jeder Prüfer-Änderung alle Levels gegen die Referenz laufen lassen, nicht nur die neuen.
+
+### Nachtrag: Haiku-Preisstufe (Spec 1.4.0, 2026-11-21)
+- **Quelle:** Anthropic-Preisseite. Haiku 5.5 bei Prompts über 100’000 Tokens: $0.50 Eingabe, $0.625 / $1 Cache schreiben (5 min / 1 h), $0.05 Cache lesen, $2.50 Ausgabe. Abgerechnet wird pro Anfrage, und zur Prompt-Länge zählen Eingabe, Cache-Schreiben und Cache-Lesen.
+- **Umsetzung:** in `collect-tokens.mjs` (Referenz) und `judge/lib/phasen.mjs` (Prüfer). Der Prüfer wendet die Stufe erst ab Spec 1.4.0 an; ältere Läufe werden nach ihrer eigenen Spec bewertet.
+- **Wirkung:** Lauf 008 (Haiku) kostet korrekt **2,27 USD** statt 0,47 USD. Lauf 007 (Sonnet, nur bis Level 7) bleibt bei 1,61 USD. Haiku ist für einen ganzen Lauf also nicht 20-mal billiger als Sonnet, weil der lange Kontext in die teure Stufe fällt.
+- **Fund (Umgebung):** Nach einem Neustart der Podman-Maschine dauerte jede DNS-Abfrage in Containern 2 Sekunden, weil der erste Namensserver nicht antwortete. Folgen: `make check` dauerte 5,4 statt 1,2 min, und der Darstellungstest von Level 10 lief in seine Zeitgrenze. Mit `--dns 1.1.1.1` ging es wieder normal. Das betrifft auch Agent- und Prüfer-Container. **Offen:** DNS fest in den Dev Containern setzen (`runArgs`) oder die Podman-Maschine neu aufsetzen.

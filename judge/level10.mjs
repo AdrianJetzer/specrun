@@ -10,7 +10,7 @@ import path from 'node:path';
 import { spawnSync } from 'node:child_process';
 import { fileURLToPath } from 'node:url';
 import { chromium } from '@playwright/test';
-import { phasenVerbrauch, hatBauzeit, ohneBauzeit } from './lib/phasen.mjs';
+import { phasenVerbrauch, hatBauzeit, ohneBauzeit, hatPreisstufen, setzePreisstufen } from './lib/phasen.mjs';
 import { LEVEL1_CHECKS, LEVEL2_CHECKS, LEVEL3_CHECKS, LEVEL4_CHECKS, LEVEL5_CHECKS, LEVEL6_CHECKS, LEVEL7_CHECKS, LEVEL8_CHECKS, LEVEL9_CHECKS, LEVEL10_CHECKS } from './lib/fixtures.mjs';
 
 const here = path.dirname(fileURLToPath(import.meta.url));
@@ -96,6 +96,8 @@ const bauzeit = (s) => (typeof s !== 'number' ? '–' : s < 60 ? `${s} s` : `${M
 const PROTOKOLL = process.env.SPECRUN_PROTOKOLL ?? '/lauf/protokoll';
 // Bauzeit erst ab Spec 1.3.0 (ältere Läufe werden nach ihrer eigenen Spec bewertet)
 const BAUZEIT = hatBauzeit(target);
+// Haiku-Preisstufe über 100k Tokens erst ab Spec 1.4.0
+setzePreisstufen(hatPreisstufen(target));
 
 console.log(`Prüfer Level 10 → ${target} (live ${LIVE})\n`);
 let snapshot = null;
