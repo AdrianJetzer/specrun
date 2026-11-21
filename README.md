@@ -6,7 +6,22 @@ Specrun ist ein Experiment. Eine frische Claude-Code-Session erhält ausschließ
 
 Die gebaute App, das **Levelboard**, ist zugleich die Anzeigetafel für die Leistung des Agenten: Sie zeigt, welche Levels er geschafft hat. Ein **unabhängiger Prüfer**, den der Agent nicht sieht, misst anschließend nach. Nur sein Urteil zählt.
 
-> **Stand:** Levels 1–7 sind umgesetzt (Referenz, Prüfer, Dev Container). Alle 10 Levels sind umgesetzt (Spec v1.2.0). Die Referenz ist auf einem Hetzner-Server live, prüft sich dort selbst samt Lasttest, zeigt einen Abschlussbericht und erreicht laut Prüfer **Level 10 (Score 100)**. Die Referenz läuft als echtes Repo [`specrun-lab/levelboard-referenz`](https://github.com/specrun-lab/levelboard-referenz): Die Pipeline testet die Levels 1–5, baut die App-Images, testet sie als Container und veröffentlicht sie in der GHCR. Echte Nachbauten haben Level 1 (Lauf 001) und Level 2 (Lauf 003) laut unabhängigem Prüfer bestanden; Lauf 005 (Levels 1–4) ist gebaut, aber noch nicht geprüft.
+> **Stand (Spec v1.4.0):** Alle 10 Levels sind umgesetzt: Spec, Referenz, unabhängiger Prüfer, Dev Container und ein Hetzner-Server für die Live-Läufe. Die Referenz läuft als echtes Repo [`specrun-lab/levelboard-referenz`](https://github.com/specrun-lab/levelboard-referenz) und erreicht laut Prüfer Score 100. **Drei Modelle haben die Spec im Nachbau vollständig geschafft**, jeweils 100 / 100 laut unabhängigem Prüfer, ohne Abweichung zwischen Selbst- und Fremdmessung.
+
+## Ergebnisse
+
+| Lauf | Modell | Spec | Score | Session | Kosten (API-Preis) | Ausgabe-Tokens | Bericht |
+|---|---|---|---|---|---|---|---|
+| 008 | Haiku 5.5 | 1.2.0 | **100** | 43 min | 2,27 USD | 243k | [runs/lauf-008](runs/lauf-008/report.md) |
+| 010 | Sonnet 5.5 | 1.4.0 | **100** | 16 min | 1,99 USD | 83k | [runs/lauf-010](runs/lauf-010/report.md) |
+| 011 | Opus 5.5 | 1.4.0 | **100** | 44 min | 5,15 USD | 103k | [runs/lauf-011](runs/lauf-011/report.md) |
+
+- **Sonnet** war am schnellsten und am günstigsten. Es baute in großen Blöcken und prüfte seltener.
+- **Opus** ging Level für Level vor und erreichte die höchste Testabdeckung, war aber langsam und am teuersten.
+- **Haiku** ist pro Token am billigsten. Es brauchte aber die meisten Tokens, und der lange Kontext fällt in Haikus teurere Preisstufe.
+- Die Kosten sind aus dem Session-Protokoll zum API-Preis gerechnet (`spec/05-datenmodell.md`). Bei Haiku 008 sind sie nach Spec 1.4.0 nachgerechnet; der Lauf selbst meldete nach Spec 1.2.0 noch 0,47 USD.
+
+Frühere Läufe ([lauf-003](runs/lauf-003/report.md) usw.) stammen aus der Aufbauphase mit weniger Levels.
 
 ## Die 10 Levels
 
@@ -21,9 +36,11 @@ Die gebaute App, das **Levelboard**, ist zugleich die Anzeigetafel für die Leis
 | 7 | Images in der Pipeline | Images nur in der Pipeline gebaut, im Runner getestet, in die GHCR gepusht |
 | 8 | Deployment | Pipeline deployt per SSH auf einen Hetzner-Server, live unter `https://<lauf>.<domain>` |
 | 9 | Live-Prüfung | Agent prüft die Live-Seite inkl. Lasttest und meldet Level 1–9 an die Live-API |
-| 10 | Metriken veröffentlicht | Abschlussbericht vollständig und live: Tokens und Kosten, Lasttest, Image-Größen, Pipeline-Dauer |
+| 10 | Metriken veröffentlicht | Abschlussbericht vollständig und live: Ergebnis, Tokens und Kosten, Bauzeit, Lasttest, Image-Größen, Pipeline-Dauer |
 
 **Score:** 10 Punkte pro durchgehend bestandenem Level, also 0–100. Beim ersten nicht bestandenen Level ist Schluss. Kosten, Tokens, Dauer, Performance, Optik und die Abweichung zwischen Selbst- und Fremdmessung werden als Nebenwerte protokolliert.
+
+**Kennzahlen pro Level:** Schon ab Level 1 zeigt jede Karte des Levelboards, was das Level gekostet hat: **Bauzeit**, **Kosten** zum API-Preis und **Tokens (Ausgabe)**, berechnet aus dem Session-Protokoll des Agenten. Der Abschlussbericht erscheint ab dem ersten geprüften Level und füllt sich mit jedem weiteren. So zeigt auch ein Lauf, der früh scheitert, was er gekostet hat. Der Prüfer rechnet alle diese Werte aus dem Protokoll unabhängig nach.
 
 Alle Entscheidungen und ihre Begründungen stehen in [`KONZEPT.md`](KONZEPT.md).
 
@@ -68,7 +85,10 @@ runner/uebernehmen.sh <laufordner>    # Bericht nach runs/lauf-<nr>/ übernehmen
 ```
 Das Modell des Agenten ist pro Lauf fest vorgegeben (`ANTHROPIC_MODEL` im Agent-Container, Standard `claude-sonnet-5-5`). Der Bericht zeigt das vorgegebene und das laut Protokoll tatsächlich verwendete Modell.
 
-Der Prüfer läuft in einem eigenen Container aus demselben Image. Er sieht das Werk des Agenten nur lesend und baut es selbst neu.
+Der Prüfer läuft in einem eigenen Container aus demselben Image. Er sieht das Werk des Agenten nur lesend und baut es selbst neu. Zu beachten:
+- Pro Prüfer-Container läuft **immer nur eine Prüfung**. Zwei gleichzeitige Prüfungen stören sich (gleicher Build-Ordner, gleiche Ports). `pruefen.sh` startet nicht, solange `ergebnis/` existiert; für eine neue Prüfung den Ordner erst umbenennen.
+- Ein Lauf wird nach **seiner eigenen Spec-Version** bewertet (Kopie in `<lauf>/work/spec/`). Neuere Anforderungen wie die Bauzeit (ab 1.3.0) gelten für ältere Läufe nicht.
+- Agent- und Prüfer-Container nutzen feste DNS-Server (`1.1.1.1`, `9.9.9.9`), weil der Standard der Podman-Maschine nach Neustarts langsam antwortete.
 
 **Server für Level 8 (einmalig einrichten)**
 
@@ -88,19 +108,12 @@ Der Container speichert keinen Claude-Zustand über Läufe hinweg. Jeder Agent s
 3. VS Code komplett beenden und neu starten, damit es die Variable übernimmt.
 
 Hinweis: Der Agent kann das Token in seiner Umgebung sehen. Es berechtigt nur zur Nutzung von Claude und lässt sich jederzeit widerrufen.
-Der Dev Container ([`infra/devcontainer/`](infra/devcontainer/Dockerfile)) enthält genau die Startausrüstung aus der Spec. Er hat keine root-Rechte und kein Docker, und der Agent sieht nichts außer dem Laufordner.
 
-**Nachbau-Lauf ohne Container (headless auf dem Mac)**
-```bash
-runner/run.sh --fake      # Probelauf ohne Agent (Referenz als Attrappe), kostet nichts
-runner/run.sh             # echter Lauf: frische Claude-Session baut aus spec/
-```
-Ein echter Lauf hat diese Grenzen:
-- **Budget:** 10 USD (`--budget`)
-- **Zeitlimit:** 45 Minuten (`--timeout`)
-- **Modell:** über `--model` wählbar
+**Der Dev Container** ([`infra/devcontainer/`](infra/devcontainer/Dockerfile)) enthält genau die Startausrüstung aus der Spec. Er hat keine root-Rechte und kein Docker, und der Agent sieht nichts außer dem Laufordner.
 
-Der Agent arbeitet in einem Ordner außerhalb dieses Repos (`~/specrun-builds/<id>`). Er sieht weder Referenz noch Prüfer noch Konzept. Der Bericht landet in `runs/<id>/report.md`.
+**Älterer Weg: Lauf ohne Container (headless auf dem Mac)**
+
+`runner/run.sh` stammt aus der Aufbauphase. Es startet eine Claude-Session direkt auf dem Mac, ohne Dev Container und ohne Server. Für Läufe über alle 10 Levels ist es nicht mehr vorgesehen; dafür gilt der Weg über den Dev Container oben. `runner/run.sh --fake` macht weiterhin einen kostenlosen Probelauf mit der Referenz als Attrappe.
 
 ## Vorgehen
 
