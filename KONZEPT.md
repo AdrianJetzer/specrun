@@ -1135,3 +1135,15 @@ Inkrementell gebaut: Die Referenz bekam nur die neuen Dateien, die laufende App 
 - **Geschönte Selbstmessung entdeckt:** `write-results.mjs` übernahm `spec.ok`. Playwright meldet übersprungene Tests aber mit `ok: true`. So wurde ein übersprungenes Level 10 als „bestanden (3/3)“ gemeldet. Jetzt zählt ein Check nur, wenn der Test wirklich gelaufen ist (`status` `expected` oder `flaky`). Die Regel steht in Spec 05 und gilt für alle Levels.
 - **Prüfer-Reihenfolge:** `make check` bis Level 9 (im Prüfer für Level 9) leert live Level 10. Der Prüfer für Level 9 stellt deshalb auch höhere Levels aus dem festgehaltenen Stand wieder her.
 - **Schlüsselreihenfolge:** Das Go-Backend speichert `metrics` mit sortierten Schlüsseln. Der Prüfer vergleicht deshalb unabhängig von der Reihenfolge.
+
+### Nachtrag 2026-11-21: Tokens und Kosten im Abschlussbericht (Spec 1.1.0)
+- **Entscheidung:** Der Agent misst seinen Verbrauch selbst. `checks/collect-tokens.mjs` liest bei Level 10 die eigenen Session-Protokolle unter `~/.claude/projects`. Jede Antwort zählt nur einmal, `<synthetic>`-Einträge zählen nicht. Die Kosten rechnet er nach der Preistabelle in der Spec, das Cache-Schreiben getrennt nach 5 min und 1 h. Die Werte stehen als `tokens` in den `metrics` von Level 10, auf der Seite in der Kachel „Tokens“ (5 Kacheln in 3 Spalten).
+- **Preise** (USD pro Mio. Tokens; Eingabe / Cache schreiben 5 min / 1 h / Cache lesen / Ausgabe):
+  - Opus 5.5: 4 / 5 / 8 / 0.2 / 20
+  - Sonnet 5.5: 2 / 2.5 / 4 / 0.1 / 10
+  - Haiku 5.5: 0.1 / 0.125 / 0.2 / 0.01 / 0.5
+
+  Bei Haiku gilt vereinfacht immer der Preis für Prompts bis 100k Tokens. Mit dem Abo zahlt man das nicht; es ist ein Vergleichswert.
+- **Prüfer:** Er rechnet aus `/lauf/protokoll` alle Antworten bis `tokens.until` nach; die Werte müssen exakt stimmen. Den Verbrauch nach der Messung protokolliert er nur (`tokensNachMessung`).
+- **Test:** Referenz mit dem Protokoll von Lauf 007 (39 Antworten, 4 610 946 Tokens, 1,60 USD). Prüfer Level 10 bestanden. Gegenprobe mit geschönten Kosten (0,50 USD) wird erkannt.
+- **Panne:** Weil der Scratch-Ordner gelöscht war, lief ein `git commit`/`push` im Specrun-Repo statt im Referenz-Repo (Commit `e33b085`, ohne Freigabe und ungetestet, aber ohne Secrets). Seither laufen solche Befehlsketten mit `set -euo pipefail` und einer Prüfung des Ziel-Repos.
