@@ -90,6 +90,7 @@ async function ownImageMB(name) {
 }
 const comma = (n, d = 1) => (typeof n === 'number' ? n.toFixed(d).replace('.', ',') : String(n));
 const thousands = (n) => (typeof n === 'number' ? n.toLocaleString('de-CH') : String(n));
+const bauzeit = (s) => (typeof s !== 'number' ? '–' : s < 60 ? `${s} s` : `${Math.floor(s / 60)}:${String(s % 60).padStart(2, '0')} min`);
 
 // Session-Protokoll des Agenten (im Prüfer-Container unter /lauf/protokoll)
 const PROTOKOLL = process.env.SPECRUN_PROTOKOLL ?? '/lauf/protokoll';
@@ -149,7 +150,7 @@ if (!RUN_ID || !process.env.GH_TOKEN || !LIVE_DOMAIN) {
         'report-responses': thousands(sum('responses')), 'report-tokens-input': thousands(sum('input')),
         'report-tokens-cache-write': thousands(sum('cacheWrite5m') + sum('cacheWrite1h')), 'report-tokens-cache-read': thousands(sum('cacheRead')),
         'report-tokens-output': thousands(sum('output')), 'report-tokens-total': thousands(sum('total')),
-        'report-cost': `${comma(Math.round(sum('costUsd') * 100) / 100, 2)} USD`,
+        'report-cost': `${comma(Math.round(sum('costUsd') * 100) / 100, 2)} USD`, 'report-build-time': bauzeit(sum('buildS')),
         'report-p50': `${lt?.p50Ms} ms`, 'report-p95': `${lt?.p95Ms} ms`, 'report-rps': `${comma(lt?.rps)} Anfragen/s`, 'report-errors': String(lt?.errors),
         'report-image-frontend': `${comma(im?.frontendMB)} MB`, 'report-image-backend': `${comma(im?.backendMB)} MB`,
         'report-job-check': `${pl?.jobs?.check} s`, 'report-job-images': `${pl?.jobs?.images} s`, 'report-job-deploy': `${pl?.jobs?.deploy} s`,
@@ -166,8 +167,9 @@ if (!RUN_ID || !process.env.GH_TOKEN || !LIVE_DOMAIN) {
         const t = l.metrics?.tokens;
         const wantCost = !t ? '–' : t.inLevel !== undefined ? `in L${String(t.inLevel).padStart(2, '0')}` : `${comma(t.costUsd, 2)} USD`;
         const wantOut = t && t.inLevel === undefined ? thousands(t.output) : '–';
-        const [c, o] = [await text('level-cost', card).catch(() => null), await text('level-output', card).catch(() => null)];
-        if (c !== wantCost || o !== wantOut) dp.push(`Karte ${l.level}: „${c}“/„${o}“ statt „${wantCost}“/„${wantOut}“`);
+        const wantBuild = !t ? '–' : t.inLevel !== undefined ? `in L${String(t.inLevel).padStart(2, '0')}` : bauzeit(t.buildS);
+        const [c, o, b] = [await text('level-cost', card).catch(() => null), await text('level-output', card).catch(() => null), await text('level-build-time', card).catch(() => null)];
+        if (c !== wantCost || o !== wantOut || b !== wantBuild) dp.push(`Karte ${l.level}: „${c}“/„${o}“/„${b}“ statt „${wantCost}“/„${wantOut}“/„${wantBuild}“`);
       }
       await page.screenshot({ path: path.join(out, 'level10-live.png'), fullPage: true }).catch(() => {});
     }
@@ -176,7 +178,7 @@ if (!RUN_ID || !process.env.GH_TOKEN || !LIVE_DOMAIN) {
   } finally {
     await browser.close();
   }
-  add('L10-K2', 'Live-Seite zeigt den vollständigen Abschlussbericht und die Kosten je Karte mit genau den gemeldeten Werten', dp.length === 0, dp.join('; '));
+  add('L10-K2', 'Live-Seite zeigt den vollständigen Abschlussbericht sowie Kosten und Bauzeit je Karte mit genau den gemeldeten Werten', dp.length === 0, dp.join('; '));
 
   // ---- L10-K3: make level10 + make check (meldet neu und prüft live nach) ----
   run('make', ['down']);

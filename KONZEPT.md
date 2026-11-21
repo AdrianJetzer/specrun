@@ -1175,3 +1175,9 @@ Inkrementell gebaut: Die Referenz bekam nur die neuen Dateien, die laufende App 
 ### Funde
 - Die Summe der gerundeten Kosten pro Level (1,61 USD) weicht von der gerundeten Gesamtsumme (1,60 USD) um einen Rappen ab. Festgelegt: Der Bericht zeigt die Summe der Kartenwerte.
 - Der Scratch-Ordner wird bei einem Neustart des Macs geleert, und die Podman-Maschine ist danach aus. Die Absicherung `set -euo pipefail` mit Prüfung des Ziel-Repos hat diesmal korrekt abgebrochen.
+
+### Nachtrag: Bauzeit pro Level (Spec 1.3.0, 2026-11-21)
+- **Bauzeit** (`buildS` im Token-Objekt): vom Ende der vorigen Phase bis zum Start des `make check`, der das Level besteht. Bei Level 1 beginnt sie mit der ersten Antwort. Beide Zeitpunkte stehen im Protokoll, deshalb rechnet der Prüfer sie sekundengenau nach. Die Laufzeit des `make check` selbst steckt in „Checkdauer“.
+- **Karte:** „Checkdauer“ (bisher „Dauer“), „Checks“, „Bauzeit“, „Kosten“, „Tokens (Ausgabe)“ (bisher „Ausgabe“). Im Bericht steht zusätzlich „Bauzeit gesamt“.
+- **Lauf 007:** L1 7:32 min, L2 31 s, L3 1 s, L4 0 s, L5 1 s, L6–7 4:44 min (bei L7), L8–10 8:03 min (bei L10, Rest der Session nach Level 7).
+- **Test:** Referenz live; Prüfer Level 10 bestanden, Bauzeit und Kosten je Karte stimmen.

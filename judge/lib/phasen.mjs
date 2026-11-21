@@ -86,17 +86,20 @@ export function phasenVerbrauch(dir, stand) {
   }
 
   const erg = {};
-  const setze = (von, bis, teil) => { erg[bis] = summe(teil); for (let n = von; n < bis; n++) erg[n] = { inLevel: bis }; };
+  // Bauzeit: Beginn = Ende der vorigen Phase (bei der ersten: erste Antwort), Ende = letzte Antwort der Phase
+  const mitBau = (teil, beginn) => ({ ...summe(teil), buildS: teil.length ? Math.round((teil[teil.length - 1].t - beginn) / 1000) : 0 });
+  const setze = (von, bis, teil, beginn) => { erg[bis] = mitBau(teil, beginn); for (let n = von; n < bis; n++) erg[n] = { inLevel: bis }; };
   let vorher = -Infinity;
-  for (const g of grenzen) { setze(g.von, g.bis, liste.filter((x) => x.t > vorher && x.t <= g.t)); vorher = g.t; }
+  for (const g of grenzen) { setze(g.von, g.bis, liste.filter((x) => x.t > vorher && x.t <= g.t), vorher === -Infinity ? liste[0].t : vorher); vorher = g.t; }
   const rest = liste.filter((x) => x.t > vorher);
+  const restBeginn = vorher === -Infinity ? liste[0].t : vorher;
   let jetzt = 0;
   for (const l of stand) { if (l.status !== 'bestanden') break; jetzt = l.level; }
   const fehler = stand.find((l) => l.status === 'fehlgeschlagen');
   if (jetzt > beste) {
-    setze(beste + 1, jetzt, rest);
-    if (fehler && fehler.level > beste) erg[fehler.level] = summe([]);
-  } else if (fehler && fehler.level > beste) erg[fehler.level] = summe(rest);
+    setze(beste + 1, jetzt, rest, restBeginn);
+    if (fehler && fehler.level > beste) erg[fehler.level] = mitBau([], restBeginn);
+  } else if (fehler && fehler.level > beste) erg[fehler.level] = mitBau(rest, restBeginn);
   const geprueft = new Set(stand.filter((l) => l.status === 'bestanden' || l.status === 'fehlgeschlagen').map((l) => l.level));
   for (const k of Object.keys(erg)) if (!geprueft.has(Number(k))) delete erg[k];
   return erg;
