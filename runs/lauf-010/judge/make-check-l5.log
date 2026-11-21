@@ -1,0 +1,45 @@
+
+Running 30 tests using 1 worker
+
+  ✓   1 [levels] › tests/level1.spec.ts:4:3 › level-1 › Seite antwortet mit HTTP 200 (17ms)
+  ✓   2 [levels] › tests/level1.spec.ts:10:3 › level-1 › Titel ist „Levelboard“ (110ms)
+  ✓   3 [levels] › tests/level1.spec.ts:15:3 › level-1 › 10 Level-Karten sichtbar (123ms)
+  ✓   4 [levels] › tests/level1.spec.ts:23:3 › level-1 › Keine Konsolenfehler (97ms)
+  ✓   5 [levels] › tests/level1.spec.ts:34:3 › level-1 › Handy-Ansicht: Karten einspaltig (114ms)
+  ✓   6 [levels] › tests/level2.spec.ts:12:3 › level-2 › Antwort kommt von nginx (3ms)
+  ✓   7 [levels] › tests/level2.spec.ts:18:3 › level-2 › results.json wird nicht zwischengespeichert (3ms)
+  ✓   8 [levels] › tests/level2.spec.ts:24:3 › level-2 › index.html wird nicht zwischengespeichert (3ms)
+  ✓   9 [levels] › tests/level2.spec.ts:29:3 › level-2 › Assets werden ein Jahr zwischengespeichert (7ms)
+  ✓  10 [levels] › tests/level2.spec.ts:36:3 › level-2 › Fehlende Datei ergibt 404 (8ms)
+  ✓  11 [levels] › tests/level2.spec.ts:41:3 › level-2 › Antworten sind gzip-komprimiert (10ms)
+  ✓  12 [levels] › tests/level2.spec.ts:48:3 › level-2 › Seite funktioniert über nginx (103ms)
+  ✓  13 [levels] › tests/level3.spec.ts:12:3 › level-3 › Backend antwortet auf /api/health (4ms)
+  ✓  14 [levels] › tests/level3.spec.ts:23:3 › level-3 › GET /api/levels liefert alle 10 Levels im Schema (10ms)
+  ✓  15 [levels] › tests/level3.spec.ts:36:3 › level-3 › Ergebnis melden setzt Status und Zeitpunkt (7ms)
+  ✓  16 [levels] › tests/level3.spec.ts:47:3 › level-3 › Fehlschlag sperrt höhere Levels (5ms)
+  ✓  17 [levels] › tests/level3.spec.ts:57:3 › level-3 › Falsche Reihenfolge ergibt 409 (2ms)
+  ✓  18 [levels] › tests/level3.spec.ts:65:3 › level-3 › Ungültige Anfragen ergeben 400 (6ms)
+  ✓  19 [levels] › tests/level3.spec.ts:74:3 › level-3 › Unbekanntes Level ergibt 404 (4ms)
+  ✓  20 [levels] › tests/level3.spec.ts:81:3 › level-3 › Go-Tests bestehen (412ms)
+  ✓  21 [levels] › tests/level4.spec.ts:15:3 › level-4 › Meldungen erscheinen in der Historie, neueste zuerst (10ms)
+  ✓  22 [levels] › tests/level4.spec.ts:29:3 › level-4 › Historie begrenzt mit limit (9ms)
+  ✓  23 [levels] › tests/level4.spec.ts:36:3 › level-4 › Daten überstehen einen Neustart des Backends (131ms)
+  ✓  24 [levels] › tests/level4.spec.ts:47:3 › level-4 › Abgelehnte Meldungen landen nicht in der Historie (20ms)
+  ✓  25 [levels] › tests/level4.spec.ts:56:3 › level-4 › Datenbank hat das vorgegebene Schema (1ms)
+  ✓  26 [levels] › tests/level5.spec.ts:8:3 › level-5 › Seite liest aus dem Backend (129ms)
+  ✓  27 [levels] › tests/level5.spec.ts:18:3 › level-5 › nginx leitet /api/ an das Backend weiter (6ms)
+  ✓  28 [levels] › tests/level5.spec.ts:29:3 › level-5 › Gemeldetes Ergebnis erscheint ohne Neuladen (5.5s)
+  ✓  29 [levels] › tests/level5.spec.ts:42:3 › level-5 › Backend-Ausfall wird angezeigt (10.5s)
+  ✓  30 [levels] › tests/level5.spec.ts:57:3 › level-5 › Meldungen über nginx landen in der Historie (16ms)
+
+  30 passed (18.0s)
+Level 1: bestanden (5/5 Checks)
+Level 2: bestanden (7/7 Checks)
+Level 3: bestanden (8/8 Checks)
+Level 4: bestanden (5/5 Checks)
+Level 5: bestanden (5/5 Checks)
+Level 1 an das Backend gemeldet
+Level 2 an das Backend gemeldet
+Level 3 an das Backend gemeldet
+Level 4 an das Backend gemeldet
+Level 5 an das Backend gemeldet

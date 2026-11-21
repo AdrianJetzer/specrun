@@ -1,0 +1,129 @@
+{
+  "level": 1,
+  "passed": true,
+  "checkedAt": "2026-11-21T19:04:44.158Z",
+  "target": "/home/dev/build",
+  "criteria": [
+    {
+      "id": "K1",
+      "name": "make level1 startet die Seite auf Port 8080",
+      "ok": true,
+      "detail": "4.6 s"
+    },
+    {
+      "id": "K2",
+      "name": "gültige Testdaten werden korrekt dargestellt",
+      "ok": true,
+      "detail": "5 Tests"
+    },
+    {
+      "id": "K3",
+      "name": "fehlende/ungültige Datei → richtiger Hinweis und Leerzustand",
+      "ok": true,
+      "detail": "7 Tests"
+    },
+    {
+      "id": "K4",
+      "name": "data-testids, keine Konsolenfehler, Raster responsiv",
+      "ok": true,
+      "detail": "3 Tests"
+    },
+    {
+      "id": "K5",
+      "name": "make check: Exit 0, schemagültig, Level 1 bestanden mit den 5 Checks",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "id": "K6",
+      "name": "public/results.json bleibt im Startzustand",
+      "ok": true,
+      "detail": ""
+    }
+  ],
+  "nebenwerte": {
+    "makeLevel1Ms": 4626,
+    "judgeTests": [
+      {
+        "title": "K2.1 gemischte Status: Karten, Abzeichen, Fakten",
+        "ok": true,
+        "error": ""
+      },
+      {
+        "title": "K2.2 feste Titel und Nummern L01–L10",
+        "ok": true,
+        "error": ""
+      },
+      {
+        "title": "K2.3 Kopfzeile und Zusammenfassung",
+        "ok": true,
+        "error": ""
+      },
+      {
+        "title": "K2.4 alle bestanden → 10 / 10",
+        "ok": true,
+        "error": ""
+      },
+      {
+        "title": "K2.5 Statusfarben laut Design-Tokens",
+        "ok": true,
+        "error": ""
+      },
+      {
+        "title": "K3.1 Datei fehlt → Hinweis „missing“ und Leerzustand",
+        "ok": true,
+        "error": ""
+      },
+      {
+        "title": "K3.2 ungültig (kein JSON) → Hinweis „invalid“",
+        "ok": true,
+        "error": ""
+      },
+      {
+        "title": "K3.2 ungültig (nur 9 Levels) → Hinweis „invalid“",
+        "ok": true,
+        "error": ""
+      },
+      {
+        "title": "K3.2 ungültig (unbekannter Status) → Hinweis „invalid“",
+        "ok": true,
+        "error": ""
+      },
+      {
+        "title": "K3.2 ungültig (doppelte Nummer) → Hinweis „invalid“",
+        "ok": true,
+        "error": ""
+      },
+      {
+        "title": "K3.2 ungültig (run fehlt) → Hinweis „invalid“",
+        "ok": true,
+        "error": ""
+      },
+      {
+        "title": "K3.2 ungültig (falscher Typ bei durationMs) → Hinweis „invalid“",
+        "ok": true,
+        "error": ""
+      },
+      {
+        "title": "K4.1 alle data-testids vorhanden",
+        "ok": true,
+        "error": ""
+      },
+      {
+        "title": "K4.2 keine Konsolenfehler (gültig, fehlend, ungültig)",
+        "ok": true,
+        "error": ""
+      },
+      {
+        "title": "K4.3 Raster: 5 / 2 / 1 Spalten, kein horizontales Scrollen",
+        "ok": true,
+        "error": ""
+      }
+    ],
+    "makeCheckMs": 2759,
+    "selbstmessung": "bestanden",
+    "fremdmessung": "bestanden",
+    "abweichung": false,
+    "bundleBytes": 237332
+  }
+}

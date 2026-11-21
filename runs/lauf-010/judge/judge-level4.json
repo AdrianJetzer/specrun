@@ -1,0 +1,66 @@
+{
+  "level": 4,
+  "passed": true,
+  "checkedAt": "2026-11-21T19:05:22.438Z",
+  "target": "/home/dev/build",
+  "criteria": [
+    {
+      "id": "L4-K1",
+      "name": "make level4 startet alles, .run/levelboard.db existiert",
+      "ok": true,
+      "detail": "2.4 s"
+    },
+    {
+      "id": "L4-K2",
+      "name": "Datenbankdatei hat das vorgegebene Schema (user_version 1)",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "id": "L4-K3",
+      "name": "Historie: Reihenfolge, Inhalte, limit, 409 nicht gespeichert, Datei = API",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "id": "L4-K4",
+      "name": "make restart-backend behält Stand und Historie",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "id": "L4-K5",
+      "name": "100 gleichzeitige Meldungen: kein 5xx, genau 100 neue Einträge, konsistent",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "id": "L4-K6",
+      "name": "Go: genau modernc.org/sqlite v1.62.0, go vet sauber, go test grün",
+      "ok": true,
+      "detail": "Abdeckung 71.9 %"
+    },
+    {
+      "id": "L4-K7",
+      "name": "make check: Exit 0, schemagültig, Level 1–4 bestanden mit den Checks der Spec",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "id": "L4-K8",
+      "name": "Startdatei unverändert, make down gibt 8080 und 8081 frei",
+      "ok": true,
+      "detail": ""
+    }
+  ],
+  "nebenwerte": {
+    "makeLevel4Ms": 2391,
+    "resetNachLevel4": true,
+    "goCoverage": 71.9,
+    "goTestFiles": 1,
+    "makeCheckMs": 2824,
+    "selbstmessung": "bestanden",
+    "fremdmessung": "bestanden",
+    "abweichung": false
+  }
+}

@@ -1,0 +1,135 @@
+{
+  "reachedLevel": 10,
+  "score": 100,
+  "maxChecked": 10,
+  "levels": [
+    {
+      "level": 1,
+      "passed": true
+    },
+    {
+      "level": 2,
+      "passed": true
+    },
+    {
+      "level": 3,
+      "passed": true
+    },
+    {
+      "level": 4,
+      "passed": true
+    },
+    {
+      "level": 5,
+      "passed": true
+    },
+    {
+      "level": 6,
+      "passed": true
+    },
+    {
+      "level": 7,
+      "passed": true
+    },
+    {
+      "level": 8,
+      "passed": true
+    },
+    {
+      "level": 9,
+      "passed": true
+    },
+    {
+      "level": 10,
+      "passed": true
+    }
+  ],
+  "tokens": {
+    "abweichendeLevels": [],
+    "pruefer": {
+      "1": {
+        "models": [
+          "claude-sonnet-5-5"
+        ],
+        "responses": 15,
+        "input": 30,
+        "cacheWrite5m": 0,
+        "cacheWrite1h": 109052,
+        "cacheRead": 1249246,
+        "output": 36086,
+        "total": 1394414,
+        "costUsd": 0.92,
+        "from": "2026-11-21T18:26:31.973Z",
+        "until": "2026-11-21T18:30:19.404Z",
+        "buildS": 227
+      },
+      "2": {
+        "models": [
+          "claude-sonnet-5-5"
+        ],
+        "responses": 1,
+        "input": 2,
+        "cacheWrite5m": 0,
+        "cacheWrite1h": 1013,
+        "cacheRead": 133128,
+        "output": 172,
+        "total": 134315,
+        "costUsd": 0.02,
+        "from": "2026-11-21T18:30:24.723Z",
+        "until": "2026-11-21T18:30:24.723Z",
+        "buildS": 1
+      },
+      "3": {
+        "inLevel": 5
+      },
+      "4": {
+        "inLevel": 5
+      },
+      "5": {
+        "models": [
+          "claude-sonnet-5-5"
+        ],
+        "responses": 8,
+        "input": 16,
+        "cacheWrite5m": 0,
+        "cacheWrite1h": 19916,
+        "cacheRead": 1157582,
+        "output": 22143,
+        "total": 1199657,
+        "costUsd": 0.42,
+        "from": "2026-11-21T18:30:53.485Z",
+        "until": "2026-11-21T18:32:29.226Z",
+        "buildS": 116
+      },
+      "6": {
+        "inLevel": 10
+      },
+      "7": {
+        "inLevel": 10
+      },
+      "8": {
+        "inLevel": 10
+      },
+      "9": {
+        "inLevel": 10
+      },
+      "10": {
+        "models": [
+          "claude-sonnet-5-5"
+        ],
+        "responses": 15,
+        "input": 30,
+        "cacheWrite5m": 0,
+        "cacheWrite1h": 33595,
+        "cacheRead": 2551655,
+        "output": 24080,
+        "total": 2609360,
+        "costUsd": 0.63,
+        "from": "2026-11-21T18:33:18.379Z",
+        "until": "2026-11-21T18:40:31.809Z",
+        "buildS": 435
+      }
+    }
+  },
+  "checkedAt": "2026-11-21T19:11:08.430Z"
+}

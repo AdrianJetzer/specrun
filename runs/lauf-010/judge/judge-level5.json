@@ -1,0 +1,53 @@
+{
+  "level": 5,
+  "passed": true,
+  "checkedAt": "2026-11-21T19:06:04.889Z",
+  "target": "/home/dev/build",
+  "criteria": [
+    {
+      "id": "L5-K1",
+      "name": "make level5: 8080 und 8081 antworten, config.json = api, Kopfzeile „Backend“",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "id": "L5-K2",
+      "name": "Weiterleitung /api/ 1:1 (Status, JSON, Content-Type, no-store), Regeln aus Level 2 gelten",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "id": "L5-K3",
+      "name": "Live-Anzeige: gemeldete Ergebnisse erscheinen ohne Neuladen innerhalb von 7 s",
+      "ok": true,
+      "detail": "erste Änderung nach 4949 ms"
+    },
+    {
+      "id": "L5-K4",
+      "name": "Backend-Ausfall: Hinweis und Leerzustand, nach Neustart wieder Daten",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "id": "L5-K5",
+      "name": "make check: Exit 0, results.json und /api/levels melden Level 1–5 bestanden",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "id": "L5-K6",
+      "name": "public/results.json und public/config.json unverändert, make down gibt die Ports frei",
+      "ok": true,
+      "detail": ""
+    }
+  ],
+  "nebenwerte": {
+    "makeLevel5Ms": 2377,
+    "liveVerzoegerungMs": 4949,
+    "makeCheckMs": 19156,
+    "selbstmessung": "bestanden",
+    "konsolenfehler": [],
+    "fremdmessung": "bestanden",
+    "abweichung": false
+  }
+}

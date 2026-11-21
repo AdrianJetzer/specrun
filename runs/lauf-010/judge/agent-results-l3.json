@@ -1,0 +1,221 @@
+{
+  "run": {
+    "id": "lauf-010",
+    "version": "0.1.0",
+    "commit": null,
+    "updatedAt": "2026-11-21T19:05:12.182Z"
+  },
+  "levels": [
+    {
+      "level": 1,
+      "title": "Statische Seite",
+      "status": "bestanden",
+      "checkedAt": "2026-11-21T19:05:12.182Z",
+      "durationMs": 467,
+      "checks": [
+        {
+          "name": "Seite antwortet mit HTTP 200",
+          "ok": true
+        },
+        {
+          "name": "Titel ist „Levelboard“",
+          "ok": true
+        },
+        {
+          "name": "10 Level-Karten sichtbar",
+          "ok": true
+        },
+        {
+          "name": "Keine Konsolenfehler",
+          "ok": true
+        },
+        {
+          "name": "Handy-Ansicht: Karten einspaltig",
+          "ok": true
+        }
+      ],
+      "metrics": {
+        "tokens": {
+          "models": [
+            "claude-sonnet-5-5"
+          ],
+          "responses": 15,
+          "input": 30,
+          "cacheWrite5m": 0,
+          "cacheWrite1h": 109052,
+          "cacheRead": 1249246,
+          "output": 36086,
+          "total": 1394414,
+          "costUsd": 0.92,
+          "from": "2026-11-21T18:26:31.973Z",
+          "until": "2026-11-21T18:30:19.404Z",
+          "buildS": 227
+        }
+      }
+    },
+    {
+      "level": 2,
+      "title": "Webserver",
+      "status": "bestanden",
+      "checkedAt": "2026-11-21T19:05:12.182Z",
+      "durationMs": 119,
+      "checks": [
+        {
+          "name": "Antwort kommt von nginx",
+          "ok": true
+        },
+        {
+          "name": "results.json wird nicht zwischengespeichert",
+          "ok": true
+        },
+        {
+          "name": "index.html wird nicht zwischengespeichert",
+          "ok": true
+        },
+        {
+          "name": "Assets werden ein Jahr zwischengespeichert",
+          "ok": true
+        },
+        {
+          "name": "Fehlende Datei ergibt 404",
+          "ok": true
+        },
+        {
+          "name": "Antworten sind gzip-komprimiert",
+          "ok": true
+        },
+        {
+          "name": "Seite funktioniert über nginx",
+          "ok": true
+        }
+      ],
+      "metrics": {
+        "tokens": {
+          "models": [
+            "claude-sonnet-5-5"
+          ],
+          "responses": 1,
+          "input": 2,
+          "cacheWrite5m": 0,
+          "cacheWrite1h": 1013,
+          "cacheRead": 133128,
+          "output": 172,
+          "total": 134315,
+          "costUsd": 0.02,
+          "from": "2026-11-21T18:30:24.723Z",
+          "until": "2026-11-21T18:30:24.723Z",
+          "buildS": 1
+        }
+      }
+    },
+    {
+      "level": 3,
+      "title": "REST-Backend",
+      "status": "bestanden",
+      "checkedAt": "2026-11-21T19:05:12.182Z",
+      "durationMs": 491,
+      "checks": [
+        {
+          "name": "Backend antwortet auf /api/health",
+          "ok": true
+        },
+        {
+          "name": "GET /api/levels liefert alle 10 Levels im Schema",
+          "ok": true
+        },
+        {
+          "name": "Ergebnis melden setzt Status und Zeitpunkt",
+          "ok": true
+        },
+        {
+          "name": "Fehlschlag sperrt höhere Levels",
+          "ok": true
+        },
+        {
+          "name": "Falsche Reihenfolge ergibt 409",
+          "ok": true
+        },
+        {
+          "name": "Ungültige Anfragen ergeben 400",
+          "ok": true
+        },
+        {
+          "name": "Unbekanntes Level ergibt 404",
+          "ok": true
+        },
+        {
+          "name": "Go-Tests bestehen",
+          "ok": true
+        }
+      ],
+      "metrics": {
+        "tokens": {
+          "inLevel": 5
+        }
+      }
+    },
+    {
+      "level": 4,
+      "title": "Datenbank",
+      "status": "offen",
+      "checkedAt": null,
+      "durationMs": null,
+      "checks": [],
+      "metrics": {}
+    },
+    {
+      "level": 5,
+      "title": "Frontend + Backend",
+      "status": "offen",
+      "checkedAt": null,
+      "durationMs": null,
+      "checks": [],
+      "metrics": {}
+    },
+    {
+      "level": 6,
+      "title": "Repo + CI",
+      "status": "offen",
+      "checkedAt": null,
+      "durationMs": null,
+      "checks": [],
+      "metrics": {}
+    },
+    {
+      "level": 7,
+      "title": "Images in der Pipeline",
+      "status": "offen",
+      "checkedAt": null,
+      "durationMs": null,
+      "checks": [],
+      "metrics": {}
+    },
+    {
+      "level": 8,
+      "title": "Deployment",
+      "status": "offen",
+      "checkedAt": null,
+      "durationMs": null,
+      "checks": [],
+      "metrics": {}
+    },
+    {
+      "level": 9,
+      "title": "Live-Prüfung",
+      "status": "offen",
+      "checkedAt": null,
+      "durationMs": null,
+      "checks": [],
+      "metrics": {}
+    },
+    {
+      "level": 10,
+      "title": "Metriken veröffentlicht",
+      "status": "offen",
+      "checkedAt": null,
+      "durationMs": null,
+      "checks": [],
+      "metrics": {}
+    }
+  ]
+}

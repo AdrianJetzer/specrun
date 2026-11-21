@@ -1,0 +1,9 @@
+{
+  "runId": "lauf-010",
+  "specVersion": "1.4.0",
+  "model": "claude-sonnet-5-5",
+  "fake": false,
+  "buildDir": "/lauf/work",
+  "judgedIn": "Prüfer-Container",
+  "judgedAt": "2026-11-21T19:04:32Z"
+}

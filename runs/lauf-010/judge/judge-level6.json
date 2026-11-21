@@ -1,0 +1,53 @@
+{
+  "level": 6,
+  "passed": true,
+  "checkedAt": "2026-11-21T19:06:37.782Z",
+  "target": "/home/dev/build",
+  "criteria": [
+    {
+      "id": "L6-K1",
+      "name": "Repo öffentlich mit main; lokaler HEAD = main auf GitHub, nichts uncommittet",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "id": "L6-K2",
+      "name": ".github/workflows/ci.yml erfüllt die Eckpunkte",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "id": "L6-K3",
+      "name": "Letzter Lauf von CI für den aktuellen Commit: completed/success",
+      "ok": true,
+      "detail": "completed/success"
+    },
+    {
+      "id": "L6-K4",
+      "name": "Artefakt levelboard-report: Level 1–5 bestanden mit den Checks der Spec",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "id": "L6-K5",
+      "name": "Keine Zugangsdaten in Repo, Historie, Remote-Adresse und Pipeline-Logs",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "id": "L6-K6",
+      "name": "make level6 und make check: Level 1–6 bestanden mit den Checks der Spec",
+      "ok": true,
+      "detail": ""
+    }
+  ],
+  "nebenwerte": {
+    "repo": "specrun-lab/levelboard-lauf-010",
+    "commits": 2,
+    "pipelineLaeufe": 2,
+    "pipelineDauerS": 257,
+    "selbstmessung": "bestanden",
+    "fremdmessung": "bestanden",
+    "abweichung": false
+  }
+}

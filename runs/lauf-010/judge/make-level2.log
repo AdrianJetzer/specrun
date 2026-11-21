@@ -1,0 +1,24 @@
+cd frontend && npm ci && npm run build
+
+added 24 packages, and audited 25 packages in 818ms
+
+8 packages are looking for funding
+  run `npm fund` for details
+
+found 0 vulnerabilities
+
+> levelboard-frontend@0.1.0 build
+> tsc -b && vite build
+
+vite v8.3.8 building client environment for production...
+transforming...
+✓ 22 modules transformed.
+rendering chunks...
+computing gzip size...
+dist/index.html                   0.44 kB │ gzip:  0.28 kB
+dist/assets/index-BMep8naa.css    5.22 kB │ gzip:  1.48 kB
+dist/assets/index-C2RaJtKx.js   232.10 kB │ gzip: 72.28 kB
+
+✓ built in 115ms
+nginx -p "/home/dev/build/" -e .run/nginx-error.log -c frontend/nginx.conf
+Levelboard läuft auf http://127.0.0.1:8080
