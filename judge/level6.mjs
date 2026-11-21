@@ -86,7 +86,8 @@ if (!RUN_ID || !process.env.GH_TOKEN) {
     const jobs = Object.keys(wf.jobs ?? {});
     const job = wf.jobs?.check;
     // Level 6: genau der Job „check“; ab Level 7 kommt rechtmäßig der Job „images“ dazu
-    if (!jobs.includes('check') || jobs.some((j) => !['check', 'images'].includes(j))) wp.push(`Jobs ${JSON.stringify(jobs)} statt ["check"] (ab Level 7 zusätzlich "images")`);
+    // Ab Level 7 kommt der Job „images“ dazu, ab Level 8 „deploy“; andere Jobs sind nicht vorgesehen
+    if (!jobs.includes('check') || jobs.some((j) => !['check', 'images', 'deploy'].includes(j))) wp.push(`Jobs ${JSON.stringify(jobs)} statt ["check"] (ab Level 7 zusätzlich "images", ab Level 8 "deploy")`);
     if (job) {
       if (job['runs-on'] !== 'ubuntu-latest') wp.push(`runs-on ${job['runs-on']}`);
       if (job['timeout-minutes'] !== 20) wp.push(`timeout-minutes ${job['timeout-minutes']}`);

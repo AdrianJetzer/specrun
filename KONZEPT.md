@@ -1181,3 +1181,15 @@ Inkrementell gebaut: Die Referenz bekam nur die neuen Dateien, die laufende App 
 - **Karte:** „Checkdauer“ (bisher „Dauer“), „Checks“, „Bauzeit“, „Kosten“, „Tokens (Ausgabe)“ (bisher „Ausgabe“). Im Bericht steht zusätzlich „Bauzeit gesamt“.
 - **Lauf 007:** L1 7:32 min, L2 31 s, L3 1 s, L4 0 s, L5 1 s, L6–7 4:44 min (bei L7), L8–10 8:03 min (bei L10, Rest der Session nach Level 7).
 - **Test:** Referenz live; Prüfer Level 10 bestanden, Bauzeit und Kosten je Karte stimmen.
+
+---
+
+## 26. Lauf 008: Haiku 5.5 erreicht 100 / 100 (Spec 1.2.0, 2026-11-21)
+- **Ergebnis laut unabhängigem Prüfer:** Score 100, alle 10 Levels bestanden. Keine Abweichung zwischen Selbst- und Fremdmessung, auch nicht bei den Tokens pro Level. Lasttest Agent/Prüfer: p95 68/66 ms, 0 Fehler.
+- **Aufwand:** 43 min Session, 94 Antworten, 132 Werkzeugaufrufe, 242’522 Ausgabe-Tokens. Level 1 dauerte 9:54 min und brauchte 62 % der Ausgabe; die Levels 6–10 dauerten zusammen ~29 min (Pipeline, Deploy, Warten).
+- **Kosten:** laut Tabelle 0,47 USD. Das ist zu tief, denn Haiku kostet bei Prompts über 100k Tokens das Fünffache, und der Lauf las im Schnitt ~300k Tokens pro Antwort aus dem Cache. Realistisch sind es ~2–2,50 USD. **Offen:** die Haiku-Preisstufe über 100k in die Preistabelle aufnehmen (pro Antwort nach Prompt-Größe).
+- **Funde im Prüfer (nicht beim Agenten):**
+  - Der Prüfer für Level 6 kannte den Job `deploy` nicht (seit Level 8 nötig, nie mit allen Levels gegen die Referenz geprüft). Korrigiert.
+  - `pruefen.sh` ließ Prozesse früherer Prüfungen im selben Container weiterlaufen, deren PID-Dateien beim Neuaufbau verloren gehen. Jetzt räumt es vor jeder Prüfung auf.
+  - Zwei Prüfungen gleichzeitig im selben Container stören sich (gleicher Build-Ordner, gleiche Ports). Regel: immer nur eine.
+  - **Lehre:** Bei jeder Prüfer-Änderung alle Levels gegen die Referenz laufen lassen, nicht nur die neuen.

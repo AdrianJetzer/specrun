@@ -22,6 +22,10 @@ if [ -e "$OUT" ]; then
   exit 1
 fi
 
+# Übrig gebliebene Prozesse einer früheren Prüfung in diesem Container beenden (ihre PID-Dateien gehen mit $BUILD verloren)
+if [ -d "$BUILD" ]; then ( cd "$BUILD" && make down > /dev/null 2>&1 ) || true; fi
+pkill -u "$(id -u)" -f 'nginx: master process|levelboard-backend|vite preview' 2> /dev/null || true
+
 step "1/5 Werk des Agenten kopieren ($AGENT → $BUILD, ohne node_modules/dist/.run)"
 rm -rf "$BUILD" && mkdir -p "$BUILD"
 ( cd "$AGENT" && tar --exclude=node_modules --exclude=dist --exclude=.run --exclude=.out \
