@@ -110,7 +110,7 @@ if (!RUN_ID || !process.env.GH_TOKEN || !LIVE_DOMAIN) {
     if (snapshot.run.commit !== head) sp.push(`run.commit „${snapshot.run.commit}“, erwartet ${head}`);
     const l9 = snapshot.levels[8];
     if (!same(l9.checks.map((c) => c.name), LEVEL9_CHECKS)) sp.push(`Checks von Level 9: ${JSON.stringify(l9.checks.map((c) => c.name))}`);
-    const m = l9.metrics ?? {};
+    const m = l9.metrics?.loadtest ?? l9.metrics ?? {}; // ab Spec 1.2.0 unter metrics.loadtest
     const missing = LOADTEST_FIELDS.filter((f) => typeof m[f] !== 'number');
     if (missing.length) sp.push(`metrics von Level 9 ohne ${missing.join(', ')}`);
     else {

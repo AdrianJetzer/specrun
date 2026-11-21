@@ -18,6 +18,8 @@
   // Nur lesbar: der ganze Laufordner (Werk des Agenten unter /lauf/work) und Specrun (Prüfer, Spec)
   "mounts": [
     "source=${localWorkspaceFolder}/..,target=/lauf,type=bind,readonly",
+    // Session-Protokoll des Agenten dort, wo seine Prüfsuite es sucht: make check im Prüfer rechnet so dieselben Tokens
+    "source=${localWorkspaceFolder}/../protokoll,target=/home/dev/.claude/projects,type=bind,readonly",
     "source=__SPECRUN__,target=/specrun,type=bind,readonly"
   ],
 

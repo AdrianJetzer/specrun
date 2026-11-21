@@ -1147,3 +1147,31 @@ Inkrementell gebaut: Die Referenz bekam nur die neuen Dateien, die laufende App 
 - **Prüfer:** Er rechnet aus `/lauf/protokoll` alle Antworten bis `tokens.until` nach; die Werte müssen exakt stimmen. Den Verbrauch nach der Messung protokolliert er nur (`tokensNachMessung`).
 - **Test:** Referenz mit dem Protokoll von Lauf 007 (39 Antworten, 4 610 946 Tokens, 1,60 USD). Prüfer Level 10 bestanden. Gegenprobe mit geschönten Kosten (0,50 USD) wird erkannt.
 - **Panne:** Weil der Scratch-Ordner gelöscht war, lief ein `git commit`/`push` im Specrun-Repo statt im Referenz-Repo (Commit `e33b085`, ohne Freigabe und ungetestet, aber ohne Secrets). Seither laufen solche Befehlsketten mit `set -euo pipefail` und einer Prüfung des Ziel-Repos.
+
+---
+
+## 25. Kennzahlen pro Level und Abschlussbericht ab Level 1 (Spec 1.2.0)
+
+**Status (2026-11-21):** gebaut und live bestätigt.
+
+**Anlass:** Tokens und Kosten standen nur im Bericht von Level 10. Ein Modell, das nur bis Level 5 kommt, hätte auf der Seite keine Kosten gezeigt.
+
+### Entscheidungen
+| Thema | Entscheidung |
+|---|---|
+| Ort der Daten | **Kennzahlen bei ihrem Level:** `tokens` bei jedem geprüften Level ab Level 1, `pipeline` bei Level 6, `images` bei Level 7, `loadtest` bei Level 9. Der Bericht hat keine eigenen Daten |
+| Bericht | **immer sichtbar**, sobald ein Level geprüft ist. Er wird aus den Levels zusammengesetzt; fehlende Teile zeigen „noch nicht erreicht“. `data-complete` und „Vollständig: ja/nein“ |
+| Karte | zwei neue Zeilen **„Kosten“** und **„Ausgabe“** (Ausgabe-Tokens); alle Token-Arten stehen in `metrics.tokens` |
+| Phasen | Grenzen sind die früheren `make check` im Protokoll (wie in `runner/tokens.mjs`). Ein bestandenes Level behält seinen Wert. Ein gescheitertes Level zeigt den bisherigen Versuch |
+| Mehrere Levels in einem Check | ganze Phase **beim höchsten Level**, die übrigen `{ inLevel: n }`, angezeigt als „in L07“ |
+| Level 10 | heißt jetzt „Bericht vollständig und live“, mit 3 neuen Tests (vollständig, Darstellung, Teilbericht) |
+| Prüfer | eigene, unabhängige Phasen-Berechnung (`judge/lib/phasen.mjs`). Level 10 vergleicht die Tokens aller Levels exakt; `all.mjs` vergleicht sie bei jedem Lauf als Nebenwert. Der Prüfer-Container hängt das Protokoll zusätzlich unter `~/.claude/projects` ein, damit `make check` dort dieselben Tokens rechnet |
+
+### Ergebnis (Referenz mit dem Protokoll von Lauf 007)
+- Karten: L1 1,20 USD (56’103 Ausgabe), L2 0,07, L3 0,02, L4 0,00, L5 0,02, L6 „in L07“, L7 0,25, L8/L9 „in L10“, L10 0,05.
+- Prüfer Level 9 und 10 bestanden; Referenz Score 100.
+- Gegenprobe: Live gemeldete Kosten von Level 2 auf 0,01 statt 0,07 USD gesetzt; der Prüfer bemängelt genau Level 2.
+
+### Funde
+- Die Summe der gerundeten Kosten pro Level (1,61 USD) weicht von der gerundeten Gesamtsumme (1,60 USD) um einen Rappen ab. Festgelegt: Der Bericht zeigt die Summe der Kartenwerte.
+- Der Scratch-Ordner wird bei einem Neustart des Macs geleert, und die Podman-Maschine ist danach aus. Die Absicherung `set -euo pipefail` mit Prüfung des Ziel-Repos hat diesmal korrekt abgebrochen.

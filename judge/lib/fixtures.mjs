@@ -141,9 +141,9 @@ export const LEVEL9_CHECKS = [
 ];
 
 export const LEVEL10_CHECKS = [
-  'Kennzahlen für den Bericht gesammelt',
-  'Abschlussbericht wird dargestellt',
-  'Ohne Level 10 erscheint der Hinweis',
+  'Alle Teile des Berichts sind vorhanden',
+  'Vollständiger Bericht wird dargestellt',
+  'Teilbericht zeigt fehlende Teile',
 ];
 
 export const LOADTEST_FIELDS = ['connections', 'durationS', 'requests', 'errors', 'rps', 'p50Ms', 'p95Ms', 'maxMs'];
