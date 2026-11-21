@@ -9,7 +9,9 @@
   "remoteUser": "dev",
   "containerUser": "dev",
   "updateRemoteUserUID": false,
-  "runArgs": ["--userns=keep-id:uid=1000,gid=1000"],
+  // Fester DNS: Der Standard-Namensserver der Podman-Maschine antwortete nach Neustarts nicht,
+  // jede Abfrage dauerte dann 2 s (Tests liefen in Zeitgrenzen). Zwei öffentliche Server zur Sicherheit.
+  "runArgs": ["--userns=keep-id:uid=1000,gid=1000", "--dns", "1.1.1.1", "--dns", "9.9.9.9"],
 
   // Arbeitsordner = <lauf>/judge: hier landen die Ergebnisse (ergebnis/)
   "workspaceFolder": "/workspace",
