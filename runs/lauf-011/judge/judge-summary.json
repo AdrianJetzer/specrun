@@ -1,0 +1,213 @@
+{
+  "reachedLevel": 10,
+  "score": 100,
+  "maxChecked": 10,
+  "levels": [
+    {
+      "level": 1,
+      "passed": true
+    },
+    {
+      "level": 2,
+      "passed": true
+    },
+    {
+      "level": 3,
+      "passed": true
+    },
+    {
+      "level": 4,
+      "passed": true
+    },
+    {
+      "level": 5,
+      "passed": true
+    },
+    {
+      "level": 6,
+      "passed": true
+    },
+    {
+      "level": 7,
+      "passed": true
+    },
+    {
+      "level": 8,
+      "passed": true
+    },
+    {
+      "level": 9,
+      "passed": true
+    },
+    {
+      "level": 10,
+      "passed": true
+    }
+  ],
+  "tokens": {
+    "abweichendeLevels": [],
+    "pruefer": {
+      "1": {
+        "models": [
+          "claude-opus-5-5"
+        ],
+        "responses": 24,
+        "input": 50,
+        "cacheWrite5m": 0,
+        "cacheWrite1h": 123304,
+        "cacheRead": 2293806,
+        "output": 42527,
+        "total": 2459687,
+        "costUsd": 2.3,
+        "from": "2026-11-21T19:18:47.553Z",
+        "until": "2026-11-21T19:31:36.701Z",
+        "buildS": 769
+      },
+      "2": {
+        "models": [
+          "claude-opus-5-5"
+        ],
+        "responses": 6,
+        "input": 14,
+        "cacheWrite5m": 0,
+        "cacheWrite1h": 8180,
+        "cacheRead": 900253,
+        "output": 3861,
+        "total": 912308,
+        "costUsd": 0.32,
+        "from": "2026-11-21T19:31:44.821Z",
+        "until": "2026-11-21T19:32:24.651Z",
+        "buildS": 43
+      },
+      "3": {
+        "models": [
+          "claude-opus-5-5"
+        ],
+        "responses": 4,
+        "input": 8,
+        "cacheWrite5m": 0,
+        "cacheWrite1h": 16617,
+        "cacheRead": 646822,
+        "output": 15526,
+        "total": 678973,
+        "costUsd": 0.57,
+        "from": "2026-11-21T19:32:45.553Z",
+        "until": "2026-11-21T19:34:32.298Z",
+        "buildS": 122
+      },
+      "4": {
+        "models": [
+          "claude-opus-5-5"
+        ],
+        "responses": 3,
+        "input": 6,
+        "cacheWrite5m": 0,
+        "cacheWrite1h": 9513,
+        "cacheRead": 524288,
+        "output": 8639,
+        "total": 542446,
+        "costUsd": 0.35,
+        "from": "2026-11-21T19:34:39.816Z",
+        "until": "2026-11-21T19:35:52.534Z",
+        "buildS": 75
+      },
+      "5": {
+        "models": [
+          "claude-opus-5-5"
+        ],
+        "responses": 2,
+        "input": 4,
+        "cacheWrite5m": 0,
+        "cacheWrite1h": 3117,
+        "cacheRead": 363886,
+        "output": 2353,
+        "total": 369360,
+        "costUsd": 0.14,
+        "from": "2026-11-21T19:36:00.788Z",
+        "until": "2026-11-21T19:36:21.235Z",
+        "buildS": 22
+      },
+      "6": {
+        "models": [
+          "claude-opus-5-5"
+        ],
+        "responses": 6,
+        "input": 12,
+        "cacheWrite5m": 0,
+        "cacheWrite1h": 7790,
+        "cacheRead": 1134839,
+        "output": 6219,
+        "total": 1148860,
+        "costUsd": 0.41,
+        "from": "2026-11-21T19:36:55.132Z",
+        "until": "2026-11-21T19:40:45.317Z",
+        "buildS": 241
+      },
+      "7": {
+        "models": [
+          "claude-opus-5-5"
+        ],
+        "responses": 4,
+        "input": 8,
+        "cacheWrite5m": 0,
+        "cacheWrite1h": 8136,
+        "cacheRead": 775791,
+        "output": 6996,
+        "total": 790931,
+        "costUsd": 0.36,
+        "from": "2026-11-21T19:41:20.842Z",
+        "until": "2026-11-21T19:44:43.554Z",
+        "buildS": 205
+      },
+      "8": {
+        "models": [
+          "claude-opus-5-5"
+        ],
+        "responses": 2,
+        "input": 4,
+        "cacheWrite5m": 0,
+        "cacheWrite1h": 6517,
+        "cacheRead": 402234,
+        "output": 5720,
+        "total": 414475,
+        "costUsd": 0.25,
+        "from": "2026-11-21T19:45:32.628Z",
+        "until": "2026-11-21T19:49:59.619Z",
+        "buildS": 277
+      },
+      "9": {
+        "models": [
+          "claude-opus-5-5"
+        ],
+        "responses": 2,
+        "input": 4,
+        "cacheWrite5m": 0,
+        "cacheWrite1h": 3972,
+        "cacheRead": 415125,
+        "output": 3698,
+        "total": 422799,
+        "costUsd": 0.19,
+        "from": "2026-11-21T19:50:55.090Z",
+        "until": "2026-11-21T19:54:55.157Z",
+        "buildS": 241
+      },
+      "10": {
+        "models": [
+          "claude-opus-5-5"
+        ],
+        "responses": 2,
+        "input": 4,
+        "cacheWrite5m": 0,
+        "cacheWrite1h": 6653,
+        "cacheRead": 423522,
+        "output": 5996,
+        "total": 436175,
+        "costUsd": 0.26,
+        "from": "2026-11-21T19:56:31.829Z",
+        "until": "2026-11-21T20:00:37.045Z",
+        "buildS": 252
+      }
+    }
+  },
+  "checkedAt": "2026-11-21T20:13:38.564Z"
+}

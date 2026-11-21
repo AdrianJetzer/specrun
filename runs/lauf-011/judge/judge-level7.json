@@ -1,0 +1,42 @@
+{
+  "level": 7,
+  "passed": true,
+  "checkedAt": "2026-11-21T20:09:15.257Z",
+  "target": "/home/dev/build",
+  "criteria": [
+    {
+      "id": "L7-K1",
+      "name": "Dockerfiles, nginx-container.conf und docker-compose.yml erfüllen die Eckpunkte",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "id": "L7-K2",
+      "name": "Job images grün; Container-Report mit den 6 Checks der Spec, alle bestanden",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "id": "L7-K3",
+      "name": "Beide Images öffentlich mit Tag des Commits; Labels und Laufzeit-Konfiguration stimmen",
+      "ok": true,
+      "detail": "Größe: Frontend 25.2 MB, Backend 8.3 MB"
+    },
+    {
+      "id": "L7-K4",
+      "name": "make level7 und make check: Level 1–7 bestanden mit den Checks der Spec",
+      "ok": true,
+      "detail": ""
+    }
+  ],
+  "nebenwerte": {
+    "imagesJobS": 82,
+    "imageGroessenMB": {
+      "frontend": 25.2,
+      "backend": 8.3
+    },
+    "selbstmessung": "bestanden",
+    "fremdmessung": "bestanden",
+    "abweichung": false
+  }
+}

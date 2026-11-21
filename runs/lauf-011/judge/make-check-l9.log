@@ -1,0 +1,110 @@
+cd frontend && npm ci && npm run build
+
+added 24 packages, and audited 25 packages in 779ms
+
+8 packages are looking for funding
+  run `npm fund` for details
+
+found 0 vulnerabilities
+
+> levelboard-frontend@0.1.0 build
+> tsc -b && vite build
+
+vite v8.3.8 building client environment for production...
+transforming...
+✓ 22 modules transformed.
+rendering chunks...
+computing gzip size...
+dist/index.html                   0.47 kB │ gzip:  0.29 kB
+dist/assets/index-r0-SBS47.css    5.58 kB │ gzip:  1.58 kB
+dist/assets/index-BPe6heY6.js   233.94 kB │ gzip: 72.75 kB
+
+✓ built in 115ms
+cd backend && go build -o bin/levelboard-backend .
+nginx -p "/home/dev/build/" -e .run/nginx-error.log -c frontend/nginx-api.conf
+Levelboard läuft auf http://127.0.0.1:8080 (Quelle: Backend)
+Backend läuft auf http://127.0.0.1:8081
+Datenbank: .run/levelboard.db
+Repo: https://github.com/specrun-lab/levelboard-lauf-011
+Images: ghcr.io/specrun-lab/levelboard-lauf-011-frontend und ghcr.io/specrun-lab/levelboard-lauf-011-backend
+Live: https://lauf-011.2-29-223-205.sslip.io
+Live-Prüfung gegen https://lauf-011.2-29-223-205.sslip.io
+curl: (22) The requested URL returned error: 502
+
+Running 46 tests using 1 worker
+
+  ✓   1 [levels] › tests/level1.spec.ts:4:3 › level-1 › Seite antwortet mit HTTP 200 (19ms)
+  ✓   2 [levels] › tests/level1.spec.ts:10:3 › level-1 › Titel ist „Levelboard“ (105ms)
+  ✓   3 [levels] › tests/level1.spec.ts:16:3 › level-1 › 10 Level-Karten sichtbar (115ms)
+  ✓   4 [levels] › tests/level1.spec.ts:26:3 › level-1 › Keine Konsolenfehler (387ms)
+  ✓   5 [levels] › tests/level1.spec.ts:38:3 › level-1 › Handy-Ansicht: Karten einspaltig (158ms)
+  ✓   6 [levels] › tests/level2.spec.ts:11:3 › level-2 › Antwort kommt von nginx (4ms)
+  ✓   7 [levels] › tests/level2.spec.ts:17:3 › level-2 › results.json wird nicht zwischengespeichert (6ms)
+  ✓   8 [levels] › tests/level2.spec.ts:23:3 › level-2 › index.html wird nicht zwischengespeichert (3ms)
+  ✓   9 [levels] › tests/level2.spec.ts:28:3 › level-2 › Assets werden ein Jahr zwischengespeichert (9ms)
+  ✓  10 [levels] › tests/level2.spec.ts:35:3 › level-2 › Fehlende Datei ergibt 404 (2ms)
+  ✓  11 [levels] › tests/level2.spec.ts:40:3 › level-2 › Antworten sind gzip-komprimiert (12ms)
+  ✓  12 [levels] › tests/level2.spec.ts:49:3 › level-2 › Seite funktioniert über nginx (403ms)
+  ✓  13 [levels] › tests/level3.spec.ts:13:3 › level-3 › Backend antwortet auf /api/health (11ms)
+  ✓  14 [levels] › tests/level3.spec.ts:24:3 › level-3 › GET /api/levels liefert alle 10 Levels im Schema (7ms)
+  ✓  15 [levels] › tests/level3.spec.ts:37:3 › level-3 › Ergebnis melden setzt Status und Zeitpunkt (8ms)
+  ✓  16 [levels] › tests/level3.spec.ts:49:3 › level-3 › Fehlschlag sperrt höhere Levels (4ms)
+  ✓  17 [levels] › tests/level3.spec.ts:59:3 › level-3 › Falsche Reihenfolge ergibt 409 (7ms)
+  ✓  18 [levels] › tests/level3.spec.ts:67:3 › level-3 › Ungültige Anfragen ergeben 400 (5ms)
+  ✓  19 [levels] › tests/level3.spec.ts:79:3 › level-3 › Unbekanntes Level ergibt 404 (7ms)
+  ✓  20 [levels] › tests/level3.spec.ts:86:3 › level-3 › Go-Tests bestehen (491ms)
+  ✓  21 [levels] › tests/level4.spec.ts:15:3 › level-4 › Meldungen erscheinen in der Historie, neueste zuerst (12ms)
+  ✓  22 [levels] › tests/level4.spec.ts:29:3 › level-4 › Historie begrenzt mit limit (5ms)
+  ✓  23 [levels] › tests/level4.spec.ts:37:3 › level-4 › Daten überstehen einen Neustart des Backends (135ms)
+  ✓  24 [levels] › tests/level4.spec.ts:48:3 › level-4 › Abgelehnte Meldungen landen nicht in der Historie (10ms)
+  ✓  25 [levels] › tests/level4.spec.ts:60:3 › level-4 › Datenbank hat das vorgegebene Schema (2ms)
+  ✓  26 [levels] › tests/level5.spec.ts:8:3 › level-5 › Seite liest aus dem Backend (110ms)
+  ✓  27 [levels] › tests/level5.spec.ts:18:3 › level-5 › nginx leitet /api/ an das Backend weiter (7ms)
+  ✓  28 [levels] › tests/level5.spec.ts:29:3 › level-5 › Gemeldetes Ergebnis erscheint ohne Neuladen (5.5s)
+  ✓  29 [levels] › tests/level5.spec.ts:41:3 › level-5 › Backend-Ausfall wird angezeigt (10.6s)
+  ✓  30 [levels] › tests/level5.spec.ts:58:3 › level-5 › Meldungen über nginx landen in der Historie (10ms)
+  ✓  31 [levels] › tests/level6.spec.ts:11:3 › level-6 › Repo existiert und ist öffentlich (523ms)
+  ✓  32 [levels] › tests/level6.spec.ts:18:3 › level-6 › Lokaler Stand ist gepusht (513ms)
+  ✓  33 [levels] › tests/level6.spec.ts:24:3 › level-6 › Letzter Pipeline-Lauf ist grün (598ms)
+  ✓  34 [levels] › tests/level6.spec.ts:31:3 › level-6 › Report enthält Level 1–5 bestanden (1.9s)
+  ✓  35 [levels] › tests/level7.spec.ts:34:3 › level-7 › Job images des letzten Laufs ist grün (1.2s)
+  ✓  36 [levels] › tests/level7.spec.ts:42:3 › level-7 › Beide Images liegen öffentlich in der GHCR (691ms)
+  ✓  37 [levels] › tests/level7.spec.ts:55:3 › level-7 › Report der Container-Suite enthält nur bestandene Checks (2.1s)
+  ✓  38 [levels] › tests/level8.spec.ts:10:3 › level-8 › Job deploy des letzten Laufs ist grün (7.0s)
+  ✓  39 [levels] › tests/level8.spec.ts:18:3 › level-8 › Live-Seite antwortet über HTTPS (1.4s)
+  ✓  40 [levels] › tests/level8.spec.ts:27:3 › level-8 › Live-Seite meldet den aktuellen Commit (2.2s)
+  ✓  41 [levels] › tests/level8.spec.ts:37:3 › level-8 › Live-Seite zeigt die Ergebnisse der Pipeline (258ms)
+  ✓  42 [levels] › tests/level9.spec.ts:13:3 › level-9 › Live-Seite zeigt Kopfzeile und 10 Karten (595ms)
+  ✓  43 [levels] › tests/level9.spec.ts:22:3 › level-9 › Cache- und gzip-Regeln gelten live (705ms)
+  ✓  44 [levels] › tests/level9.spec.ts:35:3 › level-9 › Live-API antwortet laut Spec (575ms)
+  ✓  45 [levels] › tests/level9.spec.ts:59:3 › level-9 › Meldung erscheint live ohne Neuladen (5.9s)
+  ✓  46 [levels] › tests/level9.spec.ts:72:3 › level-9 › Lasttest: 10 Verbindungen, 30 s, ohne Fehler, p95 unter 1 s (30.1s)
+
+  46 passed (1.3m)
+Level 1: bestanden (5/5 Checks)
+Level 2: bestanden (7/7 Checks)
+Level 3: bestanden (8/8 Checks)
+Level 4: bestanden (5/5 Checks)
+Level 5: bestanden (5/5 Checks)
+Level 6: bestanden (4/4 Checks)
+Level 7: bestanden (3/3 Checks)
+Level 8: bestanden (4/4 Checks)
+Level 9: bestanden (5/5 Checks)
+Level 1 an das Backend gemeldet
+Level 2 an das Backend gemeldet
+Level 3 an das Backend gemeldet
+Level 4 an das Backend gemeldet
+Level 5 an das Backend gemeldet
+Level 6 an das Backend gemeldet
+Level 7 an das Backend gemeldet
+Level 8 an das Backend gemeldet
+Level 9 an das Backend gemeldet
+Level 1 an die Live-API gemeldet
+Level 2 an die Live-API gemeldet
+Level 3 an die Live-API gemeldet
+Level 4 an die Live-API gemeldet
+Level 5 an die Live-API gemeldet
+Level 6 an die Live-API gemeldet
+Level 7 an die Live-API gemeldet
+Level 8 an die Live-API gemeldet
+Level 9 an die Live-API gemeldet

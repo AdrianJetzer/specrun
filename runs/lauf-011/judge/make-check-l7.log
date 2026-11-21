@@ -1,0 +1,86 @@
+cd frontend && npm ci && npm run build
+
+added 24 packages, and audited 25 packages in 779ms
+
+8 packages are looking for funding
+  run `npm fund` for details
+
+found 0 vulnerabilities
+
+> levelboard-frontend@0.1.0 build
+> tsc -b && vite build
+
+vite v8.3.8 building client environment for production...
+transforming...
+✓ 22 modules transformed.
+rendering chunks...
+computing gzip size...
+dist/index.html                   0.47 kB │ gzip:  0.29 kB
+dist/assets/index-r0-SBS47.css    5.58 kB │ gzip:  1.58 kB
+dist/assets/index-BPe6heY6.js   233.94 kB │ gzip: 72.75 kB
+
+✓ built in 107ms
+cd backend && go build -o bin/levelboard-backend .
+nginx -p "/home/dev/build/" -e .run/nginx-error.log -c frontend/nginx-api.conf
+Levelboard läuft auf http://127.0.0.1:8080 (Quelle: Backend)
+Backend läuft auf http://127.0.0.1:8081
+Datenbank: .run/levelboard.db
+Repo: https://github.com/specrun-lab/levelboard-lauf-011
+Images: ghcr.io/specrun-lab/levelboard-lauf-011-frontend und ghcr.io/specrun-lab/levelboard-lauf-011-backend
+curl: (22) The requested URL returned error: 502
+
+Running 37 tests using 1 worker
+
+  ✓   1 [levels] › tests/level1.spec.ts:4:3 › level-1 › Seite antwortet mit HTTP 200 (19ms)
+  ✓   2 [levels] › tests/level1.spec.ts:10:3 › level-1 › Titel ist „Levelboard“ (108ms)
+  ✓   3 [levels] › tests/level1.spec.ts:16:3 › level-1 › 10 Level-Karten sichtbar (116ms)
+  ✓   4 [levels] › tests/level1.spec.ts:26:3 › level-1 › Keine Konsolenfehler (402ms)
+  ✓   5 [levels] › tests/level1.spec.ts:38:3 › level-1 › Handy-Ansicht: Karten einspaltig (174ms)
+  ✓   6 [levels] › tests/level2.spec.ts:11:3 › level-2 › Antwort kommt von nginx (4ms)
+  ✓   7 [levels] › tests/level2.spec.ts:17:3 › level-2 › results.json wird nicht zwischengespeichert (3ms)
+  ✓   8 [levels] › tests/level2.spec.ts:23:3 › level-2 › index.html wird nicht zwischengespeichert (3ms)
+  ✓   9 [levels] › tests/level2.spec.ts:28:3 › level-2 › Assets werden ein Jahr zwischengespeichert (15ms)
+  ✓  10 [levels] › tests/level2.spec.ts:35:3 › level-2 › Fehlende Datei ergibt 404 (7ms)
+  ✓  11 [levels] › tests/level2.spec.ts:40:3 › level-2 › Antworten sind gzip-komprimiert (11ms)
+  ✓  12 [levels] › tests/level2.spec.ts:49:3 › level-2 › Seite funktioniert über nginx (433ms)
+  ✓  13 [levels] › tests/level3.spec.ts:13:3 › level-3 › Backend antwortet auf /api/health (6ms)
+  ✓  14 [levels] › tests/level3.spec.ts:24:3 › level-3 › GET /api/levels liefert alle 10 Levels im Schema (7ms)
+  ✓  15 [levels] › tests/level3.spec.ts:37:3 › level-3 › Ergebnis melden setzt Status und Zeitpunkt (9ms)
+  ✓  16 [levels] › tests/level3.spec.ts:49:3 › level-3 › Fehlschlag sperrt höhere Levels (5ms)
+  ✓  17 [levels] › tests/level3.spec.ts:59:3 › level-3 › Falsche Reihenfolge ergibt 409 (6ms)
+  ✓  18 [levels] › tests/level3.spec.ts:67:3 › level-3 › Ungültige Anfragen ergeben 400 (6ms)
+  ✓  19 [levels] › tests/level3.spec.ts:79:3 › level-3 › Unbekanntes Level ergibt 404 (7ms)
+  ✓  20 [levels] › tests/level3.spec.ts:86:3 › level-3 › Go-Tests bestehen (426ms)
+  ✓  21 [levels] › tests/level4.spec.ts:15:3 › level-4 › Meldungen erscheinen in der Historie, neueste zuerst (12ms)
+  ✓  22 [levels] › tests/level4.spec.ts:29:3 › level-4 › Historie begrenzt mit limit (4ms)
+  ✓  23 [levels] › tests/level4.spec.ts:37:3 › level-4 › Daten überstehen einen Neustart des Backends (131ms)
+  ✓  24 [levels] › tests/level4.spec.ts:48:3 › level-4 › Abgelehnte Meldungen landen nicht in der Historie (9ms)
+  ✓  25 [levels] › tests/level4.spec.ts:60:3 › level-4 › Datenbank hat das vorgegebene Schema (1ms)
+  ✓  26 [levels] › tests/level5.spec.ts:8:3 › level-5 › Seite liest aus dem Backend (106ms)
+  ✓  27 [levels] › tests/level5.spec.ts:18:3 › level-5 › nginx leitet /api/ an das Backend weiter (7ms)
+  ✓  28 [levels] › tests/level5.spec.ts:29:3 › level-5 › Gemeldetes Ergebnis erscheint ohne Neuladen (5.5s)
+  ✓  29 [levels] › tests/level5.spec.ts:41:3 › level-5 › Backend-Ausfall wird angezeigt (10.5s)
+  ✓  30 [levels] › tests/level5.spec.ts:58:3 › level-5 › Meldungen über nginx landen in der Historie (9ms)
+  ✓  31 [levels] › tests/level6.spec.ts:11:3 › level-6 › Repo existiert und ist öffentlich (440ms)
+  ✓  32 [levels] › tests/level6.spec.ts:18:3 › level-6 › Lokaler Stand ist gepusht (430ms)
+  ✓  33 [levels] › tests/level6.spec.ts:24:3 › level-6 › Letzter Pipeline-Lauf ist grün (458ms)
+  ✓  34 [levels] › tests/level6.spec.ts:31:3 › level-6 › Report enthält Level 1–5 bestanden (1.8s)
+  ✓  35 [levels] › tests/level7.spec.ts:34:3 › level-7 › Job images des letzten Laufs ist grün (989ms)
+  ✓  36 [levels] › tests/level7.spec.ts:42:3 › level-7 › Beide Images liegen öffentlich in der GHCR (767ms)
+  ✓  37 [levels] › tests/level7.spec.ts:55:3 › level-7 › Report der Container-Suite enthält nur bestandene Checks (1.8s)
+
+  37 passed (25.4s)
+Level 1: bestanden (5/5 Checks)
+Level 2: bestanden (7/7 Checks)
+Level 3: bestanden (8/8 Checks)
+Level 4: bestanden (5/5 Checks)
+Level 5: bestanden (5/5 Checks)
+Level 6: bestanden (4/4 Checks)
+Level 7: bestanden (3/3 Checks)
+Level 1 an das Backend gemeldet
+Level 2 an das Backend gemeldet
+Level 3 an das Backend gemeldet
+Level 4 an das Backend gemeldet
+Level 5 an das Backend gemeldet
+Level 6 an das Backend gemeldet
+Level 7 an das Backend gemeldet

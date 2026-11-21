@@ -1,0 +1,9 @@
+{
+  "runId": "lauf-011",
+  "specVersion": "1.4.0",
+  "model": "claude-opus-5-5",
+  "fake": false,
+  "buildDir": "/lauf/work",
+  "judgedIn": "Prüfer-Container",
+  "judgedAt": "2026-11-21T20:06:11Z"
+}

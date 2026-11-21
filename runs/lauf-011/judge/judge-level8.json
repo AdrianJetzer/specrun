@@ -1,0 +1,40 @@
+{
+  "level": 8,
+  "passed": true,
+  "checkedAt": "2026-11-21T20:09:52.929Z",
+  "target": "/home/dev/build",
+  "live": "https://lauf-011.2-29-223-205.sslip.io",
+  "criteria": [
+    {
+      "id": "L8-K1",
+      "name": "deploy/compose.yml, Job deploy und Commit im Backend erfüllen die Eckpunkte; kein Schlüssel im Repo",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "id": "L8-K2",
+      "name": "Job deploy des letzten Laufs grün; keine Geheimnisse in den Logs",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "id": "L8-K3",
+      "name": "Live von außen: gültiges HTTPS, Seite aus dem Backend mit aktuellem Commit, API laut Spec, Level 1–5 bestanden",
+      "ok": true,
+      "detail": "https://lauf-011.2-29-223-205.sslip.io (240 ms)"
+    },
+    {
+      "id": "L8-K4",
+      "name": "make level8 und make check: Level 1–8 bestanden mit den Checks der Spec",
+      "ok": true,
+      "detail": ""
+    }
+  ],
+  "nebenwerte": {
+    "deployJobS": 41,
+    "liveAntwortMs": 240,
+    "selbstmessung": "bestanden",
+    "fremdmessung": "bestanden",
+    "abweichung": false
+  }
+}

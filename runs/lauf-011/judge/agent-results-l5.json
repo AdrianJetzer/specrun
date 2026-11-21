@@ -1,0 +1,622 @@
+{
+  "datei": {
+    "run": {
+      "id": "lauf-011",
+      "version": "0.1.0",
+      "commit": null,
+      "updatedAt": "2026-11-21T20:08:08.638Z"
+    },
+    "levels": [
+      {
+        "level": 1,
+        "title": "Statische Seite",
+        "status": "bestanden",
+        "checkedAt": "2026-11-21T20:08:08.638Z",
+        "durationMs": 891,
+        "checks": [
+          {
+            "name": "Seite antwortet mit HTTP 200",
+            "ok": true
+          },
+          {
+            "name": "Titel ist „Levelboard“",
+            "ok": true
+          },
+          {
+            "name": "10 Level-Karten sichtbar",
+            "ok": true
+          },
+          {
+            "name": "Keine Konsolenfehler",
+            "ok": true
+          },
+          {
+            "name": "Handy-Ansicht: Karten einspaltig",
+            "ok": true
+          }
+        ],
+        "metrics": {
+          "tokens": {
+            "models": [
+              "claude-opus-5-5"
+            ],
+            "responses": 24,
+            "input": 50,
+            "cacheWrite5m": 0,
+            "cacheWrite1h": 123304,
+            "cacheRead": 2293806,
+            "output": 42527,
+            "total": 2459687,
+            "costUsd": 2.3,
+            "from": "2026-11-21T19:18:47.553Z",
+            "until": "2026-11-21T19:31:36.701Z",
+            "buildS": 769
+          }
+        }
+      },
+      {
+        "level": 2,
+        "title": "Webserver",
+        "status": "bestanden",
+        "checkedAt": "2026-11-21T20:08:08.638Z",
+        "durationMs": 481,
+        "checks": [
+          {
+            "name": "Antwort kommt von nginx",
+            "ok": true
+          },
+          {
+            "name": "results.json wird nicht zwischengespeichert",
+            "ok": true
+          },
+          {
+            "name": "index.html wird nicht zwischengespeichert",
+            "ok": true
+          },
+          {
+            "name": "Assets werden ein Jahr zwischengespeichert",
+            "ok": true
+          },
+          {
+            "name": "Fehlende Datei ergibt 404",
+            "ok": true
+          },
+          {
+            "name": "Antworten sind gzip-komprimiert",
+            "ok": true
+          },
+          {
+            "name": "Seite funktioniert über nginx",
+            "ok": true
+          }
+        ],
+        "metrics": {
+          "tokens": {
+            "models": [
+              "claude-opus-5-5"
+            ],
+            "responses": 6,
+            "input": 14,
+            "cacheWrite5m": 0,
+            "cacheWrite1h": 8180,
+            "cacheRead": 900253,
+            "output": 3861,
+            "total": 912308,
+            "costUsd": 0.32,
+            "from": "2026-11-21T19:31:44.821Z",
+            "until": "2026-11-21T19:32:24.651Z",
+            "buildS": 43
+          }
+        }
+      },
+      {
+        "level": 3,
+        "title": "REST-Backend",
+        "status": "bestanden",
+        "checkedAt": "2026-11-21T20:08:08.638Z",
+        "durationMs": 522,
+        "checks": [
+          {
+            "name": "Backend antwortet auf /api/health",
+            "ok": true
+          },
+          {
+            "name": "GET /api/levels liefert alle 10 Levels im Schema",
+            "ok": true
+          },
+          {
+            "name": "Ergebnis melden setzt Status und Zeitpunkt",
+            "ok": true
+          },
+          {
+            "name": "Fehlschlag sperrt höhere Levels",
+            "ok": true
+          },
+          {
+            "name": "Falsche Reihenfolge ergibt 409",
+            "ok": true
+          },
+          {
+            "name": "Ungültige Anfragen ergeben 400",
+            "ok": true
+          },
+          {
+            "name": "Unbekanntes Level ergibt 404",
+            "ok": true
+          },
+          {
+            "name": "Go-Tests bestehen",
+            "ok": true
+          }
+        ],
+        "metrics": {
+          "tokens": {
+            "models": [
+              "claude-opus-5-5"
+            ],
+            "responses": 4,
+            "input": 8,
+            "cacheWrite5m": 0,
+            "cacheWrite1h": 16617,
+            "cacheRead": 646822,
+            "output": 15526,
+            "total": 678973,
+            "costUsd": 0.57,
+            "from": "2026-11-21T19:32:45.553Z",
+            "until": "2026-11-21T19:34:32.298Z",
+            "buildS": 122
+          }
+        }
+      },
+      {
+        "level": 4,
+        "title": "Datenbank",
+        "status": "bestanden",
+        "checkedAt": "2026-11-21T20:08:08.638Z",
+        "durationMs": 160,
+        "checks": [
+          {
+            "name": "Meldungen erscheinen in der Historie, neueste zuerst",
+            "ok": true
+          },
+          {
+            "name": "Historie begrenzt mit limit",
+            "ok": true
+          },
+          {
+            "name": "Daten überstehen einen Neustart des Backends",
+            "ok": true
+          },
+          {
+            "name": "Abgelehnte Meldungen landen nicht in der Historie",
+            "ok": true
+          },
+          {
+            "name": "Datenbank hat das vorgegebene Schema",
+            "ok": true
+          }
+        ],
+        "metrics": {
+          "tokens": {
+            "models": [
+              "claude-opus-5-5"
+            ],
+            "responses": 3,
+            "input": 6,
+            "cacheWrite5m": 0,
+            "cacheWrite1h": 9513,
+            "cacheRead": 524288,
+            "output": 8639,
+            "total": 542446,
+            "costUsd": 0.35,
+            "from": "2026-11-21T19:34:39.816Z",
+            "until": "2026-11-21T19:35:52.534Z",
+            "buildS": 75
+          }
+        }
+      },
+      {
+        "level": 5,
+        "title": "Frontend + Backend",
+        "status": "bestanden",
+        "checkedAt": "2026-11-21T20:08:08.638Z",
+        "durationMs": 16179,
+        "checks": [
+          {
+            "name": "Seite liest aus dem Backend",
+            "ok": true
+          },
+          {
+            "name": "nginx leitet /api/ an das Backend weiter",
+            "ok": true
+          },
+          {
+            "name": "Gemeldetes Ergebnis erscheint ohne Neuladen",
+            "ok": true
+          },
+          {
+            "name": "Backend-Ausfall wird angezeigt",
+            "ok": true
+          },
+          {
+            "name": "Meldungen über nginx landen in der Historie",
+            "ok": true
+          }
+        ],
+        "metrics": {
+          "tokens": {
+            "models": [
+              "claude-opus-5-5"
+            ],
+            "responses": 2,
+            "input": 4,
+            "cacheWrite5m": 0,
+            "cacheWrite1h": 3117,
+            "cacheRead": 363886,
+            "output": 2353,
+            "total": 369360,
+            "costUsd": 0.14,
+            "from": "2026-11-21T19:36:00.788Z",
+            "until": "2026-11-21T19:36:21.235Z",
+            "buildS": 22
+          }
+        }
+      },
+      {
+        "level": 6,
+        "title": "Repo + CI",
+        "status": "offen",
+        "checkedAt": null,
+        "durationMs": null,
+        "checks": [],
+        "metrics": {}
+      },
+      {
+        "level": 7,
+        "title": "Images in der Pipeline",
+        "status": "offen",
+        "checkedAt": null,
+        "durationMs": null,
+        "checks": [],
+        "metrics": {}
+      },
+      {
+        "level": 8,
+        "title": "Deployment",
+        "status": "offen",
+        "checkedAt": null,
+        "durationMs": null,
+        "checks": [],
+        "metrics": {}
+      },
+      {
+        "level": 9,
+        "title": "Live-Prüfung",
+        "status": "offen",
+        "checkedAt": null,
+        "durationMs": null,
+        "checks": [],
+        "metrics": {}
+      },
+      {
+        "level": 10,
+        "title": "Metriken veröffentlicht",
+        "status": "offen",
+        "checkedAt": null,
+        "durationMs": null,
+        "checks": [],
+        "metrics": {}
+      }
+    ]
+  },
+  "backend": {
+    "run": {
+      "id": "lauf-011",
+      "version": "0.1.0",
+      "commit": null,
+      "updatedAt": "2026-11-21T20:08:08.700Z"
+    },
+    "levels": [
+      {
+        "level": 1,
+        "title": "Statische Seite",
+        "status": "bestanden",
+        "checkedAt": "2026-11-21T20:08:08.686Z",
+        "durationMs": 891,
+        "checks": [
+          {
+            "name": "Seite antwortet mit HTTP 200",
+            "ok": true
+          },
+          {
+            "name": "Titel ist „Levelboard“",
+            "ok": true
+          },
+          {
+            "name": "10 Level-Karten sichtbar",
+            "ok": true
+          },
+          {
+            "name": "Keine Konsolenfehler",
+            "ok": true
+          },
+          {
+            "name": "Handy-Ansicht: Karten einspaltig",
+            "ok": true
+          }
+        ],
+        "metrics": {
+          "tokens": {
+            "models": [
+              "claude-opus-5-5"
+            ],
+            "responses": 24,
+            "input": 50,
+            "cacheWrite5m": 0,
+            "cacheWrite1h": 123304,
+            "cacheRead": 2293806,
+            "output": 42527,
+            "total": 2459687,
+            "costUsd": 2.3,
+            "from": "2026-11-21T19:18:47.553Z",
+            "until": "2026-11-21T19:31:36.701Z",
+            "buildS": 769
+          }
+        }
+      },
+      {
+        "level": 2,
+        "title": "Webserver",
+        "status": "bestanden",
+        "checkedAt": "2026-11-21T20:08:08.694Z",
+        "durationMs": 481,
+        "checks": [
+          {
+            "name": "Antwort kommt von nginx",
+            "ok": true
+          },
+          {
+            "name": "results.json wird nicht zwischengespeichert",
+            "ok": true
+          },
+          {
+            "name": "index.html wird nicht zwischengespeichert",
+            "ok": true
+          },
+          {
+            "name": "Assets werden ein Jahr zwischengespeichert",
+            "ok": true
+          },
+          {
+            "name": "Fehlende Datei ergibt 404",
+            "ok": true
+          },
+          {
+            "name": "Antworten sind gzip-komprimiert",
+            "ok": true
+          },
+          {
+            "name": "Seite funktioniert über nginx",
+            "ok": true
+          }
+        ],
+        "metrics": {
+          "tokens": {
+            "models": [
+              "claude-opus-5-5"
+            ],
+            "responses": 6,
+            "input": 14,
+            "cacheWrite5m": 0,
+            "cacheWrite1h": 8180,
+            "cacheRead": 900253,
+            "output": 3861,
+            "total": 912308,
+            "costUsd": 0.32,
+            "from": "2026-11-21T19:31:44.821Z",
+            "until": "2026-11-21T19:32:24.651Z",
+            "buildS": 43
+          }
+        }
+      },
+      {
+        "level": 3,
+        "title": "REST-Backend",
+        "status": "bestanden",
+        "checkedAt": "2026-11-21T20:08:08.697Z",
+        "durationMs": 522,
+        "checks": [
+          {
+            "name": "Backend antwortet auf /api/health",
+            "ok": true
+          },
+          {
+            "name": "GET /api/levels liefert alle 10 Levels im Schema",
+            "ok": true
+          },
+          {
+            "name": "Ergebnis melden setzt Status und Zeitpunkt",
+            "ok": true
+          },
+          {
+            "name": "Fehlschlag sperrt höhere Levels",
+            "ok": true
+          },
+          {
+            "name": "Falsche Reihenfolge ergibt 409",
+            "ok": true
+          },
+          {
+            "name": "Ungültige Anfragen ergeben 400",
+            "ok": true
+          },
+          {
+            "name": "Unbekanntes Level ergibt 404",
+            "ok": true
+          },
+          {
+            "name": "Go-Tests bestehen",
+            "ok": true
+          }
+        ],
+        "metrics": {
+          "tokens": {
+            "models": [
+              "claude-opus-5-5"
+            ],
+            "responses": 4,
+            "input": 8,
+            "cacheWrite5m": 0,
+            "cacheWrite1h": 16617,
+            "cacheRead": 646822,
+            "output": 15526,
+            "total": 678973,
+            "costUsd": 0.57,
+            "from": "2026-11-21T19:32:45.553Z",
+            "until": "2026-11-21T19:34:32.298Z",
+            "buildS": 122
+          }
+        }
+      },
+      {
+        "level": 4,
+        "title": "Datenbank",
+        "status": "bestanden",
+        "checkedAt": "2026-11-21T20:08:08.698Z",
+        "durationMs": 160,
+        "checks": [
+          {
+            "name": "Meldungen erscheinen in der Historie, neueste zuerst",
+            "ok": true
+          },
+          {
+            "name": "Historie begrenzt mit limit",
+            "ok": true
+          },
+          {
+            "name": "Daten überstehen einen Neustart des Backends",
+            "ok": true
+          },
+          {
+            "name": "Abgelehnte Meldungen landen nicht in der Historie",
+            "ok": true
+          },
+          {
+            "name": "Datenbank hat das vorgegebene Schema",
+            "ok": true
+          }
+        ],
+        "metrics": {
+          "tokens": {
+            "models": [
+              "claude-opus-5-5"
+            ],
+            "responses": 3,
+            "input": 6,
+            "cacheWrite5m": 0,
+            "cacheWrite1h": 9513,
+            "cacheRead": 524288,
+            "output": 8639,
+            "total": 542446,
+            "costUsd": 0.35,
+            "from": "2026-11-21T19:34:39.816Z",
+            "until": "2026-11-21T19:35:52.534Z",
+            "buildS": 75
+          }
+        }
+      },
+      {
+        "level": 5,
+        "title": "Frontend + Backend",
+        "status": "bestanden",
+        "checkedAt": "2026-11-21T20:08:08.700Z",
+        "durationMs": 16179,
+        "checks": [
+          {
+            "name": "Seite liest aus dem Backend",
+            "ok": true
+          },
+          {
+            "name": "nginx leitet /api/ an das Backend weiter",
+            "ok": true
+          },
+          {
+            "name": "Gemeldetes Ergebnis erscheint ohne Neuladen",
+            "ok": true
+          },
+          {
+            "name": "Backend-Ausfall wird angezeigt",
+            "ok": true
+          },
+          {
+            "name": "Meldungen über nginx landen in der Historie",
+            "ok": true
+          }
+        ],
+        "metrics": {
+          "tokens": {
+            "models": [
+              "claude-opus-5-5"
+            ],
+            "responses": 2,
+            "input": 4,
+            "cacheWrite5m": 0,
+            "cacheWrite1h": 3117,
+            "cacheRead": 363886,
+            "output": 2353,
+            "total": 369360,
+            "costUsd": 0.14,
+            "from": "2026-11-21T19:36:00.788Z",
+            "until": "2026-11-21T19:36:21.235Z",
+            "buildS": 22
+          }
+        }
+      },
+      {
+        "level": 6,
+        "title": "Repo + CI",
+        "status": "offen",
+        "checkedAt": null,
+        "durationMs": null,
+        "checks": [],
+        "metrics": {}
+      },
+      {
+        "level": 7,
+        "title": "Images in der Pipeline",
+        "status": "offen",
+        "checkedAt": null,
+        "durationMs": null,
+        "checks": [],
+        "metrics": {}
+      },
+      {
+        "level": 8,
+        "title": "Deployment",
+        "status": "offen",
+        "checkedAt": null,
+        "durationMs": null,
+        "checks": [],
+        "metrics": {}
+      },
+      {
+        "level": 9,
+        "title": "Live-Prüfung",
+        "status": "offen",
+        "checkedAt": null,
+        "durationMs": null,
+        "checks": [],
+        "metrics": {}
+      },
+      {
+        "level": 10,
+        "title": "Metriken veröffentlicht",
+        "status": "offen",
+        "checkedAt": null,
+        "durationMs": null,
+        "checks": [],
+        "metrics": {}
+      }
+    ]
+  }
+}

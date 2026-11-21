@@ -1,0 +1,138 @@
+{
+  "run": {
+    "id": "lauf-011",
+    "version": "0.1.0",
+    "commit": null,
+    "updatedAt": "2026-11-21T20:06:49.273Z"
+  },
+  "levels": [
+    {
+      "level": 1,
+      "title": "Statische Seite",
+      "status": "bestanden",
+      "checkedAt": "2026-11-21T20:06:49.273Z",
+      "durationMs": 887,
+      "checks": [
+        {
+          "name": "Seite antwortet mit HTTP 200",
+          "ok": true
+        },
+        {
+          "name": "Titel ist „Levelboard“",
+          "ok": true
+        },
+        {
+          "name": "10 Level-Karten sichtbar",
+          "ok": true
+        },
+        {
+          "name": "Keine Konsolenfehler",
+          "ok": true
+        },
+        {
+          "name": "Handy-Ansicht: Karten einspaltig",
+          "ok": true
+        }
+      ],
+      "metrics": {
+        "tokens": {
+          "models": [
+            "claude-opus-5-5"
+          ],
+          "responses": 24,
+          "input": 50,
+          "cacheWrite5m": 0,
+          "cacheWrite1h": 123304,
+          "cacheRead": 2293806,
+          "output": 42527,
+          "total": 2459687,
+          "costUsd": 2.3,
+          "from": "2026-11-21T19:18:47.553Z",
+          "until": "2026-11-21T19:31:36.701Z",
+          "buildS": 769
+        }
+      }
+    },
+    {
+      "level": 2,
+      "title": "Webserver",
+      "status": "offen",
+      "checkedAt": null,
+      "durationMs": null,
+      "checks": [],
+      "metrics": {}
+    },
+    {
+      "level": 3,
+      "title": "REST-Backend",
+      "status": "offen",
+      "checkedAt": null,
+      "durationMs": null,
+      "checks": [],
+      "metrics": {}
+    },
+    {
+      "level": 4,
+      "title": "Datenbank",
+      "status": "offen",
+      "checkedAt": null,
+      "durationMs": null,
+      "checks": [],
+      "metrics": {}
+    },
+    {
+      "level": 5,
+      "title": "Frontend + Backend",
+      "status": "offen",
+      "checkedAt": null,
+      "durationMs": null,
+      "checks": [],
+      "metrics": {}
+    },
+    {
+      "level": 6,
+      "title": "Repo + CI",
+      "status": "offen",
+      "checkedAt": null,
+      "durationMs": null,
+      "checks": [],
+      "metrics": {}
+    },
+    {
+      "level": 7,
+      "title": "Images in der Pipeline",
+      "status": "offen",
+      "checkedAt": null,
+      "durationMs": null,
+      "checks": [],
+      "metrics": {}
+    },
+    {
+      "level": 8,
+      "title": "Deployment",
+      "status": "offen",
+      "checkedAt": null,
+      "durationMs": null,
+      "checks": [],
+      "metrics": {}
+    },
+    {
+      "level": 9,
+      "title": "Live-Prüfung",
+      "status": "offen",
+      "checkedAt": null,
+      "durationMs": null,
+      "checks": [],
+      "metrics": {}
+    },
+    {
+      "level": 10,
+      "title": "Metriken veröffentlicht",
+      "status": "offen",
+      "checkedAt": null,
+      "durationMs": null,
+      "checks": [],
+      "metrics": {}
+    }
+  ]
+}
