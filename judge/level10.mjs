@@ -92,7 +92,45 @@ async function ownImageMB(name) {
   }
   return Math.round((((m.layers ?? []).reduce((s, l) => s + l.size, 0)) / 1024 / 1024) * 10) / 10;
 }
-const comma = (n) => (typeof n === 'number' ? n.toFixed(1).replace('.', ',') : String(n));
+const comma = (n, d = 1) => (typeof n === 'number' ? n.toFixed(d).replace('.', ',') : String(n));
+const thousands = (n) => (typeof n === 'number' ? n.toLocaleString('de-CH') : String(n));
+
+// Eigene Nachrechnung der Tokens aus dem Session-Protokoll des Agenten (im Prüfer-Container unter /lauf/protokoll)
+const PROTOKOLL = process.env.SPECRUN_PROTOKOLL ?? '/lauf/protokoll';
+const PREIS = {
+  'claude-opus-5-5': [4, 5, 8, 0.2, 20],
+  'claude-sonnet-5-5': [2, 2.5, 4, 0.1, 10],
+  'claude-haiku-5-5': [0.1, 0.125, 0.2, 0.01, 0.5],
+};
+function ownTokens(bis) {
+  const files = [];
+  const walk = (d) => { for (const e of fs.readdirSync(d, { withFileTypes: true })) { const p = path.join(d, e.name); if (e.isDirectory()) walk(p); else if (e.name.endsWith('.jsonl')) files.push(p); } };
+  if (!fs.existsSync(PROTOKOLL)) return null;
+  walk(PROTOKOLL);
+  const seen = new Map();
+  for (const f of files) for (const line of fs.readFileSync(f, 'utf8').split('\n')) {
+    let d; try { d = JSON.parse(line); } catch { continue; }
+    if (d?.type !== 'assistant' || !d.message?.id || !d.message.usage || d.message.model === '<synthetic>' || seen.has(d.message.id)) continue;
+    seen.set(d.message.id, { t: Date.parse(d.timestamp), model: d.message.model, u: d.message.usage });
+  }
+  const sum = (list) => {
+    const r = { input: 0, cacheWrite5m: 0, cacheWrite1h: 0, cacheRead: 0, output: 0 };
+    let cost = 0; const models = new Set();
+    for (const { model, u } of list) {
+      const w1 = u.cache_creation?.ephemeral_1h_input_tokens ?? 0;
+      const w5 = u.cache_creation ? (u.cache_creation.ephemeral_5m_input_tokens ?? 0) : (u.cache_creation_input_tokens ?? 0);
+      const v = [u.input_tokens ?? 0, w5, w1, u.cache_read_input_tokens ?? 0, u.output_tokens ?? 0];
+      [r.input, r.cacheWrite5m, r.cacheWrite1h, r.cacheRead, r.output] = [r.input + v[0], r.cacheWrite5m + v[1], r.cacheWrite1h + v[2], r.cacheRead + v[3], r.output + v[4]];
+      const pr = PREIS[model]; models.add(model);
+      cost += pr ? v.reduce((acc, x, i) => acc + x * pr[i], 0) / 1e6 : NaN;
+    }
+    const ts = list.map((x) => x.t).sort((a, b) => a - b);
+    return { models: [...models].sort(), responses: list.length, ...r, total: Object.values(r).reduce((a, b) => a + b, 0),
+      costUsd: Math.round(cost * 100) / 100, sessionS: ts.length ? Math.round((ts.at(-1) - ts[0]) / 1000) : 0, until: ts.length ? new Date(ts.at(-1)).toISOString() : null };
+  };
+  const all = [...seen.values()];
+  return { bis: sum(all.filter((x) => x.t <= Date.parse(bis))), gesamt: sum(all) };
+}
 
 console.log(`Prüfer Level 10 → ${target} (live ${LIVE})\n`);
 let snapshot = null;
@@ -110,7 +148,7 @@ if (!RUN_ID || !process.env.GH_TOKEN || !LIVE_DOMAIN) {
     const notPassed = snapshot.levels.filter((l) => l.status !== 'bestanden').map((l) => l.level);
     if (notPassed.length) kp.push(`live nicht bestanden: Level ${notPassed.join(', ')}`);
     if (!same(snapshot.levels[9].checks.map((c) => c.name), LEVEL10_CHECKS)) kp.push(`Checks von Level 10: ${JSON.stringify(snapshot.levels[9].checks.map((c) => c.name))}`);
-    if (!same(Object.keys(m).sort(), ['images', 'loadtest', 'pipeline'])) kp.push(`metrics-Felder: ${Object.keys(m).join(', ')}`);
+    if (!same(Object.keys(m).sort(), ['images', 'loadtest', 'pipeline', 'tokens'])) kp.push(`metrics-Felder: ${Object.keys(m).join(', ')}`);
     const pipe = ownPipeline();
     nebenwerte.pipelinePruefer = pipe;
     if (!pipe) kp.push('kein Pipeline-Lauf für den aktuellen Commit');
@@ -121,8 +159,16 @@ if (!RUN_ID || !process.env.GH_TOKEN || !LIVE_DOMAIN) {
     const l9 = snapshot.levels[8].metrics ?? {};
     const lt = { requests: l9.requests, errors: l9.errors, rps: l9.rps, p50Ms: l9.p50Ms, p95Ms: l9.p95Ms };
     if (!equal(m.loadtest, lt)) kp.push(`loadtest ${JSON.stringify(m.loadtest)} ≠ Level 9 ${JSON.stringify(lt)}`);
+    const tok = m.tokens?.until ? ownTokens(m.tokens.until) : null;
+    if (!tok) kp.push(m.tokens?.until ? `kein Session-Protokoll unter ${PROTOKOLL}` : 'tokens.until fehlt');
+    else {
+      if (!equal(m.tokens, tok.bis)) kp.push(`tokens gemeldet ${JSON.stringify(m.tokens)}, nachgerechnet ${JSON.stringify(tok.bis)}`);
+      nebenwerte.tokensBisMessung = tok.bis;
+      nebenwerte.tokensGesamt = tok.gesamt;
+      nebenwerte.tokensNachMessung = tok.gesamt.total - tok.bis.total;
+    }
   }
-  add('L10-K1', 'Level 1–10 live bestanden; Kennzahlen stimmen mit eigener Messung (Pipeline, Images) und Level 9 (Lasttest)', kp.length === 0, kp.join('; '));
+  add('L10-K1', 'Level 1–10 live bestanden; Kennzahlen stimmen mit eigener Messung (Pipeline, Images, Tokens) und Level 9 (Lasttest)', kp.length === 0, kp.join('; '));
 
   // ---- L10-K2: Live-Seite zeigt den Bericht mit genau diesen Werten ----
   const dp = [];
@@ -142,6 +188,11 @@ if (!RUN_ID || !process.env.GH_TOKEN || !LIVE_DOMAIN) {
         'report-image-frontend': `${comma(m.images?.frontendMB)} MB`, 'report-image-backend': `${comma(m.images?.backendMB)} MB`,
         'report-job-check': `${m.pipeline?.jobs?.check} s`, 'report-job-images': `${m.pipeline?.jobs?.images} s`,
         'report-job-deploy': `${m.pipeline?.jobs?.deploy} s`, 'report-pipeline-total': `${m.pipeline?.totalS} s`,
+        'report-model': (m.tokens?.models ?? []).join(', '), 'report-tokens-input': thousands(m.tokens?.input),
+        'report-tokens-cache-write': thousands((m.tokens?.cacheWrite5m ?? 0) + (m.tokens?.cacheWrite1h ?? 0)),
+        'report-tokens-cache-read': thousands(m.tokens?.cacheRead), 'report-tokens-output': thousands(m.tokens?.output),
+        'report-tokens-total': thousands(m.tokens?.total), 'report-cost': `${comma(m.tokens?.costUsd, 2)} USD`,
+        'report-session': `${Math.round((m.tokens?.sessionS ?? 0) / 60)} min`,
       };
       for (const [id, want] of Object.entries(expected)) {
         const got = await text(id).catch(() => null);
