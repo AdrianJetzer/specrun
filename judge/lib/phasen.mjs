@@ -45,6 +45,24 @@ function summe(liste) {
  * stand: Status je geprüftem Level des zu prüfenden make check, aufsteigend ([{ level, status }]).
  * Ergebnis: { [level]: Token-Objekt | { inLevel } } oder null, wenn es kein Protokoll gibt.
  */
+/** Spec-Version des Laufs aus <ziel>/spec/00-start.md, z. B. [1, 2, 0]; unbekannt: null. */
+export function specVersion(target) {
+  try {
+    const m = /Spec-Version:\*\*\s*(\d+)\.(\d+)\.(\d+)/.exec(fs.readFileSync(path.join(target, 'spec/00-start.md'), 'utf8'));
+    return m ? m.slice(1).map(Number) : null;
+  } catch { return null; }
+}
+
+/** Bauzeit (buildS) gibt es erst ab Spec 1.3.0; für ältere Läufe wird sie aus der Nachrechnung entfernt. */
+export function hatBauzeit(target) {
+  const v = specVersion(target);
+  return !v || v[0] > 1 || (v[0] === 1 && v[1] >= 3);
+}
+export function ohneBauzeit(erg) {
+  if (!erg) return erg;
+  return Object.fromEntries(Object.entries(erg).map(([k, t]) => [k, t && 'buildS' in t ? Object.fromEntries(Object.entries(t).filter(([f]) => f !== 'buildS')) : t]));
+}
+
 export function phasenVerbrauch(dir, stand) {
   const antworten = new Map();
   const befehle = new Map();

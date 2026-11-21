@@ -10,7 +10,7 @@ import path from 'node:path';
 import { spawnSync } from 'node:child_process';
 import { fileURLToPath } from 'node:url';
 import { chromium } from '@playwright/test';
-import { phasenVerbrauch } from './lib/phasen.mjs';
+import { phasenVerbrauch, hatBauzeit, ohneBauzeit } from './lib/phasen.mjs';
 import { LEVEL1_CHECKS, LEVEL2_CHECKS, LEVEL3_CHECKS, LEVEL4_CHECKS, LEVEL5_CHECKS, LEVEL6_CHECKS, LEVEL7_CHECKS, LEVEL8_CHECKS, LEVEL9_CHECKS, LEVEL10_CHECKS } from './lib/fixtures.mjs';
 
 const here = path.dirname(fileURLToPath(import.meta.url));
@@ -94,6 +94,8 @@ const bauzeit = (s) => (typeof s !== 'number' ? '–' : s < 60 ? `${s} s` : `${M
 
 // Session-Protokoll des Agenten (im Prüfer-Container unter /lauf/protokoll)
 const PROTOKOLL = process.env.SPECRUN_PROTOKOLL ?? '/lauf/protokoll';
+// Bauzeit erst ab Spec 1.3.0 (ältere Läufe werden nach ihrer eigenen Spec bewertet)
+const BAUZEIT = hatBauzeit(target);
 
 console.log(`Prüfer Level 10 → ${target} (live ${LIVE})\n`);
 let snapshot = null;
@@ -120,7 +122,8 @@ if (!RUN_ID || !process.env.GH_TOKEN || !LIVE_DOMAIN) {
     if (!equal(lv[6].metrics?.images, img)) kp.push(`Level 7 images ${JSON.stringify(lv[6].metrics?.images)}, gemessen ${JSON.stringify(img)}`);
     const lt = lv[8].metrics?.loadtest ?? {};
     if (!['requests', 'errors', 'rps', 'p50Ms', 'p95Ms', 'maxMs'].every((k) => typeof lt[k] === 'number') || lt.errors !== 0 || !(lt.p95Ms < 1000)) kp.push(`Level 9 loadtest unvollständig oder unplausibel: ${JSON.stringify(lt)}`);
-    const own = phasenVerbrauch(PROTOKOLL, lv.map((l) => ({ level: l.level, status: l.status })));
+    const ownRoh = phasenVerbrauch(PROTOKOLL, lv.map((l) => ({ level: l.level, status: l.status })));
+    const own = BAUZEIT ? ownRoh : ohneBauzeit(ownRoh);
     if (!own) kp.push(`kein Session-Protokoll unter ${PROTOKOLL}`);
     else {
       const wrong = lv.filter((l) => !equal(l.metrics?.tokens, own[l.level])).map((l) => l.level);
@@ -150,7 +153,7 @@ if (!RUN_ID || !process.env.GH_TOKEN || !LIVE_DOMAIN) {
         'report-responses': thousands(sum('responses')), 'report-tokens-input': thousands(sum('input')),
         'report-tokens-cache-write': thousands(sum('cacheWrite5m') + sum('cacheWrite1h')), 'report-tokens-cache-read': thousands(sum('cacheRead')),
         'report-tokens-output': thousands(sum('output')), 'report-tokens-total': thousands(sum('total')),
-        'report-cost': `${comma(Math.round(sum('costUsd') * 100) / 100, 2)} USD`, 'report-build-time': bauzeit(sum('buildS')),
+        'report-cost': `${comma(Math.round(sum('costUsd') * 100) / 100, 2)} USD`, ...(BAUZEIT ? { 'report-build-time': bauzeit(sum('buildS')) } : {}),
         'report-p50': `${lt?.p50Ms} ms`, 'report-p95': `${lt?.p95Ms} ms`, 'report-rps': `${comma(lt?.rps)} Anfragen/s`, 'report-errors': String(lt?.errors),
         'report-image-frontend': `${comma(im?.frontendMB)} MB`, 'report-image-backend': `${comma(im?.backendMB)} MB`,
         'report-job-check': `${pl?.jobs?.check} s`, 'report-job-images': `${pl?.jobs?.images} s`, 'report-job-deploy': `${pl?.jobs?.deploy} s`,
@@ -168,7 +171,7 @@ if (!RUN_ID || !process.env.GH_TOKEN || !LIVE_DOMAIN) {
         const wantCost = !t ? '–' : t.inLevel !== undefined ? `in L${String(t.inLevel).padStart(2, '0')}` : `${comma(t.costUsd, 2)} USD`;
         const wantOut = t && t.inLevel === undefined ? thousands(t.output) : '–';
         const wantBuild = !t ? '–' : t.inLevel !== undefined ? `in L${String(t.inLevel).padStart(2, '0')}` : bauzeit(t.buildS);
-        const [c, o, b] = [await text('level-cost', card).catch(() => null), await text('level-output', card).catch(() => null), await text('level-build-time', card).catch(() => null)];
+        const [c, o, b] = [await text('level-cost', card).catch(() => null), await text('level-output', card).catch(() => null), BAUZEIT ? await text('level-build-time', card).catch(() => null) : wantBuild];
         if (c !== wantCost || o !== wantOut || b !== wantBuild) dp.push(`Karte ${l.level}: „${c}“/„${o}“/„${b}“ statt „${wantCost}“/„${wantOut}“/„${wantBuild}“`);
       }
       await page.screenshot({ path: path.join(out, 'level10-live.png'), fullPage: true }).catch(() => {});

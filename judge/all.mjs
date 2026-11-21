@@ -39,8 +39,9 @@ for (const n of available.filter((n) => n <= max)) {
 let tokens = null;
 try {
   const data = JSON.parse(fs.readFileSync(path.join(target, 'frontend/dist/results.json'), 'utf8'));
-  const { phasenVerbrauch } = await import('./lib/phasen.mjs');
-  const own = phasenVerbrauch(process.env.SPECRUN_PROTOKOLL ?? '/lauf/protokoll', data.levels.filter((l) => l.checkedAt).map((l) => ({ level: l.level, status: l.status })));
+  const { phasenVerbrauch, hatBauzeit, ohneBauzeit } = await import('./lib/phasen.mjs');
+  const roh = phasenVerbrauch(process.env.SPECRUN_PROTOKOLL ?? '/lauf/protokoll', data.levels.filter((l) => l.checkedAt).map((l) => ({ level: l.level, status: l.status })));
+  const own = hatBauzeit(target) ? roh : ohneBauzeit(roh);
   const canon = (v) => (Array.isArray(v) ? v.map(canon) : v && typeof v === 'object' ? Object.fromEntries(Object.keys(v).sort().map((k) => [k, canon(v[k])])) : v);
   if (own) tokens = { abweichendeLevels: data.levels.filter((l) => l.checkedAt && JSON.stringify(canon(l.metrics?.tokens)) !== JSON.stringify(canon(own[l.level]))).map((l) => l.level), pruefer: own };
 } catch {}
