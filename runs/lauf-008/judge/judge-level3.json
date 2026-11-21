@@ -1,0 +1,66 @@
+{
+  "level": 3,
+  "passed": true,
+  "checkedAt": "2026-11-21T11:09:35.735Z",
+  "target": "/home/dev/build",
+  "criteria": [
+    {
+      "id": "L3-K1",
+      "name": "make level3 startet nginx (8080) und Backend (8081)",
+      "ok": true,
+      "detail": "2.0 s"
+    },
+    {
+      "id": "L3-K2",
+      "name": "API-Vertrag: Schema, Regeln und Fehlercodes",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "id": "L3-K3",
+      "name": "50 gleichzeitige Anfragen: kein 5xx, konsistenter Endzustand",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "id": "L3-K4",
+      "name": "Neustart setzt das Backend auf den Startzustand zurück",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "id": "L3-K5",
+      "name": "Go: keine Abhängigkeiten, go vet sauber, go test grün",
+      "ok": true,
+      "detail": "Abdeckung 74.9 %"
+    },
+    {
+      "id": "L3-K6",
+      "name": "make check: Exit 0, schemagültig, Level 1–3 bestanden mit den Checks der Spec",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "id": "L3-K7",
+      "name": "public/results.json bleibt im Startzustand",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "id": "L3-K8",
+      "name": "make down beendet nginx und Backend (8080 und 8081 frei)",
+      "ok": true,
+      "detail": ""
+    }
+  ],
+  "nebenwerte": {
+    "makeLevel3Ms": 2045,
+    "apiProbleme": [],
+    "goCoverage": 74.9,
+    "goTestFiles": 2,
+    "makeCheckMs": 1639,
+    "selbstmessung": "bestanden",
+    "fremdmessung": "bestanden",
+    "abweichung": false
+  }
+}

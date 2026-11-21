@@ -1,0 +1,10 @@
+make stop-backend
+make[1]: Entering directory '/home/dev/build'
+make[1]: Leaving directory '/home/dev/build'
+make start-backend
+make[1]: Entering directory '/home/dev/build'
+mkdir -p .run
+( exec env LEVELBOARD_DB="/home/dev/build/.run/levelboard.db" RUN_ID="lauf-008" backend/bin/levelboard-backend ) </dev/null >>.run/backend.log 2>&1 & echo $! > .run/backend.pid
+make[1]: Leaving directory '/home/dev/build'
+for i in $(seq 60); do curl -fsS -o /dev/null 'http://127.0.0.1:8081/api/health' 2>/dev/null && break; sleep 1; done; curl -fsS -o /dev/null 'http://127.0.0.1:8081/api/health' || { echo "Fehler: http://127.0.0.1:8081/api/health antwortet nicht" >&2; tail -n 40 .run/*.log 2>/dev/null; exit 1; }
+Backend neu gestartet (Datenbank erhalten)

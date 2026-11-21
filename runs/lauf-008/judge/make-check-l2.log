@@ -1,0 +1,19 @@
+
+Running 12 tests using 1 worker
+
+  ✓   1 [levels] › tests/level1.spec.ts:4:3 › level-1 › Seite antwortet mit HTTP 200 (11ms)
+  ✓   2 [levels] › tests/level1.spec.ts:10:3 › level-1 › Titel ist „Levelboard“ (44ms)
+  ✓   3 [levels] › tests/level1.spec.ts:15:3 › level-1 › 10 Level-Karten sichtbar (83ms)
+  ✓   4 [levels] › tests/level1.spec.ts:26:3 › level-1 › Keine Konsolenfehler (58ms)
+  ✓   5 [levels] › tests/level1.spec.ts:37:3 › level-1 › Handy-Ansicht: Karten einspaltig (69ms)
+  ✓   6 [levels] › tests/level2.spec.ts:14:3 › level-2 › Antwort kommt von nginx (5ms)
+  ✓   7 [levels] › tests/level2.spec.ts:20:3 › level-2 › results.json wird nicht zwischengespeichert (2ms)
+  ✓   8 [levels] › tests/level2.spec.ts:26:3 › level-2 › index.html wird nicht zwischengespeichert (2ms)
+  ✓   9 [levels] › tests/level2.spec.ts:31:3 › level-2 › Assets werden ein Jahr zwischengespeichert (8ms)
+  ✓  10 [levels] › tests/level2.spec.ts:38:3 › level-2 › Fehlende Datei ergibt 404 (1ms)
+  ✓  11 [levels] › tests/level2.spec.ts:43:3 › level-2 › Antworten sind gzip-komprimiert (8ms)
+  ✓  12 [levels] › tests/level2.spec.ts:51:3 › level-2 › Seite funktioniert über nginx (66ms)
+
+  12 passed (695ms)
+Level 1: bestanden (5/5 Checks)
+Level 2: bestanden (7/7 Checks)

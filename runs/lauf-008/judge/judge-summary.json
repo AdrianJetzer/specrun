@@ -1,0 +1,203 @@
+{
+  "reachedLevel": 10,
+  "score": 100,
+  "maxChecked": 10,
+  "levels": [
+    {
+      "level": 1,
+      "passed": true
+    },
+    {
+      "level": 2,
+      "passed": true
+    },
+    {
+      "level": 3,
+      "passed": true
+    },
+    {
+      "level": 4,
+      "passed": true
+    },
+    {
+      "level": 5,
+      "passed": true
+    },
+    {
+      "level": 6,
+      "passed": true
+    },
+    {
+      "level": 7,
+      "passed": true
+    },
+    {
+      "level": 8,
+      "passed": true
+    },
+    {
+      "level": 9,
+      "passed": true
+    },
+    {
+      "level": 10,
+      "passed": true
+    }
+  ],
+  "tokens": {
+    "abweichendeLevels": [],
+    "pruefer": {
+      "1": {
+        "models": [
+          "claude-haiku-5-5"
+        ],
+        "responses": 17,
+        "input": 34,
+        "cacheWrite5m": 0,
+        "cacheWrite1h": 254598,
+        "cacheRead": 2831920,
+        "output": 151045,
+        "total": 3237597,
+        "costUsd": 0.15,
+        "from": "2026-11-21T07:07:15.250Z",
+        "until": "2026-11-21T07:17:05.026Z"
+      },
+      "2": {
+        "models": [
+          "claude-haiku-5-5"
+        ],
+        "responses": 3,
+        "input": 6,
+        "cacheWrite5m": 0,
+        "cacheWrite1h": 4156,
+        "cacheRead": 766136,
+        "output": 3261,
+        "total": 773559,
+        "costUsd": 0.01,
+        "from": "2026-11-21T07:17:11.601Z",
+        "until": "2026-11-21T07:17:21.780Z"
+      },
+      "3": {
+        "models": [
+          "claude-haiku-5-5"
+        ],
+        "responses": 6,
+        "input": 12,
+        "cacheWrite5m": 0,
+        "cacheWrite1h": 21679,
+        "cacheRead": 1623188,
+        "output": 20222,
+        "total": 1665101,
+        "costUsd": 0.03,
+        "from": "2026-11-21T07:17:51.169Z",
+        "until": "2026-11-21T07:18:40.358Z"
+      },
+      "4": {
+        "models": [
+          "claude-haiku-5-5"
+        ],
+        "responses": 9,
+        "input": 18,
+        "cacheWrite5m": 0,
+        "cacheWrite1h": 22077,
+        "cacheRead": 2630999,
+        "output": 19630,
+        "total": 2672724,
+        "costUsd": 0.04,
+        "from": "2026-11-21T07:19:05.105Z",
+        "until": "2026-11-21T07:20:13.403Z"
+      },
+      "5": {
+        "models": [
+          "claude-haiku-5-5"
+        ],
+        "responses": 3,
+        "input": 6,
+        "cacheWrite5m": 0,
+        "cacheWrite1h": 3256,
+        "cacheRead": 909555,
+        "output": 2852,
+        "total": 915669,
+        "costUsd": 0.01,
+        "from": "2026-11-21T07:20:25.385Z",
+        "until": "2026-11-21T07:20:49.245Z"
+      },
+      "6": {
+        "models": [
+          "claude-haiku-5-5"
+        ],
+        "responses": 6,
+        "input": 12,
+        "cacheWrite5m": 0,
+        "cacheWrite1h": 9793,
+        "cacheRead": 1866826,
+        "output": 7688,
+        "total": 1884319,
+        "costUsd": 0.02,
+        "from": "2026-11-21T07:21:27.440Z",
+        "until": "2026-11-21T07:23:52.101Z"
+      },
+      "7": {
+        "models": [
+          "claude-haiku-5-5"
+        ],
+        "responses": 11,
+        "input": 26,
+        "cacheWrite5m": 0,
+        "cacheWrite1h": 19748,
+        "cacheRead": 3605102,
+        "output": 14480,
+        "total": 3639356,
+        "costUsd": 0.05,
+        "from": "2026-11-21T07:24:35.754Z",
+        "until": "2026-11-21T07:28:12.724Z"
+      },
+      "8": {
+        "models": [
+          "claude-haiku-5-5"
+        ],
+        "responses": 9,
+        "input": 26,
+        "cacheWrite5m": 0,
+        "cacheWrite1h": 11686,
+        "cacheRead": 3085075,
+        "output": 6712,
+        "total": 3103499,
+        "costUsd": 0.04,
+        "from": "2026-11-21T07:28:49.402Z",
+        "until": "2026-11-21T07:33:08.423Z"
+      },
+      "9": {
+        "models": [
+          "claude-haiku-5-5"
+        ],
+        "responses": 9,
+        "input": 28,
+        "cacheWrite5m": 0,
+        "cacheWrite1h": 6681,
+        "cacheRead": 3159894,
+        "output": 4673,
+        "total": 3171276,
+        "costUsd": 0.04,
+        "from": "2026-11-21T07:33:47.801Z",
+        "until": "2026-11-21T07:37:57.513Z"
+      },
+      "10": {
+        "models": [
+          "claude-haiku-5-5"
+        ],
+        "responses": 19,
+        "input": 58,
+        "cacheWrite5m": 0,
+        "cacheWrite1h": 14932,
+        "cacheRead": 6910092,
+        "output": 10108,
+        "total": 6935190,
+        "costUsd": 0.08,
+        "from": "2026-11-21T07:39:22.419Z",
+        "until": "2026-11-21T07:48:55.090Z"
+      }
+    }
+  },
+  "checkedAt": "2026-11-21T11:15:06.746Z"
+}

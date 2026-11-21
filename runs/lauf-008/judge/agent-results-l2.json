@@ -1,0 +1,182 @@
+{
+  "run": {
+    "id": "lauf-008",
+    "version": "0.1.0",
+    "commit": null,
+    "updatedAt": "2026-11-21T11:09:30.093Z"
+  },
+  "levels": [
+    {
+      "level": 1,
+      "title": "Statische Seite",
+      "status": "bestanden",
+      "checkedAt": "2026-11-21T11:09:30.093Z",
+      "durationMs": 265,
+      "checks": [
+        {
+          "name": "Seite antwortet mit HTTP 200",
+          "ok": true
+        },
+        {
+          "name": "Titel ist „Levelboard“",
+          "ok": true
+        },
+        {
+          "name": "10 Level-Karten sichtbar",
+          "ok": true
+        },
+        {
+          "name": "Keine Konsolenfehler",
+          "ok": true
+        },
+        {
+          "name": "Handy-Ansicht: Karten einspaltig",
+          "ok": true
+        }
+      ],
+      "metrics": {
+        "tokens": {
+          "models": [
+            "claude-haiku-5-5"
+          ],
+          "responses": 17,
+          "input": 34,
+          "cacheWrite5m": 0,
+          "cacheWrite1h": 254598,
+          "cacheRead": 2831920,
+          "output": 151045,
+          "total": 3237597,
+          "costUsd": 0.15,
+          "from": "2026-11-21T07:07:15.250Z",
+          "until": "2026-11-21T07:17:05.026Z"
+        }
+      }
+    },
+    {
+      "level": 2,
+      "title": "Webserver",
+      "status": "bestanden",
+      "checkedAt": "2026-11-21T11:09:30.093Z",
+      "durationMs": 92,
+      "checks": [
+        {
+          "name": "Antwort kommt von nginx",
+          "ok": true
+        },
+        {
+          "name": "results.json wird nicht zwischengespeichert",
+          "ok": true
+        },
+        {
+          "name": "index.html wird nicht zwischengespeichert",
+          "ok": true
+        },
+        {
+          "name": "Assets werden ein Jahr zwischengespeichert",
+          "ok": true
+        },
+        {
+          "name": "Fehlende Datei ergibt 404",
+          "ok": true
+        },
+        {
+          "name": "Antworten sind gzip-komprimiert",
+          "ok": true
+        },
+        {
+          "name": "Seite funktioniert über nginx",
+          "ok": true
+        }
+      ],
+      "metrics": {
+        "tokens": {
+          "models": [
+            "claude-haiku-5-5"
+          ],
+          "responses": 3,
+          "input": 6,
+          "cacheWrite5m": 0,
+          "cacheWrite1h": 4156,
+          "cacheRead": 766136,
+          "output": 3261,
+          "total": 773559,
+          "costUsd": 0.01,
+          "from": "2026-11-21T07:17:11.601Z",
+          "until": "2026-11-21T07:17:21.780Z"
+        }
+      }
+    },
+    {
+      "level": 3,
+      "title": "REST-Backend",
+      "status": "offen",
+      "checkedAt": null,
+      "durationMs": null,
+      "checks": [],
+      "metrics": {}
+    },
+    {
+      "level": 4,
+      "title": "Datenbank",
+      "status": "offen",
+      "checkedAt": null,
+      "durationMs": null,
+      "checks": [],
+      "metrics": {}
+    },
+    {
+      "level": 5,
+      "title": "Frontend + Backend",
+      "status": "offen",
+      "checkedAt": null,
+      "durationMs": null,
+      "checks": [],
+      "metrics": {}
+    },
+    {
+      "level": 6,
+      "title": "Repo + CI",
+      "status": "offen",
+      "checkedAt": null,
+      "durationMs": null,
+      "checks": [],
+      "metrics": {}
+    },
+    {
+      "level": 7,
+      "title": "Images in der Pipeline",
+      "status": "offen",
+      "checkedAt": null,
+      "durationMs": null,
+      "checks": [],
+      "metrics": {}
+    },
+    {
+      "level": 8,
+      "title": "Deployment",
+      "status": "offen",
+      "checkedAt": null,
+      "durationMs": null,
+      "checks": [],
+      "metrics": {}
+    },
+    {
+      "level": 9,
+      "title": "Live-Prüfung",
+      "status": "offen",
+      "checkedAt": null,
+      "durationMs": null,
+      "checks": [],
+      "metrics": {}
+    },
+    {
+      "level": 10,
+      "title": "Metriken veröffentlicht",
+      "status": "offen",
+      "checkedAt": null,
+      "durationMs": null,
+      "checks": [],
+      "metrics": {}
+    }
+  ]
+}

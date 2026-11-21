@@ -1,0 +1,9 @@
+{
+  "runId": "lauf-008",
+  "specVersion": "1.2.0",
+  "model": "claude-haiku-5-5",
+  "fake": false,
+  "buildDir": "/lauf/work",
+  "judgedIn": "Prüfer-Container",
+  "judgedAt": "2026-11-21T11:09:19Z"
+}

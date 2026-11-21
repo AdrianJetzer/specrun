@@ -1,0 +1,36 @@
+make down
+make[1]: Entering directory '/home/dev/build'
+make[1]: Leaving directory '/home/dev/build'
+make frontend-build
+make[1]: Entering directory '/home/dev/build'
+cd frontend && npm ci && npm run build
+
+added 24 packages, and audited 25 packages in 516ms
+
+8 packages are looking for funding
+  run `npm fund` for details
+
+found 0 vulnerabilities
+
+> levelboard-frontend@0.1.0 build
+> tsc -b && vite build
+
+vite v8.3.8 building client environment for production...
+transforming...
+✓ 22 modules transformed.
+rendering chunks...
+computing gzip size...
+dist/index.html                   0.48 kB │ gzip:  0.29 kB
+dist/assets/index-4HnA8c6L.css    5.80 kB │ gzip:  1.62 kB
+dist/assets/index-CXTDrpeK.js   232.41 kB │ gzip: 72.43 kB
+
+✓ built in 58ms
+make[1]: Leaving directory '/home/dev/build'
+make start-nginx NGINX_CONF=frontend/nginx.conf
+make[1]: Entering directory '/home/dev/build'
+mkdir -p .run/nginx-tmp
+nginx -p "/home/dev/build/" -e .run/nginx-error.log -c frontend/nginx.conf
+make[1]: Leaving directory '/home/dev/build'
+echo 2 > .run/level
+for i in $(seq 60); do curl -fsS -o /dev/null 'http://127.0.0.1:8080/' 2>/dev/null && break; sleep 1; done; curl -fsS -o /dev/null 'http://127.0.0.1:8080/' || { echo "Fehler: http://127.0.0.1:8080/ antwortet nicht" >&2; tail -n 40 .run/*.log 2>/dev/null; exit 1; }
+Levelboard läuft auf http://127.0.0.1:8080
