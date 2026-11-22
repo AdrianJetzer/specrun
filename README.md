@@ -42,7 +42,7 @@ Frühere Läufe ([lauf-003](runs/lauf-003/report.md) usw.) stammen aus der Aufba
 
 **Kennzahlen pro Level:** Schon ab Level 1 zeigt jede Karte des Levelboards die **Bauzeit** des Levels. Der Agent misst sie selbst über seine `make check` und hält sie in `bauzeit.json` fest; einmal eingetragen, ändert sie sich nicht mehr. Der Abschlussbericht erscheint ab dem ersten geprüften Level und füllt sich mit jedem weiteren.
 
-**Tokens und Kosten** misst ab Spec 2.0.0 nur noch der Prüfer, nach dem Lauf: Ein Adapter pro Harness (`runner/adapter/`) liest dessen Protokoll, `runner/verbrauch.mjs` teilt die Tokens mit den Zeitpunkten aus `bauzeit.json` pro Level auf und rechnet die Kosten mit `runner/preise.json`. Sie stehen im Prüfbericht unter `runs/lauf-<nr>/`. Ab Spec 2.1.0 trägt `runner/uebernehmen.sh` sie zusätzlich per `PUT /api/usage` auf der Live-Seite des Laufs nach (braucht `SPECRUN_LIVE_DOMAIN`). Dort zeigt der Abschlussbericht dann die Kachel „Tokens“ mit den Gesamtkosten sowie Kosten und Tokens (Ausgabe) pro Level. Bis dahin steht „wird nach der Prüfung ergänzt“.
+**Tokens und Kosten** misst ab Spec 2.0.0 nur noch der Prüfer, nach dem Lauf: Ein Adapter pro Harness (`runner/adapter/`) liest dessen Protokoll, `runner/verbrauch.mjs` teilt die Tokens mit den Zeitpunkten aus `bauzeit.json` pro Level auf und rechnet die Kosten mit `runner/preise.json`. Sie stehen im Prüfbericht unter `runs/lauf-<nr>/`. Ab Spec 2.1.0 trägt `runner/uebernehmen.sh` sie zusätzlich per `PUT /api/usage` auf der Live-Seite des Laufs nach (braucht `SPECRUN_LIVE_DOMAIN`). Dort zeigt der Abschlussbericht dann die Kachel „Tokens“ mit den Gesamtkosten sowie Kosten und Tokens (Ausgabe) pro Level. Bis dahin steht „wird nach der Prüfung ergänzt“. Wer einen Lauf **ohne Prüfer** macht, trägt mit `runner/uebernehmen.sh --nur-verbrauch <laufordner>` nur den Verbrauch nach: gerechnet direkt aus dem Protokoll und `bauzeit.json`, abgelegt als `<laufordner>/verbrauch.json`, ohne Bericht, Commit oder Archivieren des Repos. Eine spätere Prüfung bleibt möglich; die übrigen Werte auf der Seite sind dann aber ungeprüfte Selbstmessung.
 
 Alle Entscheidungen und ihre Begründungen stehen in [`KONZEPT.md`](KONZEPT.md).
 
@@ -87,6 +87,7 @@ runner/prepare-run.sh --harness opencode --modell anthropic/claude-sonnet-5-5   
 # 1. <lauf>/env in VS Code im Container öffnen, Claude den Auftrag geben (siehe Ausgabe des Skripts)
 # 2. <lauf>/judge in VS Code im Container öffnen und dort ausführen:  /specrun/runner/pruefen.sh
 runner/uebernehmen.sh <laufordner>    # Bericht nach runs/lauf-<nr>/ übernehmen, ab Spec 2.1.0 Verbrauch auf der Live-Seite nachtragen
+runner/uebernehmen.sh --nur-verbrauch <laufordner>   # ohne Prüfer: nur Tokens und Kosten rechnen und auf der Live-Seite nachtragen
 ```
 Harness und Modell sind pro Lauf fest vorgegeben und stehen in `<lauf>/harness.txt` und `<lauf>/modell.txt`. Der Bericht zeigt beide und das laut Protokoll tatsächlich verwendete Modell.
 
