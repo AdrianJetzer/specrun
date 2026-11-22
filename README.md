@@ -12,12 +12,16 @@ Die gebaute App, das **Levelboard**, ist zugleich die Anzeigetafel für die Leis
 
 | Lauf | Harness | Modell | Endstand live | Bauzeit bis 10 / 10 | `make check` | Tokens gesamt | Kosten | Live-Seite |
 |---|---|---|---|---|---|---|---|---|
+| 019 | Claude Code | Opus 5.5 | **10 / 10** | 35:56 min | nach jedem Level | 9,2 Mio. | 5,51 USD | [lauf-019](https://lauf-019.2-29-223-205.sslip.io/) |
 | 017 | Claude Code | Sonnet 5.5 | **10 / 10** | 15:33 min | 2× (nach L5 und L10) | 4,9 Mio. | 2,27 USD | [lauf-017](https://lauf-017.2-29-223-205.sslip.io/) |
+| 018 | OpenCode | DeepSeek V4 Pro | **10 / 10** | 51:21 min | nach jedem Level | 19,4 Mio. | 1,73 USD (laut OpenCode 0,86) | [lauf-018](https://lauf-018.2-29-223-205.sslip.io/) |
 | 016 | OpenCode | DeepSeek Flash | 5 / 10 | 30:10 min | nach jedem Level | 11,7 Mio. | 0,23 USD (laut OpenCode 0,12) | [lauf-016](https://lauf-016.2-29-223-205.sslip.io/) |
 
-Beide Läufe ohne unabhängigen Prüfer abgeschlossen (`runner/abschluss.sh`); Endstand und Bauzeit sind die Selbstmessung des Agenten.
+Alle vier Läufe ohne unabhängigen Prüfer abgeschlossen (`runner/abschluss.sh`); Endstand und Bauzeit sind die Selbstmessung des Agenten.
 
-- **Sonnet** baute in zwei großen Blöcken, pushte einmal und rührte danach nichts mehr an. Am schnellsten, aber rund zehnmal so teuer.
+- **Opus** prüfte jedes Level einzeln und ließ am Ende einen sauberen Stand zurück. Am gründlichsten, aber am teuersten (über das Claude-Abo gelaufen, die Kosten sind der API-Preis).
+- **Sonnet** baute in zwei großen Blöcken, pushte einmal und rührte danach nichts mehr an. Am schnellsten, etwa zehnmal so teuer wie DeepSeek Flash.
+- **DeepSeek V4 Pro** war am langsamsten und brauchte die meisten Tokens, schloss aber sauber ab: nach dem letzten Push auf die Pipeline gewartet und `make check` ausgeführt. Einen Fehler im eigenen Level-10-Test fand und behob es selbst.
 - **DeepSeek Flash** ging Level für Level vor und erreichte 10 / 10 für etwa ein Zehntel der Kosten. Danach pushte es noch eine Korrektur, wartete auf die Pipeline, startete `make level10`, vergaß aber das letzte `make check`. Der Deploy hatte die Live-Seite auf 5 / 10 zurückgesetzt, und so blieb sie.
 - DeepSeek-Kosten sind mit dem Hauptzeit-Preis gerechnet; außerhalb der Hauptzeit kostet DeepSeek die Hälfte, daher der niedrigere Wert von OpenCode.
 
