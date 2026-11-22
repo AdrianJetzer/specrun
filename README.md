@@ -2,26 +2,24 @@
 
 **Wie weit kommt ein Coding-Agent, wenn er nur eine Spezifikation bekommt?**
 
-Specrun ist ein Experiment. Eine frische Claude-Code-Session erhält ausschließlich den Ordner [`spec/`](spec/00-start.md) und muss daraus **ohne Rückfragen** eine Anwendung bauen. Der Weg ist in 10 Levels aufgeteilt, von einer statischen Seite bis zu einem öffentlichen Deployment mit CI/CD.
+Specrun ist ein Experiment. Ein Coding-Agent (z. B. Claude Code oder OpenCode) erhält ausschließlich den Ordner [`spec/`](spec/00-start.md) und muss daraus **ohne Rückfragen** eine Anwendung bauen. Der Weg ist in 10 Levels aufgeteilt, von einer statischen Seite bis zu einem öffentlichen Deployment mit CI/CD.
 
 Die gebaute App, das **Levelboard**, ist zugleich die Anzeigetafel für die Leistung des Agenten: Sie zeigt, welche Levels er geschafft hat. Ein **unabhängiger Prüfer**, den der Agent nicht sieht, misst anschließend nach. Nur sein Urteil zählt.
 
-> **Stand (Spec v2.1.0):** Alle 10 Levels sind umgesetzt: Spec, Referenz, unabhängiger Prüfer, Dev Container und ein Hetzner-Server für die Live-Läufe. **Seit 2.0.0 ist die Spec unabhängig vom Agent-Harness**: Neben Claude Code läuft auch OpenCode, weitere Harnesses brauchen nur einen Adapter und ein Image. **Seit 2.1.0 stehen Tokens und Kosten wieder auf der Live-Seite**: Der Runner trägt sie nach der Prüfung nach. Die Referenz läuft als echtes Repo [`specrun-lab/levelboard-referenz`](https://github.com/specrun-lab/levelboard-referenz) und erreicht laut Prüfer Score 100. **Drei Modelle haben die Spec im Nachbau vollständig geschafft**, jeweils 100 / 100 laut unabhängigem Prüfer, ohne Abweichung zwischen Selbst- und Fremdmessung.
+> **Stand (Spec v2.1.1):** Alle 10 Levels sind umgesetzt: Spec, Referenz, unabhängiger Prüfer, Dev Container und ein Hetzner-Server für die Live-Läufe. Die Spec ist unabhängig vom Agent-Harness: Läufe gibt es mit **Claude Code** (Claude-Modelle) und mit **OpenCode** (z. B. DeepSeek). Tokens und Kosten misst der Runner nach dem Lauf und trägt sie auf der Live-Seite nach. Die Referenz läuft als echtes Repo [`specrun-lab/levelboard-referenz`](https://github.com/specrun-lab/levelboard-referenz) und erreicht laut Prüfer Score 100.
 
-## Ergebnisse
+## Ergebnisse (Spec 2.1.1)
 
-| Lauf | Modell | Spec | Score | Session | Kosten (API-Preis) | Ausgabe-Tokens | Bericht |
-|---|---|---|---|---|---|---|---|
-| 008 | Haiku 5.5 | 1.2.0 | **100** | 43 min | 2,27 USD | 243k | [runs/lauf-008](runs/lauf-008/report.md) |
-| 010 | Sonnet 5.5 | 1.4.0 | **100** | 16 min | 1,99 USD | 83k | [runs/lauf-010](runs/lauf-010/report.md) |
-| 011 | Opus 5.5 | 1.4.0 | **100** | 44 min | 5,15 USD | 103k | [runs/lauf-011](runs/lauf-011/report.md) |
+| Lauf | Harness | Modell | Endstand live | Bauzeit bis 10 / 10 | `make check` | Tokens gesamt | Kosten | Live-Seite |
+|---|---|---|---|---|---|---|---|---|
+| 017 | Claude Code | Sonnet 5.5 | **10 / 10** | 15:33 min | 2× (nach L5 und L10) | 4,9 Mio. | 2,27 USD | [lauf-017](https://lauf-017.2-29-223-205.sslip.io/) |
+| 016 | OpenCode | DeepSeek Flash | 5 / 10 | 30:10 min | nach jedem Level | 11,7 Mio. | 0,23 USD (laut OpenCode 0,12) | [lauf-016](https://lauf-016.2-29-223-205.sslip.io/) |
 
-- **Sonnet** war am schnellsten und am günstigsten. Es baute in großen Blöcken und prüfte seltener.
-- **Opus** ging Level für Level vor und erreichte die höchste Testabdeckung, war aber langsam und am teuersten.
-- **Haiku** ist pro Token am billigsten. Es brauchte aber die meisten Tokens, und der lange Kontext fällt in Haikus teurere Preisstufe.
-- Die Kosten sind aus dem Session-Protokoll zum API-Preis gerechnet (Preise in `runner/preise.json`). Bei Haiku 008 sind sie mit der Preisstufe für langen Kontext nachgerechnet; der Lauf selbst meldete nach Spec 1.2.0 noch 0,47 USD.
+Beide Läufe ohne unabhängigen Prüfer abgeschlossen (`runner/abschluss.sh`); Endstand und Bauzeit sind die Selbstmessung des Agenten.
 
-Frühere Läufe ([lauf-003](runs/lauf-003/report.md) usw.) stammen aus der Aufbauphase mit weniger Levels.
+- **Sonnet** baute in zwei großen Blöcken, pushte einmal und rührte danach nichts mehr an. Am schnellsten, aber rund zehnmal so teuer.
+- **DeepSeek Flash** ging Level für Level vor und erreichte 10 / 10 für etwa ein Zehntel der Kosten. Danach pushte es noch eine Korrektur, wartete auf die Pipeline, startete `make level10`, vergaß aber das letzte `make check`. Der Deploy hatte die Live-Seite auf 5 / 10 zurückgesetzt, und so blieb sie.
+- DeepSeek-Kosten sind mit dem Hauptzeit-Preis gerechnet; außerhalb der Hauptzeit kostet DeepSeek die Hälfte, daher der niedrigere Wert von OpenCode.
 
 ## Die 10 Levels
 
