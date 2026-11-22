@@ -4,6 +4,8 @@
   "name": "specrun-opencode",
   "build": { "dockerfile": "Dockerfile" },
 
+  // Container beim Schliessen des Fensters anhalten (mit Podman nicht immer zuverlässig; sonst runner/aufraeumen.sh)
+  "shutdownAction": "stopContainer",
   "remoteUser": "dev",
   "containerUser": "dev",
   "updateRemoteUserUID": false,

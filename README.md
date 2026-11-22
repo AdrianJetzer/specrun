@@ -88,6 +88,8 @@ runner/prepare-run.sh --harness opencode --modell anthropic/claude-sonnet-5-5   
 # 2. <lauf>/judge in VS Code im Container öffnen und dort ausführen:  /specrun/runner/pruefen.sh
 runner/uebernehmen.sh <laufordner>    # Bericht nach runs/lauf-<nr>/ übernehmen, ab Spec 2.1.0 Verbrauch auf der Live-Seite nachtragen
 runner/uebernehmen.sh --nur-verbrauch <laufordner>   # ohne Prüfer: nur Tokens und Kosten rechnen und auf der Live-Seite nachtragen
+runner/abschluss.sh <laufordner>      # alles in einem: Container abräumen, dann mit Prüfbericht übernehmen bzw. ohne nur den Verbrauch nachtragen
+runner/aufraeumen.sh                  # alle Specrun-Container anhalten und entfernen (fragt vorher; -y ohne Rückfrage)
 ```
 Harness und Modell sind pro Lauf fest vorgegeben und stehen in `<lauf>/harness.txt` und `<lauf>/modell.txt`. Der Bericht zeigt beide und das laut Protokoll tatsächlich verwendete Modell.
 
@@ -99,6 +101,8 @@ Harness und Modell sind pro Lauf fest vorgegeben und stehen in `<lauf>/harness.t
 Beide Images haben dieselbe Startausrüstung; OpenCode läuft ohne Rückfragen (Berechtigungen im Image auf „allow“).
 
 **Welcher Harness wofür:** Claude-Modelle laufen am günstigsten in Claude Code (Abo-Token). Für andere Anbieter (DeepSeek, OpenCode-Modelle wie Big Pickle) ist OpenCode da; es braucht nur den API-Schlüssel des Anbieters. Claude in OpenCode ginge auch, aber nur mit API-Schlüssel und Kosten pro Token. Preise für die Kostenrechnung stehen in `runner/preise.json`; DeepSeek ist dort mit dem Hauptzeit-Preis eingetragen (ausserhalb der Hauptzeit kostet es die Hälfte).
+
+**Abschluss:** Nach einem Lauf (mit oder ohne Prüfung) genügt `runner/abschluss.sh <laufordner>`. Es hält die Container des Laufs an und entfernt sie, übernimmt einen vorhandenen Prüfbericht oder trägt sonst nur Tokens und Kosten nach. VS Code soll Container beim Schliessen anhalten (`shutdownAction`), mit Podman klappt das aber nicht immer; übrig gebliebene Container räumt `runner/aufraeumen.sh` ab. Die Arbeit liegt in `work/` und `protokoll/` auf dem Mac und bleibt erhalten.
 
 Der Prüfer läuft in einem eigenen Container aus demselben Image. Er sieht das Werk des Agenten nur lesend und baut es selbst neu. Zu beachten:
 - Pro Prüfer-Container läuft **immer nur eine Prüfung**. Zwei gleichzeitige Prüfungen stören sich (gleicher Build-Ordner, gleiche Ports). `pruefen.sh` startet nicht, solange `ergebnis/` existiert; für eine neue Prüfung den Ordner erst umbenennen.
