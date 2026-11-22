@@ -1,0 +1,34 @@
+{
+  // Specrun: Umgebung für einen Nachbau-Lauf mit dem Harness OpenCode.
+  // Wird von runner/prepare-run.sh --harness opencode nach <lauf>/env/.devcontainer kopiert.
+  "name": "specrun-opencode",
+  "build": { "dockerfile": "Dockerfile" },
+
+  "remoteUser": "dev",
+  "containerUser": "dev",
+  "updateRemoteUserUID": false,
+
+  // Podman (rootless), fester DNS – wie beim Claude-Container
+  "runArgs": ["--userns=keep-id:uid=1000,gid=1000", "--dns", "1.1.1.1", "--dns", "9.9.9.9"],
+
+  "workspaceFolder": "/workspace",
+  "workspaceMount": "source=${localWorkspaceFolder}/../work,target=/workspace,type=bind",
+
+  // OPENCODE_API_KEY: Schlüssel für den Anbieter „opencode“ (z. B. Big Pickle), auf dem Mac als SPECRUN_OPENCODE_API_KEY gesetzt
+  // OPENCODE_DB: Sitzungs-Datenbank im Laufordner (<lauf>/protokoll) – daraus misst der Prüfer Tokens und Kosten
+  // SPECRUN_MODEL: vorgegebenes Modell (setzt runner/prepare-run.sh ein), Start mit: opencode --standalone --model "$SPECRUN_MODEL"
+  "containerEnv": {
+    "OPENCODE_API_KEY": "${localEnv:SPECRUN_OPENCODE_API_KEY}",
+    "OPENCODE_DB": "/home/dev/.specrun-protokoll/opencode.db",
+    "SPECRUN_MODEL": "__MODEL__",
+    "GH_TOKEN": "${localEnv:SPECRUN_AGENT_GH_TOKEN}",
+    "RUN_ID": "__RUN_ID__",
+    "LIVE_DOMAIN": "${localEnv:SPECRUN_LIVE_DOMAIN}"
+  },
+
+  "mounts": ["source=${localWorkspaceFolder}/../protokoll,target=/home/dev/.specrun-protokoll,type=bind"],
+
+  "forwardPorts": [8080],
+
+  "postCreateCommand": "node -v && npm -v && go version && nginx -v && gh --version | head -1 && opencode --version"
+}

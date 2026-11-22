@@ -15,6 +15,8 @@ const meta = json('meta.json') ?? {};
 const claude = json('claude.json');
 const cost = read('cost.txt');
 const tok = json('tokens.json');
+// Kosten einer Token-Summe: ab Spec 2.0.0 aus runner/verbrauch.mjs (null = Modell ohne Preis); ältere tokens.json haben keine
+const usd = (t) => (!t || !('kostenUsd' in t) ? '–' : t.kostenUsd === null ? 'unbekannt' : `${t.kostenUsd.toFixed(2)} USD`);
 const summary = json('judge/judge-summary.json');
 const levelResults = [];
 for (let n = 1; n <= 10; n++) {
@@ -48,7 +50,8 @@ const agentLines = claude
             : ''
         }`,
         `- Dauer der Session: ${fmtS(tok.dauerS)}; ${tok.antworten} Antworten, ${tok.werkzeugaufrufe} Werkzeugaufrufe`,
-        `- Tokens gesamt: ${n(tok.gesamt.gesamt)} (Eingabe ${n(tok.gesamt.eingabe)}, Cache-Schreiben ${n(tok.gesamt.cacheSchreiben)}, Cache-Lesen ${n(tok.gesamt.cacheLesen)}, Ausgabe ${n(tok.gesamt.ausgabe)})`,
+        `- Tokens gesamt: ${n(tok.gesamt.gesamt)} (Eingabe ${n(tok.gesamt.eingabe)}, Cache-Schreiben ${n(tok.gesamt.cacheSchreiben)}, Cache-Lesen ${n(tok.gesamt.cacheLesen)}, Ausgabe ${n(tok.gesamt.ausgabe)}${tok.gesamt.reasoning ? `, davon Reasoning ${n(tok.gesamt.reasoning)}` : ''})`,
+        ...('kostenUsd' in tok.gesamt ? [`- Kosten zum API-Preis: ${tok.gesamt.kostenUsd === null ? 'unbekannt (Modell nicht in runner/preise.json)' : `${tok.gesamt.kostenUsd.toFixed(2)} USD`}${tok.gesamt.kostenGemeldetUsd !== null && tok.gesamt.kostenGemeldetUsd !== undefined ? ` (vom Harness gemeldet: ${tok.gesamt.kostenGemeldetUsd.toFixed(2)} USD)` : ''}`] : []),
         `- Laut eigener Prüfsuite erreicht: Level ${tok.erreichtesLevel}`,
       ]
   : cost
@@ -62,6 +65,7 @@ const lines = [
   '|---|---|',
   `| **Score** | **${score} / 100** (erreichtes Level: ${reached}) |`,
   `| Spec-Version | ${meta.specVersion ?? '?'} |`,
+  `| Harness | ${meta.harness ?? 'claude'} |`,
   `| Modell (vorgegeben) | ${meta.model ?? '?'} |`,
   ...(meta.claudeCode ? [`| Claude Code | ${meta.claudeCode} |`] : []),
   `| Bauordner | \`${meta.buildDir ?? '?'}\` |`,
@@ -79,13 +83,13 @@ if (tok?.phasen?.length) {
   lines.push(
     '## Tokens pro Level',
     '',
-    'Eine Phase reicht bis zu dem Zeitpunkt, an dem `make check` des Agenten das nächste Level erstmals bestanden meldet. „Gesamt“ enthält Cache-Lesen, also den wiederholt mitgeschickten Gesprächsverlauf.',
+    'Eine Phase reicht bis zu dem Zeitpunkt, an dem `make check` des Agenten das nächste Level erstmals bestanden meldet (ab Spec 2.0.0 aus `bauzeit.json` des Agenten). „Gesamt“ enthält Cache-Lesen, also den wiederholt mitgeschickten Gesprächsverlauf. Kosten zum API-Preis aus `runner/preise.json`.',
     '',
-    '| Phase | Dauer | kumuliert | Antworten | Werkzeugaufrufe | Ausgabe-Tokens | Anteil Ausgabe | Tokens gesamt |',
-    '|---|---|---|---|---|---|---|---|',
-    ...tok.phasen.map((p) => `| ${p.phase} | ${fmtS(p.dauerS)} | ${fmtS(p.kumuliertS)} | ${p.antworten} | ${p.werkzeugaufrufe} | ${n(p.tokens.ausgabe)} | ${pct(p.tokens.ausgabe, tok.gesamt.ausgabe)} | ${n(p.tokens.gesamt)} |`),
-    ...(tok.danach ? [`| danach | ${fmtS(tok.danach.dauerS)} | – | ${tok.danach.antworten} | – | ${n(tok.danach.tokens.ausgabe)} | ${pct(tok.danach.tokens.ausgabe, tok.gesamt.ausgabe)} | ${n(tok.danach.tokens.gesamt)} |`] : []),
-    `| **Summe** | ${fmtS(tok.dauerS)} | | ${tok.antworten} | ${tok.werkzeugaufrufe} | ${n(tok.gesamt.ausgabe)} | 100 % | ${n(tok.gesamt.gesamt)} |`,
+    '| Phase | Dauer | kumuliert | Antworten | Werkzeugaufrufe | Ausgabe-Tokens | Anteil Ausgabe | Tokens gesamt | Kosten |',
+    '|---|---|---|---|---|---|---|---|---|',
+    ...tok.phasen.map((p) => `| ${p.phase} | ${fmtS(p.dauerS)} | ${fmtS(p.kumuliertS)} | ${p.antworten} | ${p.werkzeugaufrufe} | ${n(p.tokens.ausgabe)} | ${pct(p.tokens.ausgabe, tok.gesamt.ausgabe)} | ${n(p.tokens.gesamt)} | ${usd(p.tokens)} |`),
+    ...(tok.danach ? [`| danach | ${fmtS(tok.danach.dauerS)} | – | ${tok.danach.antworten} | – | ${n(tok.danach.tokens.ausgabe)} | ${pct(tok.danach.tokens.ausgabe, tok.gesamt.ausgabe)} | ${n(tok.danach.tokens.gesamt)} | ${usd(tok.danach.tokens)} |`] : []),
+    `| **Summe** | ${fmtS(tok.dauerS)} | | ${tok.antworten} | ${tok.werkzeugaufrufe} | ${n(tok.gesamt.ausgabe)} | 100 % | ${n(tok.gesamt.gesamt)} | ${usd(tok.gesamt)} |`,
     '',
   );
 }

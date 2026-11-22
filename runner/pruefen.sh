@@ -46,6 +46,7 @@ cat > "$OUT/meta.json" <<EOF
   "runId": "lauf-${SPECRUN_LAUF:-?}",
   "specVersion": "${SPEC_VERSION:-?}",
   "model": "$(cat /lauf/modell.txt 2>/dev/null || echo 'nicht vorgegeben (Standard der Kommandozeile)')",
+  "harness": "$(cat /lauf/harness.txt 2>/dev/null || echo claude)",
   "fake": false,
   "buildDir": "/lauf/work",
   "judgedIn": "Prüfer-Container",
@@ -58,11 +59,21 @@ for c in /lauf/cost.txt "$AGENT/cost.txt" /workspace/cost.txt; do [ -f "$c" ] &&
     -not -name cost.txt | sort ) > "$OUT/files.txt"
 echo "  $(wc -l < "$OUT/files.txt") Dateien vom Agenten angelegt"
 
-if ls /lauf/protokoll/*/*.jsonl > /dev/null 2>&1; then
+# Tokens und Kosten (Fremdmessung) aus dem Protokoll des Harness:
+#  ab Spec 2.0.0 Phasen aus bauzeit.json des Agenten (runner/verbrauch.mjs mit Adapter), davor wie bisher aus dem Claude-Protokoll
+HARNESS="$(cat /lauf/harness.txt 2>/dev/null || echo claude)"
+case "$HARNESS" in opencode) PROT=/lauf/protokoll/opencode.db ;; *) PROT=/lauf/protokoll ;; esac
+if [ -f "$AGENT/bauzeit.json" ] && [ -e "$PROT" ]; then
+  node "$KIT/runner/verbrauch.mjs" --harness "$HARNESS" --protokoll "$PROT" --bauzeit "$AGENT/bauzeit.json" > "$OUT/tokens.json" \
+    && echo "  Tokens pro Level ausgewertet ($HARNESS, Phasen aus bauzeit.json)"
+elif ls /lauf/protokoll/*/*.jsonl > /dev/null 2>&1; then
   node "$KIT/runner/tokens.mjs" /lauf/protokoll > "$OUT/tokens.json" && echo "  Tokens pro Level ausgewertet (tokens.json)"
 else
-  echo "  kein Session-Protokoll in /lauf/protokoll – Tokens pro Level nicht messbar"
+  echo "  kein Protokoll des Harness in /lauf/protokoll – Tokens pro Level nicht messbar"
 fi
+
+# Ab Spec 2.0.0: Das make check des Agenten darf beim Prüfer keine Bauzeit eintragen (bauzeit.json bleibt, wie der Agent sie hinterließ)
+export BAUZEIT_FEST=1
 
 step "4/5 Unabhängige Messung, Level für Level"
 node "$KIT/judge/all.mjs" "$BUILD" "$OUT/judge" $MAX | tee "$OUT/judge.log"

@@ -1199,3 +1199,31 @@ Inkrementell gebaut: Die Referenz bekam nur die neuen Dateien, die laufende App 
 - **Umsetzung:** in `collect-tokens.mjs` (Referenz) und `judge/lib/phasen.mjs` (Prüfer). Der Prüfer wendet die Stufe erst ab Spec 1.4.0 an; ältere Läufe werden nach ihrer eigenen Spec bewertet.
 - **Wirkung:** Lauf 008 (Haiku) kostet korrekt **2,27 USD** statt 0,47 USD. Lauf 007 (Sonnet, nur bis Level 7) bleibt bei 1,61 USD. Haiku ist für einen ganzen Lauf also nicht 20-mal billiger als Sonnet, weil der lange Kontext in die teure Stufe fällt.
 - **Fund (Umgebung):** Nach einem Neustart der Podman-Maschine dauerte jede DNS-Abfrage in Containern 2 Sekunden, weil der erste Namensserver nicht antwortete. Folgen: `make check` dauerte 5,4 statt 1,2 min, und der Darstellungstest von Level 10 lief in seine Zeitgrenze. Mit `--dns 1.1.1.1` ging es wieder normal. Das betrifft auch Agent- und Prüfer-Container. Erledigt: Agent- und Prüfer-Container setzen in `runArgs` die DNS-Server `1.1.1.1` und `9.9.9.9` (gilt für neu angelegte Läufe).
+
+---
+
+## 27. Specrun unabhängig vom Agent-Harness (Spec 2.0.0, 2026-11-22)
+
+**Anlass:** Ein Lauf mit OpenCode und dem Modell „Big Pickle“. Die Spec setzte bis dahin Claude Code voraus: Der Agent las sein Claude-Protokoll für Tokens, Kosten und Phasen.
+
+### Entscheidungen
+| Thema | Entscheidung |
+|---|---|
+| Bauzeit | **Der Agent misst sie selbst** über seine `make check`. Die Datei `bauzeit.json` im Projektordner ist nicht in git; die Startzeit legt der Agent in Schritt 0 an. Ein Eintrag entsteht beim ersten Bestehen und ändert sich nie mehr. Mit `BAUZEIT_FEST=1` (Prüfer) wird nichts eingetragen. Der Prüfer prüft die Bauzeit nicht nach |
+| Phasengrenzen | braucht es nicht mehr aus dem Protokoll: Die Zeitpunkte in `bauzeit.json` sind die Grenzen |
+| Tokens und Kosten | **nur noch Fremdmessung** nach dem Lauf: Ein Adapter pro Harness liefert pro Antwort Zeit, Modell, Tokens und Werkzeugaufrufe; `runner/verbrauch.mjs` teilt sie pro Level auf |
+| Live-Seite | **keine Tokens und Kosten** mehr; Karten zeigen Bauzeit und Checkdauer, der Bericht „Bauzeit gesamt“ |
+| Preise | `runner/preise.json` statt in der Spec; unbekanntes Modell → Kosten „unbekannt“; Big Pickle = 0 |
+| Umgebung | **ein Image pro Harness** auf derselben Basis (`infra/devcontainer-opencode` leitet von `ghcr.io/specrun-lab/devcontainer:1` ab, ohne Claude Code); `prepare-run.sh --harness` |
+| Anmeldung | nur per Umgebungsvariable aus `~/.zshrc` (OpenCode: `SPECRUN_OPENCODE_API_KEY` → `OPENCODE_API_KEY`) |
+| Autonomie | pro Image voreingestellt (OpenCode: `permissions` alles „allow“ in `~/.config/opencode/opencode.json`); Start mit `--standalone`, damit die Variablen beim Serverprozess ankommen |
+| Alte Läufe | werden nach ihrer eigenen Spec bewertet (vor 2.0.0 mit Tokens aus dem Claude-Protokoll) |
+
+### OpenCode (Version 2) – was wir herausgefunden haben
+- Sitzungen in SQLite (`opencode.db`), Pfad umlenkbar mit `OPENCODE_DB`. Pro Antwort in `session_message.data`: `tokens` (input, output, reasoning, cache.read, cache.write), `cost`, `model` (`{id, providerID}`). Werkzeugaufrufe sind Inhaltsblöcke vom Typ `tool`.
+- Reasoning weist OpenCode getrennt aus; im Vergleich zählt „Ausgabe“ beides (Claude zählt das Nachdenken ohnehin in die Ausgabe).
+- OpenCode verdichtet lange Verläufe („compaction“).
+- Ohne `--standalone` versucht OpenCode einen Hintergrunddienst zu starten, was im Container scheitert.
+
+### Funde
+- Der wacklige Test „Daten überstehen einen Neustart des Backends“ (Level 4) kam von einer wiederverwendeten Verbindung zum beendeten Backend (`ECONNRESET`). Jetzt fragt der Test nach dem Neustart über eine frische Verbindung ab.

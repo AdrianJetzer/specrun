@@ -6,7 +6,7 @@ Specrun ist ein Experiment. Eine frische Claude-Code-Session erhält ausschließ
 
 Die gebaute App, das **Levelboard**, ist zugleich die Anzeigetafel für die Leistung des Agenten: Sie zeigt, welche Levels er geschafft hat. Ein **unabhängiger Prüfer**, den der Agent nicht sieht, misst anschließend nach. Nur sein Urteil zählt.
 
-> **Stand (Spec v1.4.0):** Alle 10 Levels sind umgesetzt: Spec, Referenz, unabhängiger Prüfer, Dev Container und ein Hetzner-Server für die Live-Läufe. Die Referenz läuft als echtes Repo [`specrun-lab/levelboard-referenz`](https://github.com/specrun-lab/levelboard-referenz) und erreicht laut Prüfer Score 100. **Drei Modelle haben die Spec im Nachbau vollständig geschafft**, jeweils 100 / 100 laut unabhängigem Prüfer, ohne Abweichung zwischen Selbst- und Fremdmessung.
+> **Stand (Spec v2.0.0):** Alle 10 Levels sind umgesetzt: Spec, Referenz, unabhängiger Prüfer, Dev Container und ein Hetzner-Server für die Live-Läufe. **Seit 2.0.0 ist die Spec unabhängig vom Agent-Harness**: Neben Claude Code läuft auch OpenCode, weitere Harnesses brauchen nur einen Adapter und ein Image. Die Referenz läuft als echtes Repo [`specrun-lab/levelboard-referenz`](https://github.com/specrun-lab/levelboard-referenz) und erreicht laut Prüfer Score 100. **Drei Modelle haben die Spec im Nachbau vollständig geschafft**, jeweils 100 / 100 laut unabhängigem Prüfer, ohne Abweichung zwischen Selbst- und Fremdmessung.
 
 ## Ergebnisse
 
@@ -19,7 +19,7 @@ Die gebaute App, das **Levelboard**, ist zugleich die Anzeigetafel für die Leis
 - **Sonnet** war am schnellsten und am günstigsten. Es baute in großen Blöcken und prüfte seltener.
 - **Opus** ging Level für Level vor und erreichte die höchste Testabdeckung, war aber langsam und am teuersten.
 - **Haiku** ist pro Token am billigsten. Es brauchte aber die meisten Tokens, und der lange Kontext fällt in Haikus teurere Preisstufe.
-- Die Kosten sind aus dem Session-Protokoll zum API-Preis gerechnet (`spec/05-datenmodell.md`). Bei Haiku 008 sind sie nach Spec 1.4.0 nachgerechnet; der Lauf selbst meldete nach Spec 1.2.0 noch 0,47 USD.
+- Die Kosten sind aus dem Session-Protokoll zum API-Preis gerechnet (Preise in `runner/preise.json`). Bei Haiku 008 sind sie mit der Preisstufe für langen Kontext nachgerechnet; der Lauf selbst meldete nach Spec 1.2.0 noch 0,47 USD.
 
 Frühere Läufe ([lauf-003](runs/lauf-003/report.md) usw.) stammen aus der Aufbauphase mit weniger Levels.
 
@@ -40,7 +40,9 @@ Frühere Läufe ([lauf-003](runs/lauf-003/report.md) usw.) stammen aus der Aufba
 
 **Score:** 10 Punkte pro durchgehend bestandenem Level, also 0–100. Beim ersten nicht bestandenen Level ist Schluss. Kosten, Tokens, Dauer, Performance, Optik und die Abweichung zwischen Selbst- und Fremdmessung werden als Nebenwerte protokolliert.
 
-**Kennzahlen pro Level:** Schon ab Level 1 zeigt jede Karte des Levelboards, was das Level gekostet hat: **Bauzeit**, **Kosten** zum API-Preis und **Tokens (Ausgabe)**, berechnet aus dem Session-Protokoll des Agenten. Der Abschlussbericht erscheint ab dem ersten geprüften Level und füllt sich mit jedem weiteren. So zeigt auch ein Lauf, der früh scheitert, was er gekostet hat. Der Prüfer rechnet alle diese Werte aus dem Protokoll unabhängig nach.
+**Kennzahlen pro Level:** Schon ab Level 1 zeigt jede Karte des Levelboards die **Bauzeit** des Levels. Der Agent misst sie selbst über seine `make check` und hält sie in `bauzeit.json` fest; einmal eingetragen, ändert sie sich nicht mehr. Der Abschlussbericht erscheint ab dem ersten geprüften Level und füllt sich mit jedem weiteren.
+
+**Tokens und Kosten** misst ab Spec 2.0.0 nur noch der Prüfer, nach dem Lauf: Ein Adapter pro Harness (`runner/adapter/`) liest dessen Protokoll, `runner/verbrauch.mjs` teilt die Tokens mit den Zeitpunkten aus `bauzeit.json` pro Level auf und rechnet die Kosten mit `runner/preise.json`. Sie stehen im Prüfbericht unter `runs/lauf-<nr>/`, nicht auf der Live-Seite.
 
 Alle Entscheidungen und ihre Begründungen stehen in [`KONZEPT.md`](KONZEPT.md).
 
@@ -79,11 +81,20 @@ Direkt auf dem Mac braucht der Prüfer für Level 2 `nginx` (`brew install nginx
 ```bash
 runner/prepare-run.sh                 # legt specruns_testlaeufe/<nr>/ an: env/, work/spec/, judge/
 runner/prepare-run.sh --modell opus  # dasselbe mit anderem Modell (Standard: sonnet; auch haiku oder eine Modell-ID)
+runner/prepare-run.sh --harness opencode                       # mit OpenCode statt Claude Code (Standard-Modell opencode/big-pickle)
+runner/prepare-run.sh --harness opencode --modell anthropic/claude-sonnet-5-5   # OpenCode mit anderem Modell
 # 1. <lauf>/env in VS Code im Container öffnen, Claude den Auftrag geben (siehe Ausgabe des Skripts)
 # 2. <lauf>/judge in VS Code im Container öffnen und dort ausführen:  /specrun/runner/pruefen.sh
 runner/uebernehmen.sh <laufordner>    # Bericht nach runs/lauf-<nr>/ übernehmen
 ```
-Das Modell des Agenten ist pro Lauf fest vorgegeben (`ANTHROPIC_MODEL` im Agent-Container, Standard `claude-sonnet-5-5`). Der Bericht zeigt das vorgegebene und das laut Protokoll tatsächlich verwendete Modell.
+Harness und Modell sind pro Lauf fest vorgegeben und stehen in `<lauf>/harness.txt` und `<lauf>/modell.txt`. Der Bericht zeigt beide und das laut Protokoll tatsächlich verwendete Modell.
+
+| Harness | Image | Anmeldung (in `~/.zshrc`) | Start im Container | Protokoll |
+|---|---|---|---|---|
+| Claude Code | `infra/devcontainer/` | `CLAUDE_CODE_OAUTH_TOKEN` | `claude` | `~/.claude/projects` → `<lauf>/protokoll` |
+| OpenCode 2.3.2 | `infra/devcontainer-opencode/` | `SPECRUN_OPENCODE_API_KEY` (wird zu `OPENCODE_API_KEY`) | `opencode --standalone --model "$SPECRUN_MODEL"` | SQLite über `OPENCODE_DB` → `<lauf>/protokoll/opencode.db` |
+
+Beide Images haben dieselbe Startausrüstung; OpenCode läuft ohne Rückfragen (Berechtigungen im Image auf „allow“).
 
 Der Prüfer läuft in einem eigenen Container aus demselben Image. Er sieht das Werk des Agenten nur lesend und baut es selbst neu. Zu beachten:
 - Pro Prüfer-Container läuft **immer nur eine Prüfung**. Zwei gleichzeitige Prüfungen stören sich (gleicher Build-Ordner, gleiche Ports). `pruefen.sh` startet nicht, solange `ergebnis/` existiert; für eine neue Prüfung den Ordner erst umbenennen.

@@ -10,7 +10,7 @@ import path from 'node:path';
 import { spawnSync } from 'node:child_process';
 import { fileURLToPath } from 'node:url';
 import { chromium } from '@playwright/test';
-import { phasenVerbrauch, hatBauzeit, ohneBauzeit, hatPreisstufen, setzePreisstufen } from './lib/phasen.mjs';
+import { phasenVerbrauch, hatBauzeit, ohneBauzeit, hatPreisstufen, setzePreisstufen, specVersion } from './lib/phasen.mjs';
 import { LEVEL1_CHECKS, LEVEL2_CHECKS, LEVEL3_CHECKS, LEVEL4_CHECKS, LEVEL5_CHECKS, LEVEL6_CHECKS, LEVEL7_CHECKS, LEVEL8_CHECKS, LEVEL9_CHECKS, LEVEL10_CHECKS } from './lib/fixtures.mjs';
 
 const here = path.dirname(fileURLToPath(import.meta.url));
@@ -96,6 +96,8 @@ const bauzeit = (s) => (typeof s !== 'number' ? '–' : s < 60 ? `${s} s` : `${M
 const PROTOKOLL = process.env.SPECRUN_PROTOKOLL ?? '/lauf/protokoll';
 // Bauzeit erst ab Spec 1.3.0 (ältere Läufe werden nach ihrer eigenen Spec bewertet)
 const BAUZEIT = hatBauzeit(target);
+// Ab Spec 2.0.0 meldet der Agent keine Tokens mehr, sondern die Bauzeit aus bauzeit.json (metrics.build)
+const V2 = (specVersion(target)?.[0] ?? 2) >= 2;
 // Haiku-Preisstufe über 100k Tokens erst ab Spec 1.4.0
 setzePreisstufen(hatPreisstufen(target));
 
@@ -124,16 +126,30 @@ if (!RUN_ID || !process.env.GH_TOKEN || !LIVE_DOMAIN) {
     if (!equal(lv[6].metrics?.images, img)) kp.push(`Level 7 images ${JSON.stringify(lv[6].metrics?.images)}, gemessen ${JSON.stringify(img)}`);
     const lt = lv[8].metrics?.loadtest ?? {};
     if (!['requests', 'errors', 'rps', 'p50Ms', 'p95Ms', 'maxMs'].every((k) => typeof lt[k] === 'number') || lt.errors !== 0 || !(lt.p95Ms < 1000)) kp.push(`Level 9 loadtest unvollständig oder unplausibel: ${JSON.stringify(lt)}`);
-    const ownRoh = phasenVerbrauch(PROTOKOLL, lv.map((l) => ({ level: l.level, status: l.status })));
+    if (V2) {
+      // Bauzeit: Selbstmessung, nicht nachgerechnet – aber jedes Level hat einen Eintrag, und live steht dasselbe wie in bauzeit.json des Agenten
+      let datei = null;
+      try { datei = JSON.parse(fs.readFileSync(path.join(target, 'bauzeit.json'), 'utf8')); } catch {}
+      const ohne = lv.filter((l) => !l.metrics?.build).map((l) => l.level);
+      if (ohne.length) kp.push(`keine Bauzeit (metrics.build) bei Level ${ohne.join(', ')}`);
+      else if (!datei?.levels) kp.push('bauzeit.json fehlt im Werk des Agenten');
+      else {
+        const anders = lv.filter((l) => !equal(l.metrics.build, datei.levels[l.level])).map((l) => l.level);
+        if (anders.length) kp.push(`Bauzeit live weicht von bauzeit.json ab bei Level ${anders.join(', ')}`);
+      }
+      nebenwerte.bauzeit = datei;
+    }
+    const ownRoh = V2 ? null : phasenVerbrauch(PROTOKOLL, lv.map((l) => ({ level: l.level, status: l.status })));
     const own = BAUZEIT ? ownRoh : ohneBauzeit(ownRoh);
-    if (!own) kp.push(`kein Session-Protokoll unter ${PROTOKOLL}`);
+    if (V2) { /* Tokens misst ab 2.0.0 nur der Runner (Adapter) */ }
+    else if (!own) kp.push(`kein Session-Protokoll unter ${PROTOKOLL}`);
     else {
       const wrong = lv.filter((l) => !equal(l.metrics?.tokens, own[l.level])).map((l) => l.level);
       if (wrong.length) kp.push(`tokens weichen ab bei Level ${wrong.join(', ')} (z. B. Level ${wrong[0]}: gemeldet ${JSON.stringify(lv[wrong[0] - 1].metrics?.tokens)}, nachgerechnet ${JSON.stringify(own[wrong[0]])})`);
       nebenwerte.tokensPruefer = own;
     }
   }
-  add('L10-K1', 'Level 1–10 live bestanden; Pipeline (L6), Images (L7) und Tokens aller Levels stimmen mit eigener Messung, Lasttest (L9) vollständig', kp.length === 0, kp.join('; '));
+  add('L10-K1', V2 ? 'Level 1–10 live bestanden; Pipeline (L6) und Images (L7) stimmen mit eigener Messung, Lasttest (L9) vollständig, Bauzeit bei allen Levels' : 'Level 1–10 live bestanden; Pipeline (L6), Images (L7) und Tokens aller Levels stimmen mit eigener Messung, Lasttest (L9) vollständig', kp.length === 0, kp.join('; '));
 
   // ---- L10-K2: Live-Seite zeigt Bericht und Karten mit genau diesen Werten ----
   const dp = [];
@@ -147,15 +163,20 @@ if (!RUN_ID || !process.env.GH_TOKEN || !LIVE_DOMAIN) {
       const text = async (id, scope = page) => (await scope.getByTestId(id).first().textContent())?.trim();
       const phases = lv.map((l) => l.metrics?.tokens).filter((t) => t && t.inLevel === undefined);
       const sum = (k) => phases.reduce((acc, t) => acc + (t[k] ?? 0), 0);
-      const [pl, im, lt] = [lv[5].metrics?.pipeline, lv[6].metrics?.images, lv[8].metrics?.loadtest];
-      const expected = {
-        'summary-reached': '10 / 10', 'report-reached': '10 / 10', 'report-score': '100 / 100', 'report-complete': 'ja',
-        'report-commit': String(snapshot?.run?.commit ?? '').slice(0, 7),
+      const builds = lv.map((l) => l.metrics?.build).filter((b) => b && b.inLevel === undefined);
+      const tokenFelder = V2 ? {} : {
         'report-model': [...new Set(phases.flatMap((t) => t.models))].sort().join(', '),
         'report-responses': thousands(sum('responses')), 'report-tokens-input': thousands(sum('input')),
         'report-tokens-cache-write': thousands(sum('cacheWrite5m') + sum('cacheWrite1h')), 'report-tokens-cache-read': thousands(sum('cacheRead')),
         'report-tokens-output': thousands(sum('output')), 'report-tokens-total': thousands(sum('total')),
-        'report-cost': `${comma(Math.round(sum('costUsd') * 100) / 100, 2)} USD`, ...(BAUZEIT ? { 'report-build-time': bauzeit(sum('buildS')) } : {}),
+        'report-cost': `${comma(Math.round(sum('costUsd') * 100) / 100, 2)} USD`,
+      };
+      const bauFeld = V2 ? { 'report-build-time': builds.length ? bauzeit(builds.reduce((a, b) => a + b.buildS, 0)) : '–' } : BAUZEIT ? { 'report-build-time': bauzeit(sum('buildS')) } : {};
+      const [pl, im, lt] = [lv[5].metrics?.pipeline, lv[6].metrics?.images, lv[8].metrics?.loadtest];
+      const expected = {
+        'summary-reached': '10 / 10', 'report-reached': '10 / 10', 'report-score': '100 / 100', 'report-complete': 'ja',
+        'report-commit': String(snapshot?.run?.commit ?? '').slice(0, 7),
+        ...tokenFelder, ...bauFeld,
         'report-p50': `${lt?.p50Ms} ms`, 'report-p95': `${lt?.p95Ms} ms`, 'report-rps': `${comma(lt?.rps)} Anfragen/s`, 'report-errors': String(lt?.errors),
         'report-image-frontend': `${comma(im?.frontendMB)} MB`, 'report-image-backend': `${comma(im?.backendMB)} MB`,
         'report-job-check': `${pl?.jobs?.check} s`, 'report-job-images': `${pl?.jobs?.images} s`, 'report-job-deploy': `${pl?.jobs?.deploy} s`,
@@ -170,10 +191,12 @@ if (!RUN_ID || !process.env.GH_TOKEN || !LIVE_DOMAIN) {
       for (const l of lv) {
         const card = page.locator(`[data-testid="level-card"][data-level="${l.level}"]`);
         const t = l.metrics?.tokens;
-        const wantCost = !t ? '–' : t.inLevel !== undefined ? `in L${String(t.inLevel).padStart(2, '0')}` : `${comma(t.costUsd, 2)} USD`;
-        const wantOut = t && t.inLevel === undefined ? thousands(t.output) : '–';
-        const wantBuild = !t ? '–' : t.inLevel !== undefined ? `in L${String(t.inLevel).padStart(2, '0')}` : bauzeit(t.buildS);
-        const [c, o, b] = [await text('level-cost', card).catch(() => null), await text('level-output', card).catch(() => null), BAUZEIT ? await text('level-build-time', card).catch(() => null) : wantBuild];
+        const inL = (n) => `in L${String(n).padStart(2, '0')}`;
+        const bm = l.metrics?.build;
+        const wantCost = V2 ? null : !t ? '–' : t.inLevel !== undefined ? inL(t.inLevel) : `${comma(t.costUsd, 2)} USD`;
+        const wantOut = V2 ? null : t && t.inLevel === undefined ? thousands(t.output) : '–';
+        const wantBuild = V2 ? (!bm ? '–' : bm.inLevel !== undefined ? inL(bm.inLevel) : bauzeit(bm.buildS)) : !t ? '–' : t.inLevel !== undefined ? inL(t.inLevel) : bauzeit(t.buildS);
+        const [c, o, b] = [V2 ? null : await text('level-cost', card).catch(() => null), V2 ? null : await text('level-output', card).catch(() => null), V2 || BAUZEIT ? await text('level-build-time', card).catch(() => null) : wantBuild];
         if (c !== wantCost || o !== wantOut || b !== wantBuild) dp.push(`Karte ${l.level}: „${c}“/„${o}“/„${b}“ statt „${wantCost}“/„${wantOut}“/„${wantBuild}“`);
       }
       await page.screenshot({ path: path.join(out, 'level10-live.png'), fullPage: true }).catch(() => {});
@@ -183,7 +206,7 @@ if (!RUN_ID || !process.env.GH_TOKEN || !LIVE_DOMAIN) {
   } finally {
     await browser.close();
   }
-  add('L10-K2', 'Live-Seite zeigt den vollständigen Abschlussbericht sowie Kosten und Bauzeit je Karte mit genau den gemeldeten Werten', dp.length === 0, dp.join('; '));
+  add('L10-K2', V2 ? 'Live-Seite zeigt den vollständigen Abschlussbericht und die Bauzeit je Karte mit genau den gemeldeten Werten' : 'Live-Seite zeigt den vollständigen Abschlussbericht sowie Kosten und Bauzeit je Karte mit genau den gemeldeten Werten', dp.length === 0, dp.join('; '));
 
   // ---- L10-K3: make level10 + make check (meldet neu und prüft live nach) ----
   run('make', ['down']);

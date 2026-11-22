@@ -1,0 +1,11 @@
+{
+  "_hinweis": "USD pro Million Tokens. Quelle: Anthropic-Preisseite (Stand 2026-11), OpenCode-Doku (Big Pickle gratis). 'lang' gilt pro Antwort, wenn Eingabe + Cache-Schreiben + Cache-Lesen über 'langAb' liegt. Unbekannte Modelle: Kosten 'unbekannt'.",
+  "claude-opus-5-5": { "eingabe": 4, "cacheSchreiben5m": 5, "cacheSchreiben1h": 8, "cacheLesen": 0.2, "ausgabe": 20 },
+  "claude-sonnet-5-5": { "eingabe": 2, "cacheSchreiben5m": 2.5, "cacheSchreiben1h": 4, "cacheLesen": 0.1, "ausgabe": 10 },
+  "claude-haiku-5-5": {
+    "eingabe": 0.1, "cacheSchreiben5m": 0.125, "cacheSchreiben1h": 0.2, "cacheLesen": 0.01, "ausgabe": 0.5,
+    "langAb": 100000,
+    "lang": { "eingabe": 0.5, "cacheSchreiben5m": 0.625, "cacheSchreiben1h": 1, "cacheLesen": 0.05, "ausgabe": 2.5 }
+  },
+  "opencode/big-pickle": { "eingabe": 0, "cacheSchreiben5m": 0, "cacheSchreiben1h": 0, "cacheLesen": 0, "ausgabe": 0 }
+}

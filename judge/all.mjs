@@ -39,7 +39,9 @@ for (const n of available.filter((n) => n <= max)) {
 let tokens = null;
 try {
   const data = JSON.parse(fs.readFileSync(path.join(target, 'frontend/dist/results.json'), 'utf8'));
-  const { phasenVerbrauch, hatBauzeit, ohneBauzeit, hatPreisstufen, setzePreisstufen } = await import('./lib/phasen.mjs');
+  const { phasenVerbrauch, hatBauzeit, ohneBauzeit, hatPreisstufen, setzePreisstufen, specVersion } = await import('./lib/phasen.mjs');
+  // Ab Spec 2.0.0 meldet der Agent keine Tokens mehr; der Vergleich entfällt (Tokens kommen vom Adapter im Runner)
+  if ((specVersion(target)?.[0] ?? 2) >= 2) throw new Error('ab 2.0.0 kein Token-Vergleich');
   setzePreisstufen(hatPreisstufen(target));
   const roh = phasenVerbrauch(process.env.SPECRUN_PROTOKOLL ?? '/lauf/protokoll', data.levels.filter((l) => l.checkedAt).map((l) => ({ level: l.level, status: l.status })));
   const own = hatBauzeit(target) ? roh : ohneBauzeit(roh);
