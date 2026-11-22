@@ -17,12 +17,14 @@
   // OPENCODE_API_KEY: Schlüssel für den Anbieter „opencode“ (z. B. Big Pickle), auf dem Mac als SPECRUN_OPENCODE_API_KEY gesetzt
   // DEEPSEEK_API_KEY: Schlüssel für den Anbieter „deepseek“ (z. B. deepseek/deepseek-flash), auf dem Mac als SPECRUN_DEEPSEEK_API_KEY gesetzt
   // OPENCODE_DB: Sitzungs-Datenbank im Laufordner (<lauf>/protokoll) – daraus misst der Prüfer Tokens und Kosten
-  // SPECRUN_MODEL: vorgegebenes Modell (setzt runner/prepare-run.sh ein), Start mit: opencode --standalone --model "$SPECRUN_MODEL"
+  // SPECRUN_MODEL: vorgegebenes Modell (setzt runner/prepare-run.sh ein)
+  // OPENCODE_CONFIG_CONTENT: legt dieses Modell in OpenCode fest (opencode 2.3 kennt kein --model beim interaktiven Start), Start mit: opencode --standalone
   "containerEnv": {
     "OPENCODE_API_KEY": "${localEnv:SPECRUN_OPENCODE_API_KEY}",
     "DEEPSEEK_API_KEY": "${localEnv:SPECRUN_DEEPSEEK_API_KEY}",
     "OPENCODE_DB": "/home/dev/.specrun-protokoll/opencode.db",
     "SPECRUN_MODEL": "__MODEL__",
+    "OPENCODE_CONFIG_CONTENT": "{\"model\":\"__MODEL__\"}",
     "GH_TOKEN": "${localEnv:SPECRUN_AGENT_GH_TOKEN}",
     "RUN_ID": "__RUN_ID__",
     "LIVE_DOMAIN": "${localEnv:SPECRUN_LIVE_DOMAIN}"

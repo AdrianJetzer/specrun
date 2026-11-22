@@ -93,7 +93,7 @@ Harness und Modell sind pro Lauf fest vorgegeben und stehen in `<lauf>/harness.t
 | Harness | Image | Anmeldung (in `~/.zshrc`) | Start im Container | Protokoll |
 |---|---|---|---|---|
 | Claude Code | `infra/devcontainer/` | `CLAUDE_CODE_OAUTH_TOKEN` | `claude` | `~/.claude/projects` → `<lauf>/protokoll` |
-| OpenCode 2.3.2 | `infra/devcontainer-opencode/` | je nach Anbieter: `SPECRUN_OPENCODE_API_KEY` (wird zu `OPENCODE_API_KEY`), `SPECRUN_DEEPSEEK_API_KEY` (wird zu `DEEPSEEK_API_KEY`) | `opencode --standalone --model "$SPECRUN_MODEL"` | SQLite über `OPENCODE_DB` → `<lauf>/protokoll/opencode.db` |
+| OpenCode 2.3.2 | `infra/devcontainer-opencode/` | je nach Anbieter: `SPECRUN_OPENCODE_API_KEY` (wird zu `OPENCODE_API_KEY`), `SPECRUN_DEEPSEEK_API_KEY` (wird zu `DEEPSEEK_API_KEY`) | `opencode --standalone` (Modell aus `OPENCODE_CONFIG_CONTENT`) | SQLite über `OPENCODE_DB` → `<lauf>/protokoll/opencode.db` |
 
 Beide Images haben dieselbe Startausrüstung; OpenCode läuft ohne Rückfragen (Berechtigungen im Image auf „allow“).
 

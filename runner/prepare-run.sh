@@ -87,7 +87,7 @@ DIR="$(cd "$DIR" && pwd)"
 add_judge "$DIR"
 find "$DIR" -name .DS_Store -delete
 
-if [ "$HARNESS" = opencode ]; then START='opencode --standalone --model "$SPECRUN_MODEL"'; else START='claude'; fi
+if [ "$HARNESS" = opencode ]; then START='opencode --standalone'; else START='claude'; fi
 SPEC_VERSION="$(grep -m1 'Spec-Version' "$ROOT/spec/00-start.md" | sed -E 's/.*\*\* *([0-9.]+).*/\1/')"
 cat <<EOF
 ✔ Laufordner angelegt: $DIR  (Spec $SPEC_VERSION, Harness $HARNESS, Modell $MODEL)
