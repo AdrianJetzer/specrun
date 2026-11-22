@@ -106,12 +106,13 @@ So geht es weiter:
      Lies spec/00-start.md und folge der Arbeitsanweisung darin vollständig. Baue das Projekt im aktuellen Verzeichnis. Stelle keine Rückfragen.
 
   3. Nicht eingreifen. Tokens und Kosten wertet der Prüfer aus $DIR/protokoll aus, die Bauzeit kommt aus bauzeit.json des Agenten.
-  4. Container schließen. Dann in VS Code: „Ordner öffnen“ → $DIR/judge → „Reopen in Container“
+  4. Optional prüfen: Container schließen, dann in VS Code: „Ordner öffnen“ → $DIR/judge → „Reopen in Container“
      und im Container-Terminal:
 
      /specrun/runner/pruefen.sh
 
-  5. Ergebnis ins Repo übernehmen (auf dem Mac):
+  5. Abschließen (auf dem Mac): räumt die Container ab und übernimmt den Prüfbericht bzw. trägt ohne Prüfung
+     nur Tokens und Kosten auf der Live-Seite nach:
 
-     $ROOT/runner/uebernehmen.sh $DIR
+     $ROOT/runner/abschluss.sh $DIR
 EOF
