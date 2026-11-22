@@ -5,13 +5,14 @@
 //         2. Live-Seite im Browser: Bericht mit genau diesen Werten
 //         3. make level10 + make check des Agenten (meldet selbst neu und prüft live nach)
 //         4. Live-Stand wiederherstellen, falls er danach nicht Level 1–10 zeigt
+//         5. ab Spec 2.1.0: /api/usage live (Fehlerfälle, Speichern, Anzeige im Bericht), danach alter Stand zurück
 import fs from 'node:fs';
 import path from 'node:path';
 import { spawnSync } from 'node:child_process';
 import { fileURLToPath } from 'node:url';
 import { chromium } from '@playwright/test';
-import { phasenVerbrauch, hatBauzeit, ohneBauzeit, hatPreisstufen, setzePreisstufen, specVersion } from './lib/phasen.mjs';
-import { LEVEL1_CHECKS, LEVEL2_CHECKS, LEVEL3_CHECKS, LEVEL4_CHECKS, LEVEL5_CHECKS, LEVEL6_CHECKS, LEVEL7_CHECKS, LEVEL8_CHECKS, LEVEL9_CHECKS, LEVEL10_CHECKS } from './lib/fixtures.mjs';
+import { phasenVerbrauch, hatBauzeit, hatVerbrauch, ohneBauzeit, hatPreisstufen, setzePreisstufen, specVersion } from './lib/phasen.mjs';
+import { LEVEL1_CHECKS, LEVEL2_CHECKS, LEVEL3_CHECKS, LEVEL4_CHECKS, LEVEL5_CHECKS, LEVEL6_CHECKS, LEVEL7_CHECKS, LEVEL8_CHECKS, LEVEL9_CHECKS, LEVEL10_CHECKS as L10_ALT, LEVEL10_CHECKS_V21 } from './lib/fixtures.mjs';
 
 const here = path.dirname(fileURLToPath(import.meta.url));
 const target = path.resolve(process.argv[2] ?? '');
@@ -26,6 +27,9 @@ const RUN_ID = process.env.RUN_ID ?? '';
 const LIVE_DOMAIN = process.env.LIVE_DOMAIN ?? '';
 const REPO = `specrun-lab/levelboard-${RUN_ID}`;
 const LIVE = `https://${RUN_ID}.${LIVE_DOMAIN}`;
+// Ab Spec 2.1.0: Verbrauch (GET/PUT /api/usage) mit eigenem Check und eigenem Kriterium L10-K4
+const VERBRAUCH = hatVerbrauch(target);
+const LEVEL10_CHECKS = VERBRAUCH ? LEVEL10_CHECKS_V21 : L10_ALT;
 const LISTS = [LEVEL1_CHECKS, LEVEL2_CHECKS, LEVEL3_CHECKS, LEVEL4_CHECKS, LEVEL5_CHECKS, LEVEL6_CHECKS, LEVEL7_CHECKS, LEVEL8_CHECKS, LEVEL9_CHECKS, LEVEL10_CHECKS];
 const criteria = [];
 const nebenwerte = {};
@@ -232,9 +236,79 @@ if (!RUN_ID || !process.env.GH_TOKEN || !LIVE_DOMAIN) {
     nebenwerte.liveWiederhergestellt = true;
     console.log('  Live-Stand aus der Selbstmessung wiederhergestellt');
   }
+
+  // ---- L10-K4 (ab Spec 2.1.0): Verbrauch live speichern, lesen und im Bericht anzeigen ----
+  if (VERBRAUCH) await pruefeVerbrauch();
 }
 
-const passed = criteria.length >= 3 && criteria.every((c) => c.ok);
+async function pruefeVerbrauch() {
+  const up = [];
+  const api = (method, body, type = 'application/json') =>
+    fetch(`${LIVE}/api/usage`, { method, headers: body === undefined ? {} : { 'Content-Type': type }, body, signal: AbortSignal.timeout(15_000) }).catch(() => null);
+  const vorher = await api('GET');
+  let alt = null;
+  try { alt = vorher?.ok ? await vorher.json() : null; } catch {}
+  if (!vorher?.ok || !alt || typeof alt !== 'object' || Array.isArray(alt)) {
+    add('L10-K4', 'Verbrauch: GET/PUT /api/usage live, Anzeige von Kosten und Tokens im Bericht', false, `GET /api/usage: ${vorher?.status ?? 'nicht erreichbar'}`);
+    return;
+  }
+  nebenwerte.verbrauchLive = alt;
+  // Eigene Testwerte des Prüfers (nicht die Beispielwerte aus den Tests des Agenten)
+  const probe = {
+    harness: 'pruefer', models: ['pruefer-modell'], measuredAt: new Date().toISOString(),
+    total: { output: 7654, total: 1234567, costUsd: 3.21 },
+    levels: Object.fromEntries(Array.from({ length: 10 }, (_, i) => [i + 1, i === 1 ? { inLevel: 3 } : { output: 700 + i, total: 100000 + i, costUsd: (i + 1) / 10 }])),
+  };
+  try {
+    const fehler = [['[1,2]', 400], ['{"a":', 400], ['{}', 415, 'text/plain'], [JSON.stringify({ a: 'x'.repeat(70 * 1024) }), 413]];
+    for (const [body, code, type] of fehler) {
+      const r = await api('PUT', body, type);
+      if (r?.status !== code) up.push(`PUT ${body.slice(0, 12)}${type ? ` (${type})` : ''}: ${r?.status} statt ${code}`);
+    }
+    const post = await api('POST', '{}');
+    if (post?.status !== 405 || !(post.headers.get('allow') ?? '').includes('PUT')) up.push(`POST: ${post?.status}, Allow „${post?.headers.get('allow')}“`);
+    const put = await api('PUT', JSON.stringify(probe));
+    if (put?.status !== 200) up.push(`PUT Testwerte: ${put?.status}`);
+    let zurueck = null;
+    try { zurueck = await (await api('GET')).json(); } catch {}
+    if (!equal(zurueck, probe)) up.push(`GET nach PUT: ${JSON.stringify(zurueck)?.slice(0, 120)}`);
+    // Anzeige im Bericht
+    const browser = await chromium.launch();
+    try {
+      const page = await browser.newPage({ viewport: { width: 1440, height: 900 } });
+      await page.goto(`${LIVE}/`, { timeout: 30_000 });
+      const ok = await page.waitForFunction(() => document.querySelector('[data-testid="report-cost"]')?.textContent?.trim() === '3,21 USD', null, { timeout: 15_000 }).then(() => true, () => false);
+      if (!ok) up.push('report-cost zeigt nicht „3,21 USD“');
+      const want = { 'report-harness': 'pruefer', 'report-model': 'pruefer-modell', 'report-tokens-output': thousands(7654), 'report-tokens-total': thousands(1234567) };
+      for (const [id, w] of Object.entries(want)) {
+        const got = (await page.getByTestId(id).first().textContent().catch(() => null))?.trim();
+        if (got !== w) up.push(`${id}: „${got}“ statt „${w}“`);
+      }
+      for (let n = 1; n <= 10; n++) {
+        const row = page.locator(`[data-testid="report-level"][data-level="${n}"]`);
+        const e = probe.levels[n];
+        const wc = e.inLevel ? 'in L03' : `${comma(e.costUsd, 2)} USD`;
+        const wo = e.inLevel ? 'in L03' : thousands(e.output);
+        const c = (await row.getByTestId('report-level-cost').textContent().catch(() => null))?.trim();
+        const o = (await row.getByTestId('report-level-output').textContent().catch(() => null))?.trim();
+        if (c !== wc || o !== wo) up.push(`Liste Level ${n}: „${c}“/„${o}“ statt „${wc}“/„${wo}“`);
+      }
+      await page.screenshot({ path: path.join(out, 'level10-verbrauch.png'), fullPage: true }).catch(() => {});
+    } finally {
+      await browser.close();
+    }
+  } catch (e) {
+    up.push(`Fehler: ${e.message.split('\n')[0]}`);
+  } finally {
+    const r = await api('PUT', JSON.stringify(alt));
+    let jetzt = null;
+    try { jetzt = await (await api('GET')).json(); } catch {}
+    if (r?.status !== 200 || !equal(jetzt, alt)) up.push('alter Verbrauch nicht wiederhergestellt');
+  }
+  add('L10-K4', 'Verbrauch: GET/PUT /api/usage live (Fehlerfälle, Speichern), Kosten und Tokens im Bericht und in der Level-Liste', up.length === 0, up.join('; '));
+}
+
+const passed = criteria.length >= (VERBRAUCH ? 4 : 3) && criteria.every((c) => c.ok);
 nebenwerte.fremdmessung = passed ? 'bestanden' : 'fehlgeschlagen';
 nebenwerte.abweichung = nebenwerte.selbstmessung !== undefined && (nebenwerte.selbstmessung === 'bestanden') !== passed;
 fs.writeFileSync(path.join(out, 'judge-level10.json'), JSON.stringify({ level: 10, passed, checkedAt: new Date().toISOString(), target, live: LIVE, criteria, nebenwerte }, null, 2));

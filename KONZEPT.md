@@ -1227,3 +1227,19 @@ Inkrementell gebaut: Die Referenz bekam nur die neuen Dateien, die laufende App 
 
 ### Funde
 - Der wacklige Test „Daten überstehen einen Neustart des Backends“ (Level 4) kam von einer wiederverwendeten Verbindung zum beendeten Backend (`ECONNRESET`). Jetzt fragt der Test nach dem Neustart über eine frische Verbindung ab.
+
+## 28. Verbrauch nachtragen (Spec 2.1.0, 2026-11-22)
+
+**Anlass:** Seit 2.0.0 zeigte die Live-Seite keine Tokens und Kosten mehr. Die Werte gab es nur im Prüfbericht, und die Level-Liste im Abschlussbericht hatte nichts dazu.
+
+### Entscheidungen
+| Thema | Entscheidung |
+|---|---|
+| Wer misst | weiterhin **nur der Runner** (Adapter + `runner/verbrauch.mjs`), nach dem Lauf. Der Agent misst nichts |
+| Wie es auf die Seite kommt | **nachträglich publizieren**: `runner/uebernehmen.sh` wandelt `tokens.json` mit `runner/usage.mjs` um und schickt es per `PUT /api/usage` an `https://lauf-<nr>.$SPECRUN_LIVE_DOMAIN`. Bei Spec < 2.1.0 wird nichts geschrieben |
+| Backend | neuer Endpunkt `GET`/`PUT /api/usage`, speichert ein beliebiges JSON-Objekt als `usage.json` neben der Datenbank (übersteht Neustart und Deploy über das Volume). Kein Inhalt geprüft, nur Objekt, Größe, `Content-Type` |
+| Anzeige | Kachel „Tokens“ (Harness, Modell, Tokens (Ausgabe), Tokens gesamt, Kosten gesamt) und in der Level-Liste die Spalten „Kosten“ und „Tokens (Ausgabe)“; gemeinsame Phasen als `in L<nn>` wie bei der Bauzeit. Ohne Verbrauch: „wird nach der Prüfung ergänzt“ |
+| Karten | bleiben wie in 2.0.0 (Bauzeit, `in L03` usw.), ohne Kosten |
+| Gesamt vs. Summe der Levels | `total` umfasst den ganzen Lauf, auch die Arbeit nach dem letzten `make check`; deshalb kann es größer sein als die Summe der Levels |
+| Prüfung | Agent: vierter Level-10-Test gegen das lokale Backend. Prüfer: neues Kriterium L10-K4 live (Fehlerfälle, eigener `PUT` mit Prüfer-Testwerten, Anzeige in Kachel und Liste, danach alter Stand zurück) |
+

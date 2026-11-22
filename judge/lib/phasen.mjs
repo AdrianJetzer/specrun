@@ -69,6 +69,11 @@ export function hatBauzeit(target) {
   const v = specVersion(target);
   return !v || v[0] > 1 || (v[0] === 1 && v[1] >= 3);
 }
+/** Verbrauch nachtragen (GET/PUT /api/usage, Tokens und Kosten im Bericht) erst ab Spec 2.1.0. */
+export function hatVerbrauch(target) {
+  const v = specVersion(target);
+  return !v || v[0] > 2 || (v[0] === 2 && v[1] >= 1);
+}
 export function ohneBauzeit(erg) {
   if (!erg) return erg;
   return Object.fromEntries(Object.entries(erg).map(([k, t]) => [k, t && 'buildS' in t ? Object.fromEntries(Object.entries(t).filter(([f]) => f !== 'buildS')) : t]));

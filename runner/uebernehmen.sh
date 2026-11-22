@@ -26,6 +26,26 @@ else
   echo "⚠ Bericht konnte nicht committet/gepusht werden – bitte von Hand prüfen" >&2
 fi
 
+# Ab Spec 2.1.0: gemessenen Verbrauch (Tokens, Kosten) auf der Live-Seite des Laufs nachtragen (PUT /api/usage)
+SPEC_VERSION="$(node -e 'try{console.log(JSON.parse(require("fs").readFileSync(process.argv[1],"utf8")).specVersion??"")}catch{console.log("")}' "$DEST/meta.json")"
+if ! node -e 'const [a,b]=(process.argv[1]||"0.0").split(".").map(Number);process.exit(a>2||(a===2&&b>=1)?0:1)' "$SPEC_VERSION"; then
+  echo "  Verbrauch nicht nachgetragen: Spec ${SPEC_VERSION:-?} kennt /api/usage noch nicht (ab 2.1.0)"
+elif [ ! -f "$DEST/tokens.json" ]; then
+  echo "⚠ Verbrauch nicht nachgetragen: kein tokens.json im Bericht" >&2
+elif [ -z "${SPECRUN_LIVE_DOMAIN:-}" ]; then
+  echo "⚠ Verbrauch nicht nachgetragen: SPECRUN_LIVE_DOMAIN ist nicht gesetzt" >&2
+else
+  LIVE="https://lauf-$(basename "$LAUF").$SPECRUN_LIVE_DOMAIN"
+  USAGE="$(mktemp)"
+  if node "$ROOT/runner/usage.mjs" "$DEST/tokens.json" > "$USAGE" \
+     && curl -fsS -X PUT -H 'Content-Type: application/json' --data-binary @"$USAGE" "$LIVE/api/usage" > /dev/null; then
+    echo "✔ Verbrauch nachgetragen: $LIVE (Kosten gesamt $(node -e 'const u=JSON.parse(require("fs").readFileSync(process.argv[1],"utf8")).total;console.log(u.costUsd===null?"unbekannt":u.costUsd.toFixed(2)+" USD")' "$USAGE"))"
+  else
+    echo "⚠ Verbrauch konnte nicht nach $LIVE/api/usage geschrieben werden" >&2
+  fi
+  rm -f "$USAGE"
+fi
+
 # Ab Level 6: das GitHub-Repo des Laufs archivieren (nur noch lesbar, bleibt als Nachweis)
 REPO="specrun-lab/levelboard-lauf-$(basename "$LAUF")"
 if gh api "repos/$REPO" --jq .archived > /dev/null 2>&1; then

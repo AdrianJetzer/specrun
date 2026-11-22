@@ -145,6 +145,8 @@ export const LEVEL10_CHECKS = [
   'Vollständiger Bericht wird dargestellt',
   'Teilbericht zeigt fehlende Teile',
 ];
+// Ab Spec 2.1.0 kommt der Verbrauch dazu (PUT/GET /api/usage)
+export const LEVEL10_CHECKS_V21 = [...LEVEL10_CHECKS, 'Verbrauch wird gespeichert und gelesen'];
 
 export const LOADTEST_FIELDS = ['connections', 'durationS', 'requests', 'errors', 'rps', 'p50Ms', 'p95Ms', 'maxMs'];
 
