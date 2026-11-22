@@ -32,7 +32,7 @@ done
 if [ "$JA" != 1 ]; then
   printf 'Alle anhalten und entfernen? [j/N] '
   read -r antwort
-  case "$antwort" in j|J|ja|Ja) ;; *) echo "Abgebrochen, nichts geändert."; exit 0 ;; esac
+  case "$antwort" in j|J|ja|Ja|y|Y|yes|Yes) ;; *) echo "Abgebrochen, nichts geändert."; exit 0 ;; esac
 fi
 echo "$LISTE" | awk '{print $1}' | xargs podman rm -f -t 10 > /dev/null
 echo "✔ $(echo "$LISTE" | wc -l | tr -d ' ') Container angehalten und entfernt"
