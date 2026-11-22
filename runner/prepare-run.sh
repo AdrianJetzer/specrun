@@ -4,7 +4,8 @@
 #         runner/prepare-run.sh --nur-pruefer <laufordner>   (ergänzt nur judge/ in einem bestehenden Lauf)
 #   Modell des Agenten: Standard claude-sonnet-5-5; Kurzformen sonnet, opus, haiku
 #   (→ claude-sonnet-5-5, claude-opus-5-5, claude-haiku-5-5) oder eine vollständige Modell-ID.
-#   Harness: Standard claude (Claude Code); opencode (OpenCode 2, Standard-Modell opencode/big-pickle).
+#   Harness: Standard claude (Claude Code); opencode (OpenCode 2, Standard-Modell opencode/big-pickle,
+#   andere Anbieter als <anbieter>/<modell>, z. B. deepseek/deepseek-flash mit SPECRUN_DEEPSEEK_API_KEY).
 #   Standard-Ordner: ~/Documents/Claude/specruns_testlaeufe/<nächste Nummer>
 #
 # Aufbau danach:
@@ -56,7 +57,12 @@ case "$HARNESS" in
   opencode)
     # OpenCode erwartet Modelle als <anbieter>/<modell>, z. B. opencode/big-pickle oder anthropic/claude-sonnet-5-5
     MODEL="${MODEL:-opencode/big-pickle}"
-    case "$MODEL" in */*) ;; *) echo "✖ Modell für OpenCode als <anbieter>/<modell> angeben, z. B. opencode/big-pickle" >&2; exit 1 ;; esac ;;
+    case "$MODEL" in */*) ;; *) echo "✖ Modell für OpenCode als <anbieter>/<modell> angeben, z. B. opencode/big-pickle" >&2; exit 1 ;; esac
+    # Schlüssel des Anbieters muss auf dem Mac gesetzt sein (der Container übernimmt ihn beim Start)
+    case "$MODEL" in
+      deepseek/*) [ -n "${SPECRUN_DEEPSEEK_API_KEY:-}" ] || echo "⚠ SPECRUN_DEEPSEEK_API_KEY ist nicht gesetzt (in ~/.zshrc eintragen, VS Code neu starten)" >&2 ;;
+      opencode/*) [ -n "${SPECRUN_OPENCODE_API_KEY:-}" ] || echo "⚠ SPECRUN_OPENCODE_API_KEY ist nicht gesetzt (in ~/.zshrc eintragen, VS Code neu starten)" >&2 ;;
+    esac ;;
   *) echo "✖ Unbekannter Harness: $HARNESS (claude oder opencode)" >&2; exit 1 ;;
 esac
 

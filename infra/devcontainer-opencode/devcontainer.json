@@ -15,10 +15,12 @@
   "workspaceMount": "source=${localWorkspaceFolder}/../work,target=/workspace,type=bind",
 
   // OPENCODE_API_KEY: Schlüssel für den Anbieter „opencode“ (z. B. Big Pickle), auf dem Mac als SPECRUN_OPENCODE_API_KEY gesetzt
+  // DEEPSEEK_API_KEY: Schlüssel für den Anbieter „deepseek“ (z. B. deepseek/deepseek-flash), auf dem Mac als SPECRUN_DEEPSEEK_API_KEY gesetzt
   // OPENCODE_DB: Sitzungs-Datenbank im Laufordner (<lauf>/protokoll) – daraus misst der Prüfer Tokens und Kosten
   // SPECRUN_MODEL: vorgegebenes Modell (setzt runner/prepare-run.sh ein), Start mit: opencode --standalone --model "$SPECRUN_MODEL"
   "containerEnv": {
     "OPENCODE_API_KEY": "${localEnv:SPECRUN_OPENCODE_API_KEY}",
+    "DEEPSEEK_API_KEY": "${localEnv:SPECRUN_DEEPSEEK_API_KEY}",
     "OPENCODE_DB": "/home/dev/.specrun-protokoll/opencode.db",
     "SPECRUN_MODEL": "__MODEL__",
     "GH_TOKEN": "${localEnv:SPECRUN_AGENT_GH_TOKEN}",

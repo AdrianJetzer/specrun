@@ -82,6 +82,7 @@ Direkt auf dem Mac braucht der Prüfer für Level 2 `nginx` (`brew install nginx
 runner/prepare-run.sh                 # legt specruns_testlaeufe/<nr>/ an: env/, work/spec/, judge/
 runner/prepare-run.sh --modell opus  # dasselbe mit anderem Modell (Standard: sonnet; auch haiku oder eine Modell-ID)
 runner/prepare-run.sh --harness opencode                       # mit OpenCode statt Claude Code (Standard-Modell opencode/big-pickle)
+runner/prepare-run.sh --harness opencode --modell deepseek/deepseek-flash      # OpenCode mit DeepSeek Flash
 runner/prepare-run.sh --harness opencode --modell anthropic/claude-sonnet-5-5   # OpenCode mit anderem Modell
 # 1. <lauf>/env in VS Code im Container öffnen, Claude den Auftrag geben (siehe Ausgabe des Skripts)
 # 2. <lauf>/judge in VS Code im Container öffnen und dort ausführen:  /specrun/runner/pruefen.sh
@@ -92,9 +93,11 @@ Harness und Modell sind pro Lauf fest vorgegeben und stehen in `<lauf>/harness.t
 | Harness | Image | Anmeldung (in `~/.zshrc`) | Start im Container | Protokoll |
 |---|---|---|---|---|
 | Claude Code | `infra/devcontainer/` | `CLAUDE_CODE_OAUTH_TOKEN` | `claude` | `~/.claude/projects` → `<lauf>/protokoll` |
-| OpenCode 2.3.2 | `infra/devcontainer-opencode/` | `SPECRUN_OPENCODE_API_KEY` (wird zu `OPENCODE_API_KEY`) | `opencode --standalone --model "$SPECRUN_MODEL"` | SQLite über `OPENCODE_DB` → `<lauf>/protokoll/opencode.db` |
+| OpenCode 2.3.2 | `infra/devcontainer-opencode/` | je nach Anbieter: `SPECRUN_OPENCODE_API_KEY` (wird zu `OPENCODE_API_KEY`), `SPECRUN_DEEPSEEK_API_KEY` (wird zu `DEEPSEEK_API_KEY`) | `opencode --standalone --model "$SPECRUN_MODEL"` | SQLite über `OPENCODE_DB` → `<lauf>/protokoll/opencode.db` |
 
 Beide Images haben dieselbe Startausrüstung; OpenCode läuft ohne Rückfragen (Berechtigungen im Image auf „allow“).
+
+**Welcher Harness wofür:** Claude-Modelle laufen am günstigsten in Claude Code (Abo-Token). Für andere Anbieter (DeepSeek, OpenCode-Modelle wie Big Pickle) ist OpenCode da; es braucht nur den API-Schlüssel des Anbieters. Claude in OpenCode ginge auch, aber nur mit API-Schlüssel und Kosten pro Token. Preise für die Kostenrechnung stehen in `runner/preise.json`; DeepSeek ist dort mit dem Hauptzeit-Preis eingetragen (ausserhalb der Hauptzeit kostet es die Hälfte).
 
 Der Prüfer läuft in einem eigenen Container aus demselben Image. Er sieht das Werk des Agenten nur lesend und baut es selbst neu. Zu beachten:
 - Pro Prüfer-Container läuft **immer nur eine Prüfung**. Zwei gleichzeitige Prüfungen stören sich (gleicher Build-Ordner, gleiche Ports). `pruefen.sh` startet nicht, solange `ergebnis/` existiert; für eine neue Prüfung den Ordner erst umbenennen.
