@@ -1,0 +1,43 @@
+{
+  "level": 9,
+  "passed": false,
+  "checkedAt": "2026-11-22T19:07:11.522Z",
+  "target": "/home/dev/build",
+  "live": "https://lauf-015.2-29-223-205.sslip.io",
+  "criteria": [
+    {
+      "id": "L9-K1",
+      "name": "Selbstmessung live: Level 1–9 bestanden, Level 9 mit den 5 Checks und plausiblen Lastwerten",
+      "ok": false,
+      "detail": "live nicht bestanden: Level 6, 7, 8, 9; Checks von Level 9: []; metrics von Level 9 ohne connections, durationS, requests, errors, rps, p50Ms, p95Ms, maxMs"
+    },
+    {
+      "id": "L9-K2",
+      "name": "Fremdmessung live: Seite, Cache-Regeln, API-Fehler, Meldung ohne Neuladen, eigener Lasttest ohne Fehler und p95 < 1 s",
+      "ok": true,
+      "detail": "p50 58 ms, p95 69 ms, 169 Anfragen/s"
+    },
+    {
+      "id": "L9-K3",
+      "name": "make level9 und make check: Level 1–9 bestanden und an die Live-API gemeldet",
+      "ok": true,
+      "detail": ""
+    }
+  ],
+  "nebenwerte": {
+    "lastAgent": {},
+    "lastPruefer": {
+      "connections": 10,
+      "durationS": 30,
+      "requests": 5080,
+      "errors": 0,
+      "rps": 169,
+      "p50Ms": 58,
+      "p95Ms": 69,
+      "maxMs": 303
+    },
+    "selbstmessung": "bestanden",
+    "fremdmessung": "fehlgeschlagen",
+    "abweichung": true
+  }
+}

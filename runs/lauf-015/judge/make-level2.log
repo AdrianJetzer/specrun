@@ -1,0 +1,22 @@
+
+added 24 packages, and audited 25 packages in 537ms
+
+8 packages are looking for funding
+  run `npm fund` for details
+
+found 0 vulnerabilities
+
+> levelboard-frontend@0.1.0 build
+> tsc -b && vite build
+
+vite v8.3.8 building client environment for production...
+transforming...
+✓ 22 modules transformed.
+rendering chunks...
+computing gzip size...
+dist/index.html                   0.48 kB │ gzip:  0.29 kB
+dist/assets/index-BlSGQPjj.css    6.51 kB │ gzip:  1.68 kB
+dist/assets/index-DPAujNd3.js   236.54 kB │ gzip: 72.77 kB
+
+✓ built in 74ms
+Levelboard läuft auf http://127.0.0.1:8080

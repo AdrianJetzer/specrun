@@ -1,0 +1,110 @@
+
+════════ Level 1 ════════
+Prüfer Level 1 → /home/dev/build
+
+✅ K1 make level1 startet die Seite auf Port 8080 – 1.7 s
+✅ K2 gültige Testdaten werden korrekt dargestellt – 5 Tests
+✅ K3 fehlende/ungültige Datei → richtiger Hinweis und Leerzustand – 7 Tests
+✅ K4 data-testids, keine Konsolenfehler, Raster responsiv – 3 Tests
+✅ K5 make check: Exit 0, schemagültig, Level 1 bestanden mit den 5 Checks
+✅ K6 public/results.json bleibt im Startzustand
+
+Level 1 laut Prüfer: BESTANDEN
+Ergebnis: /workspace/ergebnis/judge/judge-level1.json
+
+════════ Level 2 ════════
+Prüfer Level 2 → /home/dev/build
+
+✅ L2-K1 make level2 startet nginx auf Port 8080 – 0.9 s
+✅ L2-K2 nginx-Regeln (Cache, 404, gzip, Server, Typen)
+✅ L2-K3 Darstellungstests aus Level 1 bestehen über nginx – 15 Tests
+✅ L2-K4 make check: Exit 0, schemagültig, Level 1 (5) und 2 (7) bestanden
+✅ L2-K5 public/results.json bleibt im Startzustand
+✅ L2-K6 make down beendet nginx (Port 8080 frei)
+
+Level 2 laut Prüfer: BESTANDEN
+
+════════ Level 3 ════════
+Prüfer Level 3 → /home/dev/build
+
+✅ L3-K1 make level3 startet nginx (8080) und Backend (8081) – 3.4 s
+✅ L3-K2 API-Vertrag: Schema, Regeln und Fehlercodes
+✅ L3-K3 50 gleichzeitige Anfragen: kein 5xx, konsistenter Endzustand
+✅ L3-K4 Neustart setzt das Backend auf den Startzustand zurück
+✅ L3-K5 Go: keine Abhängigkeiten, go vet sauber, go test grün – Abdeckung 58.9 %
+✅ L3-K6 make check: Exit 0, schemagültig, Level 1–3 bestanden mit den Checks der Spec
+✅ L3-K7 public/results.json bleibt im Startzustand
+✅ L3-K8 make down beendet nginx und Backend (8080 und 8081 frei)
+
+Level 3 laut Prüfer: BESTANDEN
+
+════════ Level 4 ════════
+Prüfer Level 4 → /home/dev/build
+
+✅ L4-K1 make level4 startet alles, .run/levelboard.db existiert – 1.4 s
+✅ L4-K2 Datenbankdatei hat das vorgegebene Schema (user_version 1)
+✅ L4-K3 Historie: Reihenfolge, Inhalte, limit, 409 nicht gespeichert, Datei = API
+✅ L4-K4 make restart-backend behält Stand und Historie
+✅ L4-K5 100 gleichzeitige Meldungen: kein 5xx, genau 100 neue Einträge, konsistent
+✅ L4-K6 Go: genau modernc.org/sqlite v1.62.0, go vet sauber, go test grün – Abdeckung 58.9 %
+✅ L4-K7 make check: Exit 0, schemagültig, Level 1–4 bestanden mit den Checks der Spec
+✅ L4-K8 Startdatei unverändert, make down gibt 8080 und 8081 frei
+
+Level 4 laut Prüfer: BESTANDEN
+
+════════ Level 5 ════════
+Prüfer Level 5 → /home/dev/build
+
+✅ L5-K1 make level5: 8080 und 8081 antworten, config.json = api, Kopfzeile „Backend“
+✅ L5-K2 Weiterleitung /api/ 1:1 (Status, JSON, Content-Type, no-store), Regeln aus Level 2 gelten
+✅ L5-K3 Live-Anzeige: gemeldete Ergebnisse erscheinen ohne Neuladen innerhalb von 7 s – erste Änderung nach 4977 ms
+✅ L5-K4 Backend-Ausfall: Hinweis und Leerzustand, nach Neustart wieder Daten
+✅ L5-K5 make check: Exit 0, results.json und /api/levels melden Level 1–5 bestanden
+✅ L5-K6 public/results.json und public/config.json unverändert, make down gibt die Ports frei
+
+Level 5 laut Prüfer: BESTANDEN
+
+════════ Level 6 ════════
+Prüfer Level 6 → /home/dev/build (Repo specrun-lab/levelboard-lauf-015)
+
+✅ L6-K1 Repo öffentlich mit main; lokaler HEAD = main auf GitHub, nichts uncommittet
+✅ L6-K2 .github/workflows/ci.yml erfüllt die Eckpunkte
+✅ L6-K3 Letzter Lauf von CI für den aktuellen Commit: completed/success – completed/success
+✅ L6-K4 Artefakt levelboard-report: Level 1–5 bestanden mit den Checks der Spec
+✅ L6-K5 Keine Zugangsdaten in Repo, Historie, Remote-Adresse und Pipeline-Logs
+✅ L6-K6 make level6 und make check: Level 1–6 bestanden mit den Checks der Spec
+
+Level 6 laut Prüfer: BESTANDEN
+
+════════ Level 7 ════════
+Prüfer Level 7 → /home/dev/build (Repo specrun-lab/levelboard-lauf-015)
+
+✅ L7-K1 Dockerfiles, nginx-container.conf und docker-compose.yml erfüllen die Eckpunkte
+✅ L7-K2 Job images grün; Container-Report mit den 6 Checks der Spec, alle bestanden
+✅ L7-K3 Beide Images öffentlich mit Tag des Commits; Labels und Laufzeit-Konfiguration stimmen – Größe: Frontend 25.2 MB, Backend 8.3 MB
+✅ L7-K4 make level7 und make check: Level 1–7 bestanden mit den Checks der Spec
+
+Level 7 laut Prüfer: BESTANDEN
+
+════════ Level 8 ════════
+Prüfer Level 8 → /home/dev/build (Repo specrun-lab/levelboard-lauf-015, live https://lauf-015.2-29-223-205.sslip.io)
+
+✅ L8-K1 deploy/compose.yml, Job deploy und Commit im Backend erfüllen die Eckpunkte; kein Schlüssel im Repo
+✅ L8-K2 Job deploy des letzten Laufs grün; keine Geheimnisse in den Logs
+✅ L8-K3 Live von außen: gültiges HTTPS, Seite aus dem Backend mit aktuellem Commit, API laut Spec, Level 1–5 bestanden – https://lauf-015.2-29-223-205.sslip.io (231 ms)
+✅ L8-K4 make level8 und make check: Level 1–8 bestanden mit den Checks der Spec
+
+Level 8 laut Prüfer: BESTANDEN
+
+════════ Level 9 ════════
+Prüfer Level 9 → /home/dev/build (live https://lauf-015.2-29-223-205.sslip.io)
+
+❌ L9-K1 Selbstmessung live: Level 1–9 bestanden, Level 9 mit den 5 Checks und plausiblen Lastwerten – live nicht bestanden: Level 6, 7, 8, 9; Checks von Level 9: []; metrics von Level 9 ohne connections, durationS, requests, errors, rps, p50Ms, p95Ms, maxMs
+  eigener Lasttest läuft (30 s) …
+✅ L9-K2 Fremdmessung live: Seite, Cache-Regeln, API-Fehler, Meldung ohne Neuladen, eigener Lasttest ohne Fehler und p95 < 1 s – p50 58 ms, p95 69 ms, 169 Anfragen/s
+✅ L9-K3 make level9 und make check: Level 1–9 bestanden und an die Live-API gemeldet
+
+Level 9 laut Prüfer: NICHT BESTANDEN
+⚠ Selbstmessung des Agenten weicht vom Prüfer ab
+
+Erreichtes Level laut Prüfer: 8 → Score 80 / 100

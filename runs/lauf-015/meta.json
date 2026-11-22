@@ -1,0 +1,10 @@
+{
+  "runId": "lauf-015",
+  "specVersion": "2.1.0",
+  "model": "deepseek/deepseek-flash",
+  "harness": "opencode",
+  "fake": false,
+  "buildDir": "/lauf/work",
+  "judgedIn": "Prüfer-Container",
+  "judgedAt": "2026-11-22T19:02:23Z"
+}

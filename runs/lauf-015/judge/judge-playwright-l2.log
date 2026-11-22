@@ -1,0 +1,20 @@
+
+Running 15 tests using 1 worker
+
+  ✓   1 tests/level1.judge.spec.ts:38:3 › K2 Darstellung gültiger Daten › K2.1 gemischte Status: Karten, Abzeichen, Fakten (133ms)
+  ✓   2 tests/level1.judge.spec.ts:62:3 › K2 Darstellung gültiger Daten › K2.2 feste Titel und Nummern L01–L10 (87ms)
+  ✓   3 tests/level1.judge.spec.ts:73:3 › K2 Darstellung gültiger Daten › K2.3 Kopfzeile und Zusammenfassung (94ms)
+  ✓   4 tests/level1.judge.spec.ts:84:3 › K2 Darstellung gültiger Daten › K2.4 alle bestanden → 10 / 10 (69ms)
+  ✓   5 tests/level1.judge.spec.ts:91:3 › K2 Darstellung gültiger Daten › K2.5 Statusfarben laut Design-Tokens (88ms)
+  ✓   6 tests/level1.judge.spec.ts:104:3 › K3 fehlende und ungültige Daten › K3.1 Datei fehlt → Hinweis „missing“ und Leerzustand (72ms)
+  ✓   7 tests/level1.judge.spec.ts:116:5 › K3 fehlende und ungültige Daten › K3.2 ungültig (kein JSON) → Hinweis „invalid“ (100ms)
+  ✓   8 tests/level1.judge.spec.ts:116:5 › K3 fehlende und ungültige Daten › K3.2 ungültig (nur 9 Levels) → Hinweis „invalid“ (66ms)
+  ✓   9 tests/level1.judge.spec.ts:116:5 › K3 fehlende und ungültige Daten › K3.2 ungültig (unbekannter Status) → Hinweis „invalid“ (69ms)
+  ✓  10 tests/level1.judge.spec.ts:116:5 › K3 fehlende und ungültige Daten › K3.2 ungültig (doppelte Nummer) → Hinweis „invalid“ (92ms)
+  ✓  11 tests/level1.judge.spec.ts:116:5 › K3 fehlende und ungültige Daten › K3.2 ungültig (run fehlt) → Hinweis „invalid“ (98ms)
+  ✓  12 tests/level1.judge.spec.ts:116:5 › K3 fehlende und ungültige Daten › K3.2 ungültig (falscher Typ bei durationMs) → Hinweis „invalid“ (65ms)
+  ✓  13 tests/level1.judge.spec.ts:128:3 › K4 testids, Konsole, Layout › K4.1 alle data-testids vorhanden (103ms)
+  ✓  14 tests/level1.judge.spec.ts:142:3 › K4 testids, Konsole, Layout › K4.2 keine Konsolenfehler (gültig, fehlend, ungültig) (111ms)
+  ✓  15 tests/level1.judge.spec.ts:151:3 › K4 testids, Konsole, Layout › K4.3 Raster: 5 / 2 / 1 Spalten, kein horizontales Scrollen (318ms)
+
+  15 passed (1.9s)

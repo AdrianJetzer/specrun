@@ -1,0 +1,45 @@
+{
+  "reachedLevel": 8,
+  "score": 80,
+  "maxChecked": 10,
+  "levels": [
+    {
+      "level": 1,
+      "passed": true
+    },
+    {
+      "level": 2,
+      "passed": true
+    },
+    {
+      "level": 3,
+      "passed": true
+    },
+    {
+      "level": 4,
+      "passed": true
+    },
+    {
+      "level": 5,
+      "passed": true
+    },
+    {
+      "level": 6,
+      "passed": true
+    },
+    {
+      "level": 7,
+      "passed": true
+    },
+    {
+      "level": 8,
+      "passed": true
+    },
+    {
+      "level": 9,
+      "passed": false
+    }
+  ],
+  "tokens": null,
+  "checkedAt": "2026-11-22T19:07:11.561Z"
+}

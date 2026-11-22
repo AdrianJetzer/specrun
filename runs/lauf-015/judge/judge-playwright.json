@@ -1,0 +1,646 @@
+{
+  "config": {
+    "argv": [
+      "/usr/local/bin/node",
+      "/home/dev/specrun/judge/node_modules/.bin/playwright",
+      "test"
+    ],
+    "configFile": "/home/dev/specrun/judge/playwright.config.ts",
+    "rootDir": "/home/dev/specrun/judge/tests",
+    "failOnFlakyTests": false,
+    "forbidOnly": false,
+    "fullyParallel": false,
+    "globalSetup": null,
+    "globalTeardown": null,
+    "globalTimeout": 0,
+    "grep": {},
+    "grepInvert": null,
+    "maxFailures": 0,
+    "metadata": {
+      "actualWorkers": 1
+    },
+    "preserveOutput": "always",
+    "projects": [
+      {
+        "outputDir": "/home/dev/specrun/judge/test-results",
+        "repeatEach": 1,
+        "retries": 0,
+        "metadata": {
+          "actualWorkers": 1
+        },
+        "id": "",
+        "name": "",
+        "testDir": "/home/dev/specrun/judge/tests",
+        "testIgnore": [],
+        "testMatch": [
+          "**/*.@(spec|test).?(c|m)[jt]s?(x)"
+        ],
+        "timeout": 20000
+      }
+    ],
+    "filteredProjects": [
+      {
+        "grep": {},
+        "grepInvert": null,
+        "outputDir": "/home/dev/specrun/judge/test-results",
+        "repeatEach": 1,
+        "retries": 0,
+        "metadata": {
+          "actualWorkers": 1
+        },
+        "name": "",
+        "testDir": "/home/dev/specrun/judge/tests",
+        "snapshotDir": "/home/dev/specrun/judge/tests",
+        "testIgnore": [],
+        "testMatch": "**/*.@(spec|test).?(c|m)[jt]s?(x)",
+        "timeout": 20000,
+        "use": {
+          "baseURL": "http://127.0.0.1:8080",
+          "timezoneId": "Europe/Zurich",
+          "locale": "de-CH"
+        },
+        "dependencies": [],
+        "ignoreSnapshots": false,
+        "__projectId": ""
+      }
+    ],
+    "quiet": false,
+    "reporter": [
+      [
+        "list",
+        null
+      ],
+      [
+        "json",
+        {
+          "outputFile": "/workspace/ergebnis/judge/judge-playwright.json"
+        }
+      ]
+    ],
+    "reportSlowTests": {
+      "max": 5,
+      "threshold": 300000
+    },
+    "shard": null,
+    "tags": [],
+    "updateSnapshots": "default",
+    "updateSourceMethod": "patch",
+    "version": "1.65.1",
+    "workers": 1,
+    "webServer": null
+  },
+  "suites": [
+    {
+      "title": "level1.judge.spec.ts",
+      "file": "level1.judge.spec.ts",
+      "column": 0,
+      "line": 0,
+      "specs": [],
+      "suites": [
+        {
+          "title": "K2 Darstellung gültiger Daten",
+          "file": "level1.judge.spec.ts",
+          "line": 37,
+          "column": 6,
+          "specs": [
+            {
+              "title": "K2.1 gemischte Status: Karten, Abzeichen, Fakten",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 20000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "",
+                  "projectName": "",
+                  "results": [
+                    {
+                      "workerIndex": 0,
+                      "parallelIndex": 0,
+                      "status": "passed",
+                      "duration": 138,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-11-22T19:02:26.206Z",
+                      "annotations": [],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "f780fc6e128a9f9c755d-c9f6a2013ca6194e3581",
+              "file": "level1.judge.spec.ts",
+              "line": 38,
+              "column": 3
+            },
+            {
+              "title": "K2.2 feste Titel und Nummern L01–L10",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 20000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "",
+                  "projectName": "",
+                  "results": [
+                    {
+                      "workerIndex": 0,
+                      "parallelIndex": 0,
+                      "status": "passed",
+                      "duration": 123,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-11-22T19:02:26.583Z",
+                      "annotations": [],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "f780fc6e128a9f9c755d-106f74055d90cf21b5fb",
+              "file": "level1.judge.spec.ts",
+              "line": 62,
+              "column": 3
+            },
+            {
+              "title": "K2.3 Kopfzeile und Zusammenfassung",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 20000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "",
+                  "projectName": "",
+                  "results": [
+                    {
+                      "workerIndex": 0,
+                      "parallelIndex": 0,
+                      "status": "passed",
+                      "duration": 103,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-11-22T19:02:26.711Z",
+                      "annotations": [],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "f780fc6e128a9f9c755d-af358b20f65310197bf0",
+              "file": "level1.judge.spec.ts",
+              "line": 73,
+              "column": 3
+            },
+            {
+              "title": "K2.4 alle bestanden → 10 / 10",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 20000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "",
+                  "projectName": "",
+                  "results": [
+                    {
+                      "workerIndex": 0,
+                      "parallelIndex": 0,
+                      "status": "passed",
+                      "duration": 81,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-11-22T19:02:26.820Z",
+                      "annotations": [],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "f780fc6e128a9f9c755d-3f548676be70fd0d3756",
+              "file": "level1.judge.spec.ts",
+              "line": 84,
+              "column": 3
+            },
+            {
+              "title": "K2.5 Statusfarben laut Design-Tokens",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 20000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "",
+                  "projectName": "",
+                  "results": [
+                    {
+                      "workerIndex": 0,
+                      "parallelIndex": 0,
+                      "status": "passed",
+                      "duration": 184,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-11-22T19:02:26.906Z",
+                      "annotations": [],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "f780fc6e128a9f9c755d-3c5b914c2930483fd8d3",
+              "file": "level1.judge.spec.ts",
+              "line": 91,
+              "column": 3
+            }
+          ]
+        },
+        {
+          "title": "K3 fehlende und ungültige Daten",
+          "file": "level1.judge.spec.ts",
+          "line": 103,
+          "column": 6,
+          "specs": [
+            {
+              "title": "K3.1 Datei fehlt → Hinweis „missing“ und Leerzustand",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 20000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "",
+                  "projectName": "",
+                  "results": [
+                    {
+                      "workerIndex": 0,
+                      "parallelIndex": 0,
+                      "status": "passed",
+                      "duration": 73,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-11-22T19:02:27.094Z",
+                      "annotations": [],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "f780fc6e128a9f9c755d-a0c65ca4fe72e416a092",
+              "file": "level1.judge.spec.ts",
+              "line": 104,
+              "column": 3
+            },
+            {
+              "title": "K3.2 ungültig (kein JSON) → Hinweis „invalid“",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 20000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "",
+                  "projectName": "",
+                  "results": [
+                    {
+                      "workerIndex": 0,
+                      "parallelIndex": 0,
+                      "status": "passed",
+                      "duration": 75,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-11-22T19:02:27.174Z",
+                      "annotations": [],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "f780fc6e128a9f9c755d-67b12a869a2fd75b776f",
+              "file": "level1.judge.spec.ts",
+              "line": 116,
+              "column": 5
+            },
+            {
+              "title": "K3.2 ungültig (nur 9 Levels) → Hinweis „invalid“",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 20000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "",
+                  "projectName": "",
+                  "results": [
+                    {
+                      "workerIndex": 0,
+                      "parallelIndex": 0,
+                      "status": "passed",
+                      "duration": 109,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-11-22T19:02:27.253Z",
+                      "annotations": [],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "f780fc6e128a9f9c755d-08024339f0f4554463ce",
+              "file": "level1.judge.spec.ts",
+              "line": 116,
+              "column": 5
+            },
+            {
+              "title": "K3.2 ungültig (unbekannter Status) → Hinweis „invalid“",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 20000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "",
+                  "projectName": "",
+                  "results": [
+                    {
+                      "workerIndex": 0,
+                      "parallelIndex": 0,
+                      "status": "passed",
+                      "duration": 79,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-11-22T19:02:27.367Z",
+                      "annotations": [],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "f780fc6e128a9f9c755d-46e56c34de698d6e57be",
+              "file": "level1.judge.spec.ts",
+              "line": 116,
+              "column": 5
+            },
+            {
+              "title": "K3.2 ungültig (doppelte Nummer) → Hinweis „invalid“",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 20000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "",
+                  "projectName": "",
+                  "results": [
+                    {
+                      "workerIndex": 0,
+                      "parallelIndex": 0,
+                      "status": "passed",
+                      "duration": 68,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-11-22T19:02:27.451Z",
+                      "annotations": [],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "f780fc6e128a9f9c755d-a5a373df00fc5e09273c",
+              "file": "level1.judge.spec.ts",
+              "line": 116,
+              "column": 5
+            },
+            {
+              "title": "K3.2 ungültig (run fehlt) → Hinweis „invalid“",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 20000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "",
+                  "projectName": "",
+                  "results": [
+                    {
+                      "workerIndex": 0,
+                      "parallelIndex": 0,
+                      "status": "passed",
+                      "duration": 97,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-11-22T19:02:27.523Z",
+                      "annotations": [],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "f780fc6e128a9f9c755d-1dac54410ec1dab5dab8",
+              "file": "level1.judge.spec.ts",
+              "line": 116,
+              "column": 5
+            },
+            {
+              "title": "K3.2 ungültig (falscher Typ bei durationMs) → Hinweis „invalid“",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 20000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "",
+                  "projectName": "",
+                  "results": [
+                    {
+                      "workerIndex": 0,
+                      "parallelIndex": 0,
+                      "status": "passed",
+                      "duration": 77,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-11-22T19:02:27.623Z",
+                      "annotations": [],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "f780fc6e128a9f9c755d-324c3b71d10a66549b56",
+              "file": "level1.judge.spec.ts",
+              "line": 116,
+              "column": 5
+            }
+          ]
+        },
+        {
+          "title": "K4 testids, Konsole, Layout",
+          "file": "level1.judge.spec.ts",
+          "line": 127,
+          "column": 6,
+          "specs": [
+            {
+              "title": "K4.1 alle data-testids vorhanden",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 20000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "",
+                  "projectName": "",
+                  "results": [
+                    {
+                      "workerIndex": 0,
+                      "parallelIndex": 0,
+                      "status": "passed",
+                      "duration": 129,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-11-22T19:02:27.705Z",
+                      "annotations": [],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "f780fc6e128a9f9c755d-ef101fcbd698c03c7b3c",
+              "file": "level1.judge.spec.ts",
+              "line": 128,
+              "column": 3
+            },
+            {
+              "title": "K4.2 keine Konsolenfehler (gültig, fehlend, ungültig)",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 20000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "",
+                  "projectName": "",
+                  "results": [
+                    {
+                      "workerIndex": 0,
+                      "parallelIndex": 0,
+                      "status": "passed",
+                      "duration": 114,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-11-22T19:02:27.840Z",
+                      "annotations": [],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "f780fc6e128a9f9c755d-aa92a3e37a93fa0e772a",
+              "file": "level1.judge.spec.ts",
+              "line": 142,
+              "column": 3
+            },
+            {
+              "title": "K4.3 Raster: 5 / 2 / 1 Spalten, kein horizontales Scrollen",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 20000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "",
+                  "projectName": "",
+                  "results": [
+                    {
+                      "workerIndex": 0,
+                      "parallelIndex": 0,
+                      "status": "passed",
+                      "duration": 320,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-11-22T19:02:27.959Z",
+                      "annotations": [],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "f780fc6e128a9f9c755d-c28d85678ee86b5d662b",
+              "file": "level1.judge.spec.ts",
+              "line": 151,
+              "column": 3
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "errors": [],
+  "stats": {
+    "startTime": "2026-11-22T19:02:25.997Z",
+    "duration": 2313.283,
+    "expected": 15,
+    "skipped": 0,
+    "unexpected": 0,
+    "flaky": 0
+  }
+}

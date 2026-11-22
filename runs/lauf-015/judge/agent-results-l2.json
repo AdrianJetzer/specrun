@@ -1,0 +1,160 @@
+{
+  "run": {
+    "id": "lauf-015",
+    "version": "0.1.0",
+    "commit": null,
+    "updatedAt": "2026-11-22T19:02:35.689Z"
+  },
+  "levels": [
+    {
+      "level": 1,
+      "title": "Statische Seite",
+      "status": "bestanden",
+      "checkedAt": "2026-11-22T19:02:35.689Z",
+      "durationMs": 570,
+      "checks": [
+        {
+          "name": "Seite antwortet mit HTTP 200",
+          "ok": true
+        },
+        {
+          "name": "Titel ist „Levelboard“",
+          "ok": true
+        },
+        {
+          "name": "10 Level-Karten sichtbar",
+          "ok": true
+        },
+        {
+          "name": "Keine Konsolenfehler",
+          "ok": true
+        },
+        {
+          "name": "Handy-Ansicht: Karten einspaltig",
+          "ok": true
+        }
+      ],
+      "metrics": {
+        "build": {
+          "passedAt": "2026-11-22T18:26:03.663Z",
+          "buildS": 212
+        }
+      }
+    },
+    {
+      "level": 2,
+      "title": "Webserver",
+      "status": "bestanden",
+      "checkedAt": "2026-11-22T19:02:35.689Z",
+      "durationMs": 352,
+      "checks": [
+        {
+          "name": "Antwort kommt von nginx",
+          "ok": true
+        },
+        {
+          "name": "results.json wird nicht zwischengespeichert",
+          "ok": true
+        },
+        {
+          "name": "index.html wird nicht zwischengespeichert",
+          "ok": true
+        },
+        {
+          "name": "Assets werden ein Jahr zwischengespeichert",
+          "ok": true
+        },
+        {
+          "name": "Fehlende Datei ergibt 404",
+          "ok": true
+        },
+        {
+          "name": "Antworten sind gzip-komprimiert",
+          "ok": true
+        },
+        {
+          "name": "Seite funktioniert über nginx",
+          "ok": true
+        }
+      ],
+      "metrics": {
+        "build": {
+          "passedAt": "2026-11-22T18:26:21.550Z",
+          "buildS": 18
+        }
+      }
+    },
+    {
+      "level": 3,
+      "title": "REST-Backend",
+      "status": "offen",
+      "checkedAt": null,
+      "durationMs": null,
+      "checks": [],
+      "metrics": {}
+    },
+    {
+      "level": 4,
+      "title": "Datenbank",
+      "status": "offen",
+      "checkedAt": null,
+      "durationMs": null,
+      "checks": [],
+      "metrics": {}
+    },
+    {
+      "level": 5,
+      "title": "Frontend + Backend",
+      "status": "offen",
+      "checkedAt": null,
+      "durationMs": null,
+      "checks": [],
+      "metrics": {}
+    },
+    {
+      "level": 6,
+      "title": "Repo + CI",
+      "status": "offen",
+      "checkedAt": null,
+      "durationMs": null,
+      "checks": [],
+      "metrics": {}
+    },
+    {
+      "level": 7,
+      "title": "Images in der Pipeline",
+      "status": "offen",
+      "checkedAt": null,
+      "durationMs": null,
+      "checks": [],
+      "metrics": {}
+    },
+    {
+      "level": 8,
+      "title": "Deployment",
+      "status": "offen",
+      "checkedAt": null,
+      "durationMs": null,
+      "checks": [],
+      "metrics": {}
+    },
+    {
+      "level": 9,
+      "title": "Live-Prüfung",
+      "status": "offen",
+      "checkedAt": null,
+      "durationMs": null,
+      "checks": [],
+      "metrics": {}
+    },
+    {
+      "level": 10,
+      "title": "Metriken veröffentlicht",
+      "status": "offen",
+      "checkedAt": null,
+      "durationMs": null,
+      "checks": [],
+      "metrics": {}
+    }
+  ]
+}

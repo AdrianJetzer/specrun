@@ -1,0 +1,28 @@
+
+Running 20 tests using 1 worker
+
+  ✓   1 [levels] › tests/level1.spec.ts:8:3 › level-1 › Seite antwortet mit HTTP 200 (12ms)
+  ✓   2 [levels] › tests/level1.spec.ts:14:3 › level-1 › Titel ist „Levelboard“ (72ms)
+  ✓   3 [levels] › tests/level1.spec.ts:19:3 › level-1 › 10 Level-Karten sichtbar (114ms)
+  ✓   4 [levels] › tests/level1.spec.ts:30:3 › level-1 › Keine Konsolenfehler (321ms)
+  ✓   5 [levels] › tests/level1.spec.ts:44:3 › level-1 › Handy-Ansicht: Karten einspaltig (93ms)
+  ✓   6 [levels] › tests/level2.spec.ts:10:3 › level-2 › Antwort kommt von nginx (5ms)
+  ✓   7 [levels] › tests/level2.spec.ts:16:3 › level-2 › results.json wird nicht zwischengespeichert (2ms)
+  ✓   8 [levels] › tests/level2.spec.ts:22:3 › level-2 › index.html wird nicht zwischengespeichert (2ms)
+  ✓   9 [levels] › tests/level2.spec.ts:27:3 › level-2 › Assets werden ein Jahr zwischengespeichert (6ms)
+  ✓  10 [levels] › tests/level2.spec.ts:35:3 › level-2 › Fehlende Datei ergibt 404 (1ms)
+  ✓  11 [levels] › tests/level2.spec.ts:40:3 › level-2 › Antworten sind gzip-komprimiert (8ms)
+  ✓  12 [levels] › tests/level2.spec.ts:51:3 › level-2 › Seite funktioniert über nginx (353ms)
+  ✓  13 [levels] › tests/level3.spec.ts:18:3 › level-3 › Backend antwortet auf /api/health (6ms)
+  ✓  14 [levels] › tests/level3.spec.ts:29:3 › level-3 › GET /api/levels liefert alle 10 Levels im Schema (10ms)
+  ✓  15 [levels] › tests/level3.spec.ts:42:3 › level-3 › Ergebnis melden setzt Status und Zeitpunkt (4ms)
+  ✓  16 [levels] › tests/level3.spec.ts:55:3 › level-3 › Fehlschlag sperrt höhere Levels (6ms)
+  ✓  17 [levels] › tests/level3.spec.ts:68:3 › level-3 › Falsche Reihenfolge ergibt 409 (2ms)
+  ✓  18 [levels] › tests/level3.spec.ts:79:3 › level-3 › Ungültige Anfragen ergeben 400 (5ms)
+  ✓  19 [levels] › tests/level3.spec.ts:89:3 › level-3 › Unbekanntes Level ergibt 404 (2ms)
+  ✓  20 [levels] › tests/level3.spec.ts:96:3 › level-3 › Go-Tests bestehen (953ms)
+
+  20 passed (2.4s)
+Level 1: bestanden (5/5 Checks)
+Level 2: bestanden (7/7 Checks)
+Level 3: bestanden (8/8 Checks)
